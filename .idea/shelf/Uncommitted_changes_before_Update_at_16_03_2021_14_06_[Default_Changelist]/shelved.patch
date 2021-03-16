@@ -1,0 +1,75 @@
+Index: .idea/workspace.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<project version=\"4\">\r\n  <component name=\"ChangeListManager\">\r\n    <list default=\"true\" id=\"244c644c-ea97-4b49-aa2d-3304961dbbe6\" name=\"Default Changelist\" comment=\"first three exercises done\">\r\n      <change beforePath=\"$PROJECT_DIR$/.idea/workspace.xml\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/.idea/workspace.xml\" afterDir=\"false\" />\r\n    </list>\r\n    <list id=\"b93155eb-1c42-43de-a81c-815e2bf3fc11\" name=\"first three exercises done\" comment=\"\" />\r\n    <option name=\"SHOW_DIALOG\" value=\"false\" />\r\n    <option name=\"HIGHLIGHT_CONFLICTS\" value=\"true\" />\r\n    <option name=\"HIGHLIGHT_NON_ACTIVE_CHANGELIST\" value=\"false\" />\r\n    <option name=\"LAST_RESOLUTION\" value=\"IGNORE\" />\r\n  </component>\r\n  <component name=\"Git.Settings\">\r\n    <option name=\"RECENT_GIT_ROOT_PATH\" value=\"$PROJECT_DIR$\" />\r\n  </component>\r\n  <component name=\"ProjectId\" id=\"1ppzc3kNjbWnG8z3aAf5FA5eWzx\" />\r\n  <component name=\"ProjectLevelVcsManager\" settingsEditedManually=\"true\" />\r\n  <component name=\"ProjectViewState\">\r\n    <option name=\"hideEmptyMiddlePackages\" value=\"true\" />\r\n    <option name=\"showLibraryContents\" value=\"true\" />\r\n  </component>\r\n  <component name=\"PropertiesComponent\">\r\n    <property name=\"ChangesTree.GroupingKeys\" value=\"module\" />\r\n    <property name=\"RunOnceActivity.OpenProjectViewOnStart\" value=\"true\" />\r\n    <property name=\"RunOnceActivity.ShowReadmeOnStart\" value=\"true\" />\r\n    <property name=\"WebServerToolWindowFactoryState\" value=\"false\" />\r\n    <property name=\"aspect.path.notification.shown\" value=\"true\" />\r\n  </component>\r\n  <component name=\"SpellCheckerSettings\" RuntimeDictionaries=\"0\" Folders=\"0\" CustomDictionaries=\"0\" DefaultDictionary=\"application-level\" UseSingleDictionary=\"true\" transferred=\"true\" />\r\n  <component name=\"TaskManager\">\r\n    <task active=\"true\" id=\"Default\" summary=\"Default task\">\r\n      <changelist id=\"244c644c-ea97-4b49-aa2d-3304961dbbe6\" name=\"Default Changelist\" comment=\"\" />\r\n      <changelist id=\"b93155eb-1c42-43de-a81c-815e2bf3fc11\" name=\"first three exercises done\" comment=\"\" />\r\n      <created>1615894896574</created>\r\n      <option name=\"number\" value=\"Default\" />\r\n      <option name=\"presentableId\" value=\"Default\" />\r\n      <updated>1615894896574</updated>\r\n      <workItem from=\"1615894912307\" duration=\"761000\" />\r\n      <workItem from=\"1615895721545\" duration=\"713000\" />\r\n      <workItem from=\"1615896510334\" duration=\"1808000\" />\r\n      <workItem from=\"1615899265621\" duration=\"211000\" />\r\n    </task>\r\n    <task id=\"LOCAL-00001\" summary=\"first three exercises done\">\r\n      <created>1615895927549</created>\r\n      <option name=\"number\" value=\"00001\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00001\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1615895927549</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00002\" summary=\"first three exercises done\">\r\n      <created>1615896093504</created>\r\n      <option name=\"number\" value=\"00002\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00002\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1615896093504</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00003\" summary=\"first three exercises done\">\r\n      <created>1615898435522</created>\r\n      <option name=\"number\" value=\"00003\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00003\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1615898435523</updated>\r\n    </task>\r\n    <option name=\"localTasksCounter\" value=\"4\" />\r\n    <servers />\r\n  </component>\r\n  <component name=\"TypeScriptGeneratedFilesManager\">\r\n    <option name=\"version\" value=\"3\" />\r\n  </component>\r\n  <component name=\"Vcs.Log.Tabs.Properties\">\r\n    <option name=\"TAB_STATES\">\r\n      <map>\r\n        <entry key=\"MAIN\">\r\n          <value>\r\n            <State>\r\n              <option name=\"FILTERS\">\r\n                <map>\r\n                  <entry key=\"branch\">\r\n                    <value>\r\n                      <list>\r\n                        <option value=\"origin/de-luca\" />\r\n                      </list>\r\n                    </value>\r\n                  </entry>\r\n                </map>\r\n              </option>\r\n            </State>\r\n          </value>\r\n        </entry>\r\n      </map>\r\n    </option>\r\n    <option name=\"oldMeFiltersMigrated\" value=\"true\" />\r\n  </component>\r\n  <component name=\"VcsManagerConfiguration\">\r\n    <MESSAGE value=\"first three exercises done\" />\r\n    <option name=\"LAST_COMMIT_MESSAGE\" value=\"first three exercises done\" />\r\n  </component>\r\n</project>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/workspace.xml b/.idea/workspace.xml
+--- a/.idea/workspace.xml	(revision f8802e48e0275367e09ae2ba4d7b2e5e601ddf3b)
++++ b/.idea/workspace.xml	(date 1615899989202)
+@@ -1,9 +1,7 @@
+ <?xml version="1.0" encoding="UTF-8"?>
+ <project version="4">
+   <component name="ChangeListManager">
+-    <list default="true" id="244c644c-ea97-4b49-aa2d-3304961dbbe6" name="Default Changelist" comment="first three exercises done">
+-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+-    </list>
++    <list default="true" id="244c644c-ea97-4b49-aa2d-3304961dbbe6" name="Default Changelist" comment="first three exercises done" />
+     <list id="b93155eb-1c42-43de-a81c-815e2bf3fc11" name="first three exercises done" comment="" />
+     <option name="SHOW_DIALOG" value="false" />
+     <option name="HIGHLIGHT_CONFLICTS" value="true" />
+@@ -26,6 +24,19 @@
+     <property name="WebServerToolWindowFactoryState" value="false" />
+     <property name="aspect.path.notification.shown" value="true" />
+   </component>
++  <component name="RunManager">
++    <configuration default="true" type="ArquillianJUnit" factoryName="" nameIsGenerated="true">
++      <option name="arquillianRunConfiguration">
++        <value>
++          <option name="containerStateName" value="" />
++        </value>
++      </option>
++      <option name="TEST_OBJECT" value="class" />
++      <method v="2">
++        <option name="Make" enabled="true" />
++      </method>
++    </configuration>
++  </component>
+   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+   <component name="TaskManager">
+     <task active="true" id="Default" summary="Default task">
+@@ -39,6 +50,7 @@
+       <workItem from="1615895721545" duration="713000" />
+       <workItem from="1615896510334" duration="1808000" />
+       <workItem from="1615899265621" duration="211000" />
++      <workItem from="1615899533585" duration="388000" />
+     </task>
+     <task id="LOCAL-00001" summary="first three exercises done">
+       <created>1615895927549</created>
+@@ -61,7 +73,14 @@
+       <option name="project" value="LOCAL" />
+       <updated>1615898435523</updated>
+     </task>
+-    <option name="localTasksCounter" value="4" />
++    <task id="LOCAL-00004" summary="lab1: first three exercises done">
++      <created>1615899636846</created>
++      <option name="number" value="00004" />
++      <option name="presentableId" value="LOCAL-00004" />
++      <option name="project" value="LOCAL" />
++      <updated>1615899636846</updated>
++    </task>
++    <option name="localTasksCounter" value="5" />
+     <servers />
+   </component>
+   <component name="TypeScriptGeneratedFilesManager">
+@@ -93,6 +112,7 @@
+   </component>
+   <component name="VcsManagerConfiguration">
+     <MESSAGE value="first three exercises done" />
+-    <option name="LAST_COMMIT_MESSAGE" value="first three exercises done" />
++    <MESSAGE value="lab1: first three exercises done" />
++    <option name="LAST_COMMIT_MESSAGE" value="lab1: first three exercises done" />
+   </component>
+ </project>
+\ No newline at end of file
