@@ -2,6 +2,7 @@ package it.polito.ecommerce.domain
 
 import java.sql.Timestamp
 import javax.persistence.*
+import javax.validation.constraints.Min
 
 @Entity
 class Transaction {
@@ -14,13 +15,14 @@ class Transaction {
     val timestamp:Timestamp? = null
 
     @ManyToOne
-    @JoinColumn(name="sender", referencedColumnName = "id")
+    @JoinColumn(name="sender", referencedColumnName = "id", nullable = false)
     var sender: Wallet? = null
 
     @ManyToOne
-    @JoinColumn(name="receiver", referencedColumnName = "id")
+    @JoinColumn(name="receiver", referencedColumnName = "id", nullable = false)
     var receiver: Wallet? = null
 
+    @Min(value=0, message = "Balance cannot be negative")
     @Column(nullable = false)
     val amount: Double =  0.0
 }

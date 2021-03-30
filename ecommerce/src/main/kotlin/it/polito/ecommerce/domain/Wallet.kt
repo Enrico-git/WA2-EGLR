@@ -1,6 +1,7 @@
 package it.polito.ecommerce.domain
 
 import javax.persistence.*
+import javax.validation.constraints.Min
 
 @Entity
 class Wallet {
@@ -9,12 +10,12 @@ class Wallet {
     @Column(nullable = false)
     val id:Int? = null
 
-    @Column(nullable = false)
+    @Min(value=0, message = "Balance cannot be negative")
+    @Column(nullable = false, columnDefinition = "DOUBLE default 0")
     val balance: Double = 0.0
 
     @ManyToOne
-    @JoinColumn(name="customer", referencedColumnName = "id" )
-    @Column(nullable = false)
+    @JoinColumn(name="customer", referencedColumnName = "id", nullable = false)
     val customer: Customer? = null
 
     @OneToMany(mappedBy="sender", targetEntity=Transaction::class)
