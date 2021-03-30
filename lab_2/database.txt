@@ -1,0 +1,26 @@
+View:
+	Every time a transaction is confirmed, the balance of 
+	the wallets changes
+
+    wallet 1 -300
+    wallet 2 +300
+
+Wallet
+    ID (PK)
+	Balance (UNSIGNED INT)
+	CustomerID
+		
+Transaction //  1, 2020-01-02, 1, 2, 300
+    ID (PK)
+	Timestamp
+	Sender (WALLET KEY)
+	Receiver (WALLET KEY)
+	Amount
+
+Customer
+    ID (PK)
+	Name
+	Surname
+	Address
+	Email (UNIQUE)
+
