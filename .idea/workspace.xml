@@ -2,6 +2,9 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="244c644c-ea97-4b49-aa2d-3304961dbbe6" name="Default Changelist" comment="first three exercises done">
+      <change afterPath="$PROJECT_DIR$/.idea/WA2-EGLR.iml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_16_03_2021_14_06__Default_Changelist_.xml" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
     <list id="b93155eb-1c42-43de-a81c-815e2bf3fc11" name="first three exercises done" comment="" />
@@ -23,23 +26,11 @@
     <property name="ChangesTree.GroupingKeys" value="module" />
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
+    <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="aspect.path.notification.shown" value="true" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/../lab1_" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
     <property name="settings.editor.selected.configurable" value="preferences.language.Kotlin.scripting" />
-  </component>
-  <component name="RunManager">
-    <configuration default="true" type="ArquillianJUnit" factoryName="" nameIsGenerated="true">
-      <option name="arquillianRunConfiguration">
-        <value>
-          <option name="containerStateName" value="" />
-        </value>
-      </option>
-      <option name="TEST_OBJECT" value="class" />
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
-    </configuration>
   </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
@@ -55,6 +46,7 @@
       <workItem from="1615896510334" duration="1808000" />
       <workItem from="1615899265621" duration="211000" />
       <workItem from="1615899533585" duration="1547000" />
+      <workItem from="1616686859238" duration="192000" />
     </task>
     <task id="LOCAL-00001" summary="first three exercises done">
       <created>1615895927549</created>
@@ -91,7 +83,14 @@
       <option name="project" value="LOCAL" />
       <updated>1615900958587</updated>
     </task>
-    <option name="localTasksCounter" value="6" />
+    <task id="LOCAL-00006" summary="lab 1 done">
+      <created>1616686948247</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1616686948249</updated>
+    </task>
+    <option name="localTasksCounter" value="7" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -125,7 +124,8 @@
     <MESSAGE value="first three exercises done" />
     <MESSAGE value="lab1: first three exercises done" />
     <MESSAGE value="lab1: first three exercises done, fourth started" />
-    <option name="LAST_COMMIT_MESSAGE" value="lab1: first three exercises done, fourth started" />
+    <MESSAGE value="lab 1 done" />
+    <option name="LAST_COMMIT_MESSAGE" value="lab 1 done" />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />
