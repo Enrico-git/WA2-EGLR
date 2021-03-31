@@ -31,8 +31,8 @@ CREATE TABLE customer(
      primary key (id)
 );
 
-insert into customer values(1, "Jon", "Doe", "Test street 15", "jon_doe@mail.com");
-insert into customer values(2, "Alice", "InWonderland", "Rabbit hole", "alice_wonderland@mail.com");
-insert into wallet values(1, 50, 1);
-insert into wallet values(2, 100, 2);
-insert into transaction values (1, 50, "2020-01-01 00:00:00", 1, 2);
+insert into customer(id, name, surname, address, email) values(1, "Jon", "Doe", "Test street 15", "jon_doe@mail.com");
+insert into customer(id, name, surname, address, email) values(2, "Alice", "InWonderland", "Rabbit hole", "alice_wonderland@mail.com");
+insert into wallet(id, balance, customer) values(1, 50, 1);
+insert into wallet(id, balance, customer) values(2, 100, 2);
+insert into transaction(id, amount, timestamp, sender, receiver) values (1, 50, "2020-01-01 00:00:00", 1, 2);
