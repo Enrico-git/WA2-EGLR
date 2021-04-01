@@ -4,6 +4,6 @@ import java.sql.Timestamp
 
 data class TransactionDTO(val id: Int,
                           val timestamp: Timestamp,
-                        val sender: CustomerDTO,
-                        val receiver: CustomerDTO,
+                        val sender: String,
+                        val receiver: String,
                         val amount: Double)

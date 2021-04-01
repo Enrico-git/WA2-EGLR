@@ -4,23 +4,23 @@ import javax.persistence.*
 import javax.validation.constraints.Email
 
 @Entity
-class Customer {
+class Customer(
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(nullable = false)
-    val id:Int? = null
-    @Column(nullable = false)
+   @Column(nullable = false)
+   val id:Int? = null,
 
-    val name: String = ""
     @Column(nullable = false)
-    val surname: String = ""
+    val name: String = "",
+
+    @Column(nullable = false)
+    val surname: String = "",
 
     @Column(unique=true, nullable = false)
     @Email(message = "Email must be valid")
-    val email: String = ""
+    val email: String = "") {
 
     @OneToMany(mappedBy=
         "customer", targetEntity=Wallet::class)
     val wallets: MutableList<Wallet> = mutableListOf<Wallet>()
-
 }
