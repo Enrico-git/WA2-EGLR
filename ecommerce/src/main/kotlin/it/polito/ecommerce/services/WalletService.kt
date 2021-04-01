@@ -7,10 +7,10 @@ import java.sql.Timestamp
 
 @Service
 interface WalletService {
-    fun addWallet(customerID: Int): Boolean
-    fun getWallet(walletID: Int): WalletDTO?
+    fun addWallet(customerID: Int): WalletDTO
+    fun getWallet(walletID: Int): WalletDTO
     fun performTransaction(source: Int, dest: Int, amount: Double): Boolean
-    fun getWalletTransactions(walletID: Int, from: Timestamp? = null,
-                              to: Timestamp? = null) :List<TransactionDTO>
+    fun getWalletTransactions(walletID: Int, from: Long? = null,
+                              to: Long? = null) :List<TransactionDTO>
 
 }

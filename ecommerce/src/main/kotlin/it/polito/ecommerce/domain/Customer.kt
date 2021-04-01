@@ -16,6 +16,9 @@ class Customer(
     @Column(nullable = false)
     val surname: String = "",
 
+    @Column(nullable = false)
+    val address: String = "",
+
     @Column(unique=true, nullable = false)
     @Email(message = "Email must be valid")
     val email: String = "") {
