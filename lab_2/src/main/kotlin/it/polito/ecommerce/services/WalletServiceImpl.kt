@@ -12,34 +12,32 @@ import org.springframework.stereotype.Service
 import java.lang.IllegalArgumentException
 import java.sql.Timestamp
 import java.time.Instant
+import java.util.*
 import javax.transaction.Transactional
 import kotlin.NoSuchElementException
+import kotlin.jvm.Throws
 
 @Service
 @Transactional
 class WalletServiceImpl(private val walletRepository: WalletRepository,
 private val customerRepository: CustomerRepository,
-private val transactionRepository: TransactionRepository): WalletService {
-    override fun getWallet(walletID: Int): WalletDTO? {
+private val transactionRepository: TransactionRepository): WalletService{
+//    Check if we have to use @Throws
+    override fun getWallet(walletID: Int): WalletDTO {
         val walletOpt = walletRepository.findById(walletID)
         if ( ! walletOpt.isPresent)
             throw NotFoundException("Not found")
-//        val wallet = if(walletOpt.isPresent) walletOpt.get() else null
-//        if(wallet != null)
         val wallet = walletOpt.get()
-        return WalletDTO(wallet.id!!, wallet.balance, wallet.customer?.id!!)
-//        else
-//            return null
+        return wallet.toDTO()
     }
 
     override fun addWallet(customerID: Int): WalletDTO {
-        val customer = customerRepository.findById(customerID)
-        if ( ! customer.isPresent)
+        val customerOpt = customerRepository.findById(customerID)
+        if (  ! customerOpt.isPresent )
             throw NotFoundException("Customer not found")
-        println(customer.get().name)
         val wallet = Wallet(
             id = null,
-            customer = customer.get()
+            customer = customerOpt.get()
         )
         return walletRepository.save(wallet).toDTO()
     }
@@ -74,14 +72,21 @@ private val transactionRepository: TransactionRepository): WalletService {
 
     }
 
-    override fun getWalletTransactions(walletID: Int, from: String?, to: String?): List<TransactionDTO> {
+    override fun getWalletTransactions(walletID: Int, from: Long?, to: Long?): List<TransactionDTO> {
         val wallet = walletRepository.findById(walletID)
         if ( ! wallet.isPresent)
             throw NotFoundException("Could not fetch wallet")
+        var l1 = wallet.get().transactionsReceived.map{it.toDTO()}
+        var l2 = wallet.get().transactionsSent.map{it.toDTO()}
         if (from != null && to != null) {
-            return transactionRepository.findAllByWalletAndByTimestampBetween(wallet.get(), Timestamp.valueOf(from.replace("T", " ")), Timestamp.valueOf(to.replace("T", " "))).map { it.toDTO() }
+            l1 = l1.filter { it.timestamp <= Timestamp(to) && it.timestamp >= Timestamp(from) }
+            l2 = l2.filter { it.timestamp <= Timestamp(to) && it.timestamp >= Timestamp(from) }
+            return l1 + l2
+//            return transactionRepository.findAllByWalletAndByTimestampBetween(wallet.get(), Timestamp(from), Timestamp(to)).map { it.toDTO() }
         }
-        return transactionRepository.findAllByWallet(wallet.get()).map{it.toDTO()}
+//       
+        return l1 + l2
+//        return transactionRepository.findAllByWallet(wallet.get()).map{it.toDTO()}
     }
 
     fun checkBalance(wallet: Wallet, amount: Double): Boolean{

@@ -15,7 +15,7 @@ class Wallet(
 
     @ManyToOne
     @JoinColumn(name = "customer", referencedColumnName = "id", nullable = false)
-    val customer: Customer? = null,
+    val customer: Customer,
 ) {
     @OneToMany(mappedBy = "sender", targetEntity = Transaction::class)
     val transactionsSent: MutableList<Transaction> = mutableListOf<Transaction>()
@@ -23,11 +23,16 @@ class Wallet(
     @OneToMany(mappedBy = "receiver", targetEntity = Transaction::class)
     val transactionsReceived: MutableList<Transaction> = mutableListOf<Transaction>()
 
-    fun toDTO(): WalletDTO {
-        return WalletDTO(
-            id = id!!,
-            balance = balance,
-            customer = customer?.id!!
-        )
-    }
+    fun toDTO() = WalletDTO(
+        id = id!!,
+        balance = balance,
+        customer = customer.name + " " + customer.surname
+    )
+//    fun toDTO(): WalletDTO {
+//        return WalletDTO(
+//            id = id!!,
+//            balance = balance,
+//            customer = customer?.name + " " + customer?.surname
+//        )
+//    }
 }

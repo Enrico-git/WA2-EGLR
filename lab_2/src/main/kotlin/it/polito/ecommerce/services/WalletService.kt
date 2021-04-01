@@ -8,11 +8,11 @@ import java.sql.Timestamp
 
 interface WalletService {
     fun addWallet(customerID: Int): WalletDTO
-    fun getWallet(walletID: Int): WalletDTO?
+    fun getWallet(walletID: Int): WalletDTO
     fun performTransaction(senderID: Int, receiverID: Int, amount: Double): TransactionDTO
 //    fun getWalletTransactions(walletID: Int): List<TransactionDTO>
     fun getWalletTransactions(walletID: Int,
-                                         from: String? = null,
-                                         to: String? = null)
+                                         from: Long? = null,
+                                         to: Long? = null)
     : List<TransactionDTO>
 }

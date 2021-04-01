@@ -5,7 +5,9 @@ import it.polito.ecommerce.dto.WalletDTO
 import it.polito.ecommerce.services.WalletServiceImpl
 import javassist.NotFoundException
 import org.springframework.dao.DataAccessException
+import org.springframework.format.annotation.DateTimeFormat
 import org.springframework.web.bind.annotation.*
+import java.time.format.DateTimeFormatter
 import javax.validation.constraints.Min
 
 @RestController
@@ -42,9 +44,10 @@ class TestController(private val service: WalletServiceImpl) {
 
     @GetMapping("/wallet/{walletID}/transactions")
     fun getWalletTransactions(@PathVariable walletID: Int,
-                              @RequestParam from: String?,
-                              @RequestParam to: String?): List<TransactionDTO>? {
+                              @RequestParam from: Long?,
+                              @RequestParam to: Long?): List<TransactionDTO>? {
         // format of from and to: 2021-03-31T13:58:35.000000000
+// HTTP GET localhost:8080/wallet..../transactions?from=2021-03-31T13:58:35.000000000&to=2021-04-31T13:58:35.000000000
         try {
             return service.getWalletTransactions(walletID, from, to)
         } catch (e: Exception){ //Make sure emtpy list throws exception TODO

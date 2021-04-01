@@ -30,8 +30,8 @@ class Transaction (
         return TransactionDTO(
             id = id!!,
             timestamp = timestamp,
-            sender = sender?.id!!,
-            receiver = receiver?.id!!,
+            sender = sender.customer.name + " " + sender.customer.surname,
+            receiver = receiver.customer.name + " " + receiver.customer.surname,
             amount = amount
             )
     }
