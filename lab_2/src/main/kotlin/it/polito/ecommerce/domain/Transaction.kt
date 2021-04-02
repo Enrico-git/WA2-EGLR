@@ -2,6 +2,7 @@ package it.polito.ecommerce.domain
 
 import it.polito.ecommerce.dto.TransactionDTO
 import it.polito.ecommerce.dto.WalletDTO
+import java.math.BigDecimal
 import java.sql.Timestamp
 import javax.persistence.*
 import javax.validation.constraints.Min
@@ -21,18 +22,7 @@ class Transaction (
     @JoinColumn(name="receiver", referencedColumnName = "id", nullable = false)
     val receiver: Wallet,
 
-    @Column(nullable = false, columnDefinition = "DOUBLE default 0")
+    @Column(nullable = false, columnDefinition = "DECIMAL default 0")
     @Min(value = 0, message = "Transaction amount cannot be negative")
-    val amount: Double = 0.0
-) {
-
-    fun toDTO(): TransactionDTO {
-        return TransactionDTO(
-            id = id!!,
-            timestamp = timestamp,
-            sender = sender.customer.name + " " + sender.customer.surname,
-            receiver = receiver.customer.name + " " + receiver.customer.surname,
-            amount = amount
-            )
-    }
-}
+    val amount: BigDecimal = BigDecimal(0.0)
+)

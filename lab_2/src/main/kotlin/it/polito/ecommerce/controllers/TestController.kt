@@ -7,6 +7,7 @@ import javassist.NotFoundException
 import org.springframework.dao.DataAccessException
 import org.springframework.format.annotation.DateTimeFormat
 import org.springframework.web.bind.annotation.*
+import java.math.BigDecimal
 import java.time.format.DateTimeFormatter
 import javax.validation.constraints.Min
 
@@ -33,7 +34,7 @@ class TestController(private val service: WalletServiceImpl) {
     }
 
     @PostMapping("/wallet/{walletID}/transaction")
-    fun createTransaction(@PathVariable walletID: Int, receiverID: Int, @Min(0) amount: Double): TransactionDTO? {
+    fun createTransaction(@PathVariable @Min(0) walletID: Int, receiverID: Int, @Min(0) amount: BigDecimal): TransactionDTO? {
         try {
             return service.performTransaction(walletID, receiverID, amount)
         } catch (e: Exception){ //Make proper exception

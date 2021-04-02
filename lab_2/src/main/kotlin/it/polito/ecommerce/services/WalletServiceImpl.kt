@@ -4,12 +4,14 @@ import it.polito.ecommerce.domain.Transaction
 import it.polito.ecommerce.domain.Wallet
 import it.polito.ecommerce.dto.TransactionDTO
 import it.polito.ecommerce.dto.WalletDTO
+import it.polito.ecommerce.dto.toDTO
 import it.polito.ecommerce.repositories.CustomerRepository
 import it.polito.ecommerce.repositories.TransactionRepository
 import it.polito.ecommerce.repositories.WalletRepository
 import javassist.NotFoundException
 import org.springframework.stereotype.Service
 import java.lang.IllegalArgumentException
+import java.math.BigDecimal
 import java.sql.Timestamp
 import java.time.Instant
 import java.util.*
@@ -17,6 +19,7 @@ import javax.transaction.Transactional
 import kotlin.NoSuchElementException
 import kotlin.jvm.Throws
 
+// TODO DB CRASH
 @Service
 @Transactional
 class WalletServiceImpl(private val walletRepository: WalletRepository,
@@ -42,37 +45,34 @@ private val transactionRepository: TransactionRepository): WalletService{
         return walletRepository.save(wallet).toDTO()
     }
 
-    override fun performTransaction(senderID: Int, receiverID: Int, amount: Double): TransactionDTO {
+    override fun performTransaction(senderID: Int, receiverID: Int, amount: BigDecimal): TransactionDTO {
         if (senderID == receiverID)
-            throw Exception("You can't send money to yourself")
+            throw IllegalArgumentException("You can't send money to yourself")
         val wallets = walletRepository.findAllById(listOf<Int>(senderID, receiverID))
-        var senderWallet: Wallet
-        var receiverWallet: Wallet
-        try {
-            senderWallet = wallets.first{it.id == senderID}
-            receiverWallet = wallets.first{it.id == receiverID}
-        } catch (e: NoSuchElementException) {
-            throw NotFoundException("One of the wallets was not found")
-        }
+        val senderWallet: Wallet? = wallets.find{it.id == senderID}
+        val receiverWallet: Wallet? = wallets.find{it.id == receiverID}
+        if (senderWallet == null || receiverWallet == null)
+            throw IllegalArgumentException("One of the wallets doesn't exist")
 
         if ( ! checkBalance(senderWallet, amount))
-            throw Exception("Balance not high enough")
+            throw IllegalArgumentException("Balance not high enough")
+
+        transferMoney(senderWallet, receiverWallet, amount)
 
         val transaction = Transaction(
             id = null,
-            timestamp = Timestamp(Instant.now().getEpochSecond() * 1000),
+            timestamp = Timestamp(System.currentTimeMillis()),
             sender = senderWallet,
             receiver = receiverWallet,
             amount = amount
         )
-        if (! transferMoney(senderWallet, receiverWallet, amount))
-            throw Exception("Could not transfer money")
 
         return transactionRepository.save(transaction).toDTO()
 
     }
 
     override fun getWalletTransactions(walletID: Int, from: Long?, to: Long?): List<TransactionDTO> {
+        /**
         val wallet = walletRepository.findById(walletID)
         if ( ! wallet.isPresent)
             throw NotFoundException("Could not fetch wallet")
@@ -82,27 +82,27 @@ private val transactionRepository: TransactionRepository): WalletService{
             l1 = l1.filter { it.timestamp <= Timestamp(to) && it.timestamp >= Timestamp(from) }
             l2 = l2.filter { it.timestamp <= Timestamp(to) && it.timestamp >= Timestamp(from) }
             return l1 + l2
-//            return transactionRepository.findAllByWalletAndByTimestampBetween(wallet.get(), Timestamp(from), Timestamp(to)).map { it.toDTO() }
+        */
+//        TODO Pagination
+        if ( from != null && to != null) {
+            return transactionRepository
+                    .findAllByWalletAndByTimestampBetween(walletID, Timestamp(from), Timestamp(to))
+                    .map{it.toDTO()}
         }
-//       
-        return l1 + l2
-//        return transactionRepository.findAllByWallet(wallet.get()).map{it.toDTO()}
+        if ( from != null || to != null)
+            throw IllegalArgumentException("Invalid parameters")
+
+        return transactionRepository.findAllByWallet(walletID).map{it.toDTO()}
     }
 
-    fun checkBalance(wallet: Wallet, amount: Double): Boolean{
-        return wallet.balance >= amount && amount > 0
+    fun checkBalance(wallet: Wallet, amount: BigDecimal): Boolean{
+        return wallet.balance >= amount
     }
 
-    fun transferMoney(senderWallet: Wallet, receiverWallet: Wallet, amount: Double): Boolean{
-        try {
-            senderWallet.balance -= amount
-            walletRepository.save(senderWallet)
-            receiverWallet.balance += amount
-            walletRepository.save(receiverWallet)
-        } catch (e: IllegalArgumentException) {
-            println(e)
-            return false
-        }
-        return true
+    fun transferMoney(senderWallet: Wallet, receiverWallet: Wallet, amount: BigDecimal): Unit{
+        senderWallet.balance -= amount
+        walletRepository.save(senderWallet)
+        receiverWallet.balance += amount
+        walletRepository.save(receiverWallet)
     }
 }
