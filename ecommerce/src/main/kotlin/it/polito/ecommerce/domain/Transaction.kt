@@ -1,6 +1,6 @@
 package it.polito.ecommerce.domain
 
-import it.polito.ecommerce.dto.TransactionDTO
+import java.math.BigDecimal
 import java.sql.Timestamp
 import javax.persistence.*
 import javax.validation.constraints.Min
@@ -24,11 +24,7 @@ class Transaction(
     var receiver: Wallet,
 
     @Min(value=0, message = "Balance cannot be negative")
-    @Column(nullable = false)
-    val amount: Double =  0.0
-){
-  fun toDTO() = TransactionDTO(id!!, timestamp,
-    sender.customer.name + " " + sender.customer.surname,
-    receiver.customer.name + " " + receiver.customer.surname,
-    amount  )
-}
+    @Column(nullable = false, columnDefinition = "DECIMAL default 0")
+    val amount: BigDecimal =  BigDecimal(0.0)
+)
+
