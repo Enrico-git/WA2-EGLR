@@ -5,10 +5,10 @@ import java.math.BigDecimal
 import java.sql.Timestamp
 
 data class TransactionDTO(
-    val id: Int,
-    val senderID: Int,
+    val id: Long,
+    val senderID: Long,
     val sender: String,
-    val receiverID: Int,
+    val receiverID: Long,
     val receiver: String,
     val timestamp: Timestamp,
     val amount: BigDecimal

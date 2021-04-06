@@ -10,7 +10,7 @@ import javax.validation.constraints.Min
 @Entity
 class Transaction (
     @Id @GeneratedValue(strategy = GenerationType.AUTO)
-    val id: Int? = null,
+    val id: Long? = null,
     @Column(nullable = false)
     val timestamp: Timestamp,
 
@@ -22,7 +22,7 @@ class Transaction (
     @JoinColumn(name="receiver", referencedColumnName = "id", nullable = false)
     val receiver: Wallet,
 
-    @Column(nullable = false, columnDefinition = "DECIMAL default 0")
+    @Column(nullable = false, columnDefinition = "DECIMAL(15,2) default 0")
     @Min(value = 0, message = "Transaction amount cannot be negative")
     val amount: BigDecimal = BigDecimal(0.0)
 )

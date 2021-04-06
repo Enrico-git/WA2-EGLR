@@ -5,7 +5,7 @@ import java.math.BigDecimal
 
 
 data class WalletDTO(
-    val id: Int,
+    val id: Long,
     val balance: BigDecimal,
     val customer: CustomerDTO
 //    val transactionsSent: List<TransactionDTO>,

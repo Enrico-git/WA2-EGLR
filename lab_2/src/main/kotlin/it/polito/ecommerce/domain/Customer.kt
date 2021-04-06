@@ -7,7 +7,7 @@ import javax.validation.constraints.NotNull
 @Entity
 class Customer(
     @Id @GeneratedValue(strategy = GenerationType.AUTO)
-    val id: Int? = null,
+    val id: Long? = null,
 
     @Column(nullable = false)
     val name: String = "",

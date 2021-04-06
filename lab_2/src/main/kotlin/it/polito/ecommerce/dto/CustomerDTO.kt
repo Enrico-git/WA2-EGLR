@@ -1,11 +1,13 @@
 package it.polito.ecommerce.dto
 
 import it.polito.ecommerce.domain.Customer
+import javax.validation.constraints.Min
 
 data class CustomerDTO(
-    val id: Int,
-    val name: String,
-    val surname: String
+    @field:Min(0)
+    val id: Long,
+    val name: String?,
+    val surname: String?
 )
 
 fun Customer.toDTO() = CustomerDTO(

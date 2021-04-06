@@ -26,7 +26,7 @@ class WalletServiceImpl(private val walletRepository: WalletRepository,
 private val customerRepository: CustomerRepository,
 private val transactionRepository: TransactionRepository): WalletService{
 //    Check if we have to use @Throws
-    override fun getWallet(walletID: Int): WalletDTO {
+    override fun getWallet(walletID: Long): WalletDTO {
         val walletOpt = walletRepository.findById(walletID)
         if ( ! walletOpt.isPresent)
             throw NotFoundException("Not found")
@@ -34,7 +34,7 @@ private val transactionRepository: TransactionRepository): WalletService{
         return wallet.toDTO()
     }
 
-    override fun addWallet(customerID: Int): WalletDTO {
+    override fun addWallet(customerID: Long): WalletDTO {
         val customerOpt = customerRepository.findById(customerID)
         if (  ! customerOpt.isPresent )
             throw NotFoundException("Customer not found")
@@ -45,16 +45,16 @@ private val transactionRepository: TransactionRepository): WalletService{
         return walletRepository.save(wallet).toDTO()
     }
 
-    override fun performTransaction(senderID: Int, receiverID: Int, amount: BigDecimal): TransactionDTO {
+    override fun performTransaction(senderID: Long, receiverID: Long, amount: BigDecimal): TransactionDTO {
         if (senderID == receiverID)
             throw IllegalArgumentException("You can't send money to yourself")
-        val wallets = walletRepository.findAllById(listOf<Int>(senderID, receiverID))
+        val wallets = walletRepository.findAllById(listOf<Long>(senderID, receiverID))
         val senderWallet: Wallet? = wallets.find{it.id == senderID}
         val receiverWallet: Wallet? = wallets.find{it.id == receiverID}
         if (senderWallet == null || receiverWallet == null)
             throw IllegalArgumentException("One of the wallets doesn't exist")
 
-        if ( ! checkBalance(senderWallet, amount))
+        if ( isBalanceInsufficient(senderWallet, amount))
             throw IllegalArgumentException("Balance not high enough")
 
         transferMoney(senderWallet, receiverWallet, amount)
@@ -71,35 +71,34 @@ private val transactionRepository: TransactionRepository): WalletService{
 
     }
 
-    override fun getWalletTransactions(walletID: Int, from: Long?, to: Long?): List<TransactionDTO> {
-        /**
-        val wallet = walletRepository.findById(walletID)
-        if ( ! wallet.isPresent)
+    override fun getWalletTransactions(walletID: Long, from: Long?, to: Long?): List<TransactionDTO> {
+        //        TODO Pagination
+
+        val walletOpt = walletRepository.findById(walletID)
+        if ( ! walletOpt.isPresent)
             throw NotFoundException("Could not fetch wallet")
-        var l1 = wallet.get().transactionsReceived.map{it.toDTO()}
-        var l2 = wallet.get().transactionsSent.map{it.toDTO()}
-        if (from != null && to != null) {
-            l1 = l1.filter { it.timestamp <= Timestamp(to) && it.timestamp >= Timestamp(from) }
-            l2 = l2.filter { it.timestamp <= Timestamp(to) && it.timestamp >= Timestamp(from) }
-            return l1 + l2
-        */
-//        TODO Pagination
+
+
         if ( from != null && to != null) {
             return transactionRepository
-                    .findAllByWalletAndByTimestampBetween(walletID, Timestamp(from), Timestamp(to))
+                    .findAllByWalletAndByTimestampBetween(walletOpt.get(), Timestamp(from), Timestamp(to))
                     .map{it.toDTO()}
         }
         if ( from != null || to != null)
             throw IllegalArgumentException("Invalid parameters")
 
-        return transactionRepository.findAllByWallet(walletID).map{it.toDTO()}
+        return transactionRepository.findAllByWallet(walletOpt.get()).map{it.toDTO()}
+
+//        Using JPA smart queries
+
+//        return transactionRepository.findAllBySenderOrReceiver(wallet, wallet).map{it.toDTO()}
     }
 
-    fun checkBalance(wallet: Wallet, amount: BigDecimal): Boolean{
-        return wallet.balance >= amount
+    fun isBalanceInsufficient(wallet: Wallet, amount: BigDecimal): Boolean{
+        return wallet.balance < amount
     }
 
-    fun transferMoney(senderWallet: Wallet, receiverWallet: Wallet, amount: BigDecimal): Unit{
+    fun transferMoney(senderWallet: Wallet, receiverWallet: Wallet, amount: BigDecimal): Unit {
         senderWallet.balance -= amount
         walletRepository.save(senderWallet)
         receiverWallet.balance += amount

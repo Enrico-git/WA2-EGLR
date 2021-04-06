@@ -8,9 +8,9 @@ import javax.validation.constraints.Min
 @Entity
 class Wallet(
     @Id @GeneratedValue(strategy = GenerationType.AUTO)
-    val id: Int? = null,
+    val id: Long? = null,
 
-    @Column(nullable = false, columnDefinition = "DECIMAL default 0")
+    @Column(nullable = false, columnDefinition = "DECIMAL(15,2) default 0")
     @Min(value = 0, message = "Balance cannot be negative")
     var balance: BigDecimal = BigDecimal(0.0),
 
