@@ -22,7 +22,7 @@ class WalletServiceImpl( val walletRepository: WalletRepository,
                          val transactionRepository: TransactionRepository
 
 ) : WalletService {
-    override fun addWallet(customerID: Int): WalletDTO {
+    override fun addWallet(customerID: Long): WalletDTO {
         val customer = customerRepository.findById(customerID)
         if(customer.isEmpty)
             throw NotFoundException("Customer not found")
@@ -32,7 +32,7 @@ class WalletServiceImpl( val walletRepository: WalletRepository,
         //TODO check if db is shutted down
     }
 
-    override fun getWallet(walletID: Int): WalletDTO {
+    override fun getWallet(walletID: Long): WalletDTO {
         val walletOpt = walletRepository.findById(walletID)
         if(! walletOpt.isPresent)
             throw NotFoundException("Not Found")
@@ -40,18 +40,18 @@ class WalletServiceImpl( val walletRepository: WalletRepository,
         return wallet.toDTO()
     }
 
-    override fun performTransaction(senderID: Int, receiverID: Int, amount: BigDecimal): TransactionDTO {
+    override fun performTransaction(senderID: Long, receiverID: Long, amount: BigDecimal): TransactionDTO {
         if(senderID == receiverID)
             throw IllegalArgumentException("You can't send money to yourself")
 
-        val wallets = walletRepository.findAllById(listOf<Int>(senderID, receiverID))
+        val wallets = walletRepository.findAllById(listOf<Long>(senderID, receiverID))
         val senderWallet = wallets.find { it.id == senderID }
         val receiverWallet = wallets.find { it.id == receiverID }
         if(senderWallet == null || receiverWallet == null){
             throw IllegalArgumentException("Sender or receiver Wallet not Exists")
         }
 
-        if(senderWallet.balance < amount){
+        if( isBalanceInsufficient(senderWallet, senderWallet.balance)){
             throw IllegalArgumentException("Balance not enough")
         }
 
@@ -59,18 +59,27 @@ class WalletServiceImpl( val walletRepository: WalletRepository,
             Timestamp(System.currentTimeMillis()),
             senderWallet, receiverWallet, amount)
 
-        senderWallet.balance -= amount
-        walletRepository.save(senderWallet)
-        receiverWallet.balance += amount
-        walletRepository.save(receiverWallet)
+        transferMoney(senderWallet, receiverWallet, amount)
 
         return transactionRepository.save(transaction).toDTO()
     }
 
-    override fun getWalletTransactions(walletID: Int, from: Long?, to: Long?): List<TransactionDTO> {
-//        val wallet = walletRepository.findById(walletID)
-//        if(wallet.isEmpty)
-//            throw NotFoundException("Wallet not found")
+    private fun isBalanceInsufficient(wallet: Wallet, amount: BigDecimal): Boolean{
+        return wallet.balance < amount
+    }
+
+    private fun transferMoney(senderWallet: Wallet, receiverWallet: Wallet, amount: BigDecimal){
+        senderWallet.balance -= amount
+        walletRepository.save(senderWallet)
+        receiverWallet.balance += amount
+        walletRepository.save(receiverWallet)
+    }
+
+
+    override fun getWalletTransactions(walletID: Long, from: Long?, to: Long?): List<TransactionDTO> {
+        val walletOpt = walletRepository.findById(walletID)
+        if(walletOpt.isEmpty)
+            throw NotFoundException("Wallet not found")
 
 //        var l1 = wallet.get().transactionsRecv.map { it.toDTO() }
 //        var l2 = wallet.get().transactionsSent.map { it.toDTO() }
@@ -87,7 +96,7 @@ class WalletServiceImpl( val walletRepository: WalletRepository,
 
         if(from != null && to != null){
             return transactionRepository
-                .findAllByWalletAndByTimestampBetween(walletID, Timestamp(from), Timestamp(to))
+                .findAllByWalletAndByTimestampBetween(walletOpt.get(), Timestamp(from), Timestamp(to))
                 .map{it.toDTO()}
         }
 
@@ -96,8 +105,9 @@ class WalletServiceImpl( val walletRepository: WalletRepository,
         }
 
         return transactionRepository
-            .findAllByWallet(walletID)
+            .findAllByWallet(walletOpt.get())
             .map { it.toDTO() }
+//        return transactionRepository.findAllBySenderOrReceiver(walletOpt.get(), walletOpt.get())
     }
 
 

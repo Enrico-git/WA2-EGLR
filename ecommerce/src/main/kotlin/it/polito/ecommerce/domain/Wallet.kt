@@ -9,10 +9,10 @@ class Wallet(
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(nullable = false)
-    val id:Int? = null,
+    val id:Long? = null,
 
     @Min(value=0, message = "Balance cannot be negative")
-    @Column(nullable = false, columnDefinition = "DECIMAL default 0")
+    @Column(nullable = false, columnDefinition = "DECIMAL(15, 2) default 0")
     var balance: BigDecimal = BigDecimal(0.0),
 
     @ManyToOne

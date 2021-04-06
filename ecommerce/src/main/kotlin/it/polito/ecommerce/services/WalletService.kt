@@ -6,12 +6,11 @@ import org.springframework.stereotype.Service
 import java.math.BigDecimal
 import java.sql.Timestamp
 
-@Service
 interface WalletService {
-    fun addWallet(customerID: Int): WalletDTO
-    fun getWallet(walletID: Int): WalletDTO
-    fun performTransaction(senderID: Int, receiverID: Int, amount: BigDecimal): TransactionDTO
-    fun getWalletTransactions(walletID: Int, from: Long? = null,
+    fun addWallet(customerID: Long): WalletDTO
+    fun getWallet(walletID: Long): WalletDTO
+    fun performTransaction(senderID: Long, receiverID: Long, amount: BigDecimal): TransactionDTO
+    fun getWalletTransactions(walletID: Long, from: Long? = null,
                               to: Long? = null) :List<TransactionDTO>
 
 }

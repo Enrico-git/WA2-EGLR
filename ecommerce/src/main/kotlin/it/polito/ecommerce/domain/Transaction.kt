@@ -10,7 +10,7 @@ class Transaction(
     @Id
   @GeneratedValue(strategy = GenerationType.AUTO)
   @Column(nullable = false)
-  val id:Int? = null,
+  val id:Long? = null,
 
     @Column(nullable = false)
     val timestamp:Timestamp,
@@ -24,7 +24,7 @@ class Transaction(
     var receiver: Wallet,
 
     @Min(value=0, message = "Balance cannot be negative")
-    @Column(nullable = false, columnDefinition = "DECIMAL default 0")
+    @Column(nullable = false, columnDefinition = "DECIMAL(15, 2) default 0")
     val amount: BigDecimal =  BigDecimal(0.0)
 )
 

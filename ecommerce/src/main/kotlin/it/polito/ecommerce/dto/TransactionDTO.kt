@@ -4,9 +4,9 @@ import it.polito.ecommerce.domain.Transaction
 import java.math.BigDecimal
 import java.sql.Timestamp
 
-data class TransactionDTO(val id: Int,
-                          val senderID: Int,
-                          val receiverID: Int,
+data class TransactionDTO(val id: Long,
+                          val senderID: Long,
+                          val receiverID: Long,
                         val sender: String,
                         val receiver: String,
                         val timestamp: Timestamp,

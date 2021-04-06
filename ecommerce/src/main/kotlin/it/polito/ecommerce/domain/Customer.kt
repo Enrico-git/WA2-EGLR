@@ -8,7 +8,7 @@ class Customer(
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
    @Column(nullable = false)
-   val id:Int? = null,
+   val id:Long? = null,
 
     @Column(nullable = false)
     val name: String = "",
