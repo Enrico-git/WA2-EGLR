@@ -4,6 +4,6 @@ import java.sql.Timestamp
 
 data class ErrorDTO(
     val timestamp: Timestamp,
-    var status: Int? = null,
-    val error: String
+    var status: Int = 400,
+    var error: String
 )

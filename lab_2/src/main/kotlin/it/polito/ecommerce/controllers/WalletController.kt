@@ -3,14 +3,13 @@ package it.polito.ecommerce.controllers
 import it.polito.ecommerce.dto.*
 import it.polito.ecommerce.services.WalletService
 import javassist.NotFoundException
-import org.hibernate.exception.ConstraintViolationException
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
-import org.springframework.validation.BindingResult
+import org.springframework.validation.BindException
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
-import java.math.BigDecimal
 import java.sql.Timestamp
+import java.util.regex.Pattern
 import javax.validation.Valid
 import javax.validation.ValidationException
 import javax.validation.constraints.Min
@@ -28,10 +27,11 @@ class WalletController(private val service: WalletService) {
         )
 
         var status = HttpStatus.BAD_REQUEST
-//         TODO VALIDATION ERROR CUSTOM MSG
+
         when(e){
             is ValidationException -> {
                 errorDTO.status = 422
+                errorDTO.error = errorDTO.error.replace(Regex("\\w+\\."), "")
                 status = HttpStatus.UNPROCESSABLE_ENTITY
             }
             is NotFoundException -> {
@@ -39,7 +39,6 @@ class WalletController(private val service: WalletService) {
                 status = HttpStatus.NOT_FOUND
             }
             is IllegalArgumentException -> {
-                errorDTO.status = 400
                 status = HttpStatus.BAD_REQUEST
             }
         }
@@ -47,34 +46,51 @@ class WalletController(private val service: WalletService) {
         return ResponseEntity(errorDTO, status)
     }
 
-    @GetMapping("/{id}")
-    fun getWallet(@PathVariable @Min(0) id: Long): ResponseEntity<WalletDTO> {
-        return ResponseEntity<WalletDTO>(service.getWallet(id), HttpStatus.OK)
+    @ExceptionHandler(value = [BindException::class])
+    fun bindExceptionHandler(e: BindException): ResponseEntity<ErrorDTO>{
+        val errorDTO = ErrorDTO(
+            timestamp = Timestamp(System.currentTimeMillis()),
+            error = e.fieldErrors
+                .map{"${it.field} - ${it.defaultMessage}"}
+                .reduce{acc, string -> "$acc; $string"},
+            status = 422
+        )
+        return ResponseEntity(errorDTO, HttpStatus.UNPROCESSABLE_ENTITY)
+    }
+
+
+    @GetMapping("/{walletID}")
+    fun getWallet(@PathVariable @Min(0, message="The wallet ID must be higher than 0") walletID: Long): ResponseEntity<WalletDTO> {
+        return ResponseEntity(service.getWallet(walletID), HttpStatus.OK)
     }
 
     @PostMapping("/")
-    fun createWallet(@RequestBody @Valid customerDTO: CustomerDTO, bindingResult: BindingResult): ResponseEntity<WalletDTO> {
-        if (bindingResult.hasErrors())
-            throw ValidationException("Validation error")
-        return ResponseEntity(service.addWallet(customerDTO.id), HttpStatus.CREATED)
+    fun createWallet(@RequestBody @Valid customerDTO: CustomerDTO): ResponseEntity<WalletDTO> {
+        return ResponseEntity(service.addWallet(customerDTO), HttpStatus.CREATED)
     }
 
     @PostMapping("/{walletID}/transaction")
-    fun createTransaction(@PathVariable @Min(0) walletID: Long, receiverID: Long, @Min(0) amount: BigDecimal): ResponseEntity<TransactionDTO> {
-        return ResponseEntity<TransactionDTO>(service.performTransaction(walletID, receiverID, amount), HttpStatus.CREATED)
+    fun createTransaction(@PathVariable @Min(0, message="The wallet ID must be higher than 0") walletID: Long,
+                          @RequestBody @Valid transactionDTO: TransactionDTO): ResponseEntity<TransactionDTO>
+    {
+        transactionDTO.senderID = walletID
+        return ResponseEntity(service.performTransaction(transactionDTO), HttpStatus.CREATED)
     }
 
+//    TODO startup records script
+//    TODO pagination
     @GetMapping("/{walletID}/transactions")
-    fun getWalletTransactions(@PathVariable walletID: Long,
+    fun getWalletTransactions(@PathVariable @Min(0, message = "The wallet ID must be higher than 0") walletID: Long,
                               @RequestParam from: Long?,
-                              @RequestParam to: Long?): ResponseEntity<List<TransactionDTO>> {
-        // format of from and to: 2021-03-31T13:58:35.000000000
-// HTTP GET localhost:8080/wallet..../transactions?from=2021-03-31T13:58:35.000000000&to=2021-04-31T13:58:35.000000000
-//        try {
-            return ResponseEntity(service.getWalletTransactions(walletID, from, to), HttpStatus.OK)
-//        } catch (e: IllegalArgumentException){ //Make sure emtpy list throws exception TODO
-//            println(e)
-//        }
-//        return null
+                              @RequestParam to: Long?
+    ): ResponseEntity<List<TransactionDTO>> {
+        return ResponseEntity(service.getWalletTransactions(walletID, from, to), HttpStatus.OK)
+    }
+
+    @GetMapping("/{walletID}/transactions/{transactionID}")
+    fun getWalletTransaction(@PathVariable @Min(0, message = "The wallet ID must be higher than 0") walletID: Long,
+                             @PathVariable @Min(0, message = "The transaction ID must be higher than 0") transactionID: Long
+    ): ResponseEntity<TransactionDTO> {
+        return ResponseEntity(service.getWalletTransaction(walletID, transactionID), HttpStatus.OK)
     }
 }
