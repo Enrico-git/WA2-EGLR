@@ -27,6 +27,8 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     implementation("org.hibernate.validator:hibernate-validator")
     implementation("javax.validation:validation-api")
+    //Test api
+    implementation("io.github.rybalkinsd:kohttp:0.12.0")
 }
 
 tasks.withType<KotlinCompile> {
