@@ -1,13 +1,12 @@
 package it.polito.ecommerce.domain
 
-import it.polito.ecommerce.dto.WalletDTO
 import java.math.BigDecimal
 import javax.persistence.*
 import javax.validation.constraints.Min
 
 @Entity
 class Wallet(
-    @Id @GeneratedValue(strategy = GenerationType.AUTO)
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long? = null,
 
     @Column(nullable = false, columnDefinition = "DECIMAL(15,2) default 0")
@@ -24,12 +23,4 @@ class Wallet(
     @OneToMany(mappedBy = "receiver", targetEntity = Transaction::class)
     val transactionsReceived: MutableList<Transaction> = mutableListOf<Transaction>()
 
-
-//    fun toDTO(): WalletDTO {
-//        return WalletDTO(
-//            id = id!!,
-//            balance = balance,
-//            customer = customer?.name + " " + customer?.surname
-//        )
-//    }
 }

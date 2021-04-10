@@ -22,7 +22,7 @@ fun Transaction.toDTO(): TransactionDTO {
     return TransactionDTO(
         id = id!!,
         timestamp = timestamp,
-        senderID = sender.id!!,
+        senderID =sender.id!!,
         sender = "${sender.customer.name} ${sender.customer.surname}",
         receiverID = receiver.id!!,
         receiver = "${receiver.customer.name} ${receiver.customer.surname}",

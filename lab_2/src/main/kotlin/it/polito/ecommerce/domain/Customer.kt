@@ -2,13 +2,11 @@ package it.polito.ecommerce.domain
 
 import javax.persistence.*
 import javax.validation.constraints.Email
-import javax.validation.constraints.NotNull
 
 @Entity
 class Customer(
-    @Id @GeneratedValue(strategy = GenerationType.AUTO)
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long? = null,
-
     @Column(nullable = false)
     val name: String = "",
     @Column(nullable = false)

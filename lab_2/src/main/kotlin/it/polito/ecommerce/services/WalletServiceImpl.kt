@@ -10,6 +10,7 @@ import it.polito.ecommerce.repositories.CustomerRepository
 import it.polito.ecommerce.repositories.TransactionRepository
 import it.polito.ecommerce.repositories.WalletRepository
 import javassist.NotFoundException
+import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
 import java.sql.Timestamp
@@ -66,7 +67,7 @@ private val transactionRepository: TransactionRepository): WalletService{
 
     }
 
-    override fun getWalletTransactions(walletID: Long, from: Long?, to: Long?): List<TransactionDTO> {
+    override fun getWalletTransactions(walletID: Long, from: Long?, to: Long?, pageable: Pageable): List<TransactionDTO> {
 
         val walletOpt = walletRepository.findById(walletID)
         if ( ! walletOpt.isPresent)
@@ -74,13 +75,13 @@ private val transactionRepository: TransactionRepository): WalletService{
 
         if ( from != null && to != null) {
             return transactionRepository
-                    .findAllByWalletAndByTimestampBetween(walletOpt.get(), Timestamp(from), Timestamp(to))
+                    .findAllByWalletAndByTimestampBetween(walletOpt.get(), Timestamp(from), Timestamp(to), pageable)
                     .map{it.toDTO()}
         }
         if ( from != null || to != null)
             throw IllegalArgumentException("Invalid parameters")
 
-        return transactionRepository.findAllByWallet(walletOpt.get()).map{it.toDTO()}
+        return transactionRepository.findAllByWallet(walletOpt.get(), pageable).map{it.toDTO()}
     }
 
     fun isBalanceInsufficient(wallet: Wallet, amount: BigDecimal): Boolean{

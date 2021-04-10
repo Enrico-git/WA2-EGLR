@@ -9,7 +9,7 @@ import javax.validation.constraints.Min
 
 @Entity
 class Transaction (
-    @Id @GeneratedValue(strategy = GenerationType.AUTO)
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long? = null,
     @Column(nullable = false)
     val timestamp: Timestamp,

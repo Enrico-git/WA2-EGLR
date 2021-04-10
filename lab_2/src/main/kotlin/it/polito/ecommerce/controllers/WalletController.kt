@@ -3,13 +3,13 @@ package it.polito.ecommerce.controllers
 import it.polito.ecommerce.dto.*
 import it.polito.ecommerce.services.WalletService
 import javassist.NotFoundException
+import org.springframework.data.domain.Pageable
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.validation.BindException
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
 import java.sql.Timestamp
-import java.util.regex.Pattern
 import javax.validation.Valid
 import javax.validation.ValidationException
 import javax.validation.constraints.Min
@@ -77,14 +77,13 @@ class WalletController(private val service: WalletService) {
         return ResponseEntity(service.performTransaction(transactionDTO), HttpStatus.CREATED)
     }
 
-//    TODO startup records script
-//    TODO pagination
     @GetMapping("/{walletID}/transactions")
     fun getWalletTransactions(@PathVariable @Min(0, message = "The wallet ID must be higher than 0") walletID: Long,
                               @RequestParam from: Long?,
-                              @RequestParam to: Long?
+                              @RequestParam to: Long?,
+                              pageable: Pageable
     ): ResponseEntity<List<TransactionDTO>> {
-        return ResponseEntity(service.getWalletTransactions(walletID, from, to), HttpStatus.OK)
+        return ResponseEntity(service.getWalletTransactions(walletID, from, to, pageable), HttpStatus.OK)
     }
 
     @GetMapping("/{walletID}/transactions/{transactionID}")
