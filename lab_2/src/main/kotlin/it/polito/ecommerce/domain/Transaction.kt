@@ -9,8 +9,6 @@ import javax.validation.constraints.Min
 
 @Entity
 class Transaction (
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val id: Long? = null,
     @Column(nullable = false)
     val timestamp: Timestamp,
 
@@ -25,4 +23,4 @@ class Transaction (
     @Column(nullable = false, columnDefinition = "DECIMAL(15,2) default 0")
     @Min(value = 0, message = "Transaction amount cannot be negative")
     val amount: BigDecimal = BigDecimal(0.0)
-)
+): EntityBase<Long>()

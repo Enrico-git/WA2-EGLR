@@ -1,7 +1,11 @@
 DROP TABLE IF EXISTS transaction;
 DROP TABLE IF EXISTS wallet;
 DROP TABLE IF EXISTS customer;
+DROP TABLE IF EXISTS pk_sequence;
 
+-- CREATE SEQUENCE pk_sequence START WITH 1 INCREMENT BY 1;
+create table pk_sequence (next_val bigint) engine=InnoDB;
+insert into pk_sequence values ( 1 );
 
 CREATE TABLE customer(
      id BIGINT auto_increment,

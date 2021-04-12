@@ -14,6 +14,7 @@ import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
 import java.sql.Timestamp
+import java.util.*
 import javax.transaction.Transactional
 
 @Service
@@ -31,11 +32,10 @@ private val transactionRepository: TransactionRepository): WalletService{
     }
 
     override fun addWallet(customerDTO: CustomerDTO): WalletDTO {
-        val customerOpt = customerRepository.findById(customerDTO.id)
+        val customerOpt = customerRepository.findById(customerDTO.id!!)
         if (  ! customerOpt.isPresent )
             throw IllegalArgumentException("The customer does not exist")
         val wallet = Wallet(
-            id = null,
             customer = customerOpt.get()
         )
         return walletRepository.save(wallet).toDTO()
@@ -44,19 +44,18 @@ private val transactionRepository: TransactionRepository): WalletService{
     override fun performTransaction(transactionDTO: TransactionDTO): TransactionDTO {
         if (transactionDTO.senderID == transactionDTO.receiverID)
             throw IllegalArgumentException("You can't send money to yourself")
-        val wallets = walletRepository.findAllById(listOf<Long>(transactionDTO.senderID!!, transactionDTO.receiverID))
-        val senderWallet: Wallet? = wallets.find{it.id == transactionDTO.senderID}
-        val receiverWallet: Wallet? = wallets.find{it.id == transactionDTO.receiverID}
+        val wallets = walletRepository.findAllById(listOf<Long>(transactionDTO.senderID!!, transactionDTO.receiverID!!))
+        val senderWallet: Wallet? = wallets.find{it.getId() == transactionDTO.senderID}
+        val receiverWallet: Wallet? = wallets.find{it.getId() == transactionDTO.receiverID}
         if (senderWallet == null || receiverWallet == null)
             throw IllegalArgumentException("One of the wallets doesn't exist")
 
-        if ( isBalanceInsufficient(senderWallet, transactionDTO.amount))
+        if ( isBalanceInsufficient(senderWallet, transactionDTO.amount!!))
             throw IllegalArgumentException("Balance not high enough")
 
         transferMoney(senderWallet, receiverWallet, transactionDTO.amount)
 
         val transaction = Transaction(
-            id = null,
             timestamp = Timestamp(System.currentTimeMillis()),
             sender = senderWallet,
             receiver = receiverWallet,
@@ -76,11 +75,13 @@ private val transactionRepository: TransactionRepository): WalletService{
         if ( from != null && to != null) {
             return transactionRepository
                     .findAllByWalletAndByTimestampBetween(walletOpt.get(), Timestamp(from), Timestamp(to), pageable)
+//                    .mapTo(HashSet<TransactionDTO>()){it.toDTO()}
                     .map{it.toDTO()}
         }
         if ( from != null || to != null)
             throw IllegalArgumentException("Invalid parameters")
 
+//        return transactionRepository.findAllByWallet(walletOpt.get(), pageable).mapTo(HashSet<TransactionDTO>()){it.toDTO()}
         return transactionRepository.findAllByWallet(walletOpt.get(), pageable).map{it.toDTO()}
     }
 

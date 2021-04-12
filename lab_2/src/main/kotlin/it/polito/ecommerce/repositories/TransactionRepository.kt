@@ -10,7 +10,7 @@ import java.sql.Timestamp
 import java.util.*
 
 @Repository
-interface TransactionRepository: PagingAndSortingRepository<Transaction, Int?> {
+interface TransactionRepository: PagingAndSortingRepository<Transaction, Long> {
     @Query("select t from Transaction t where t.sender = ?1 or t.receiver = ?1")
     fun findAllByWallet(wallet: Wallet, pageable: Pageable): List<Transaction>
     

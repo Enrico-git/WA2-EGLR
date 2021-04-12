@@ -5,19 +5,17 @@ import javax.validation.constraints.Email
 
 @Entity
 class Customer(
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val id: Long? = null,
     @Column(nullable = false)
-    val name: String = "",
+    var name: String = "",
     @Column(nullable = false)
-    val surname: String = "",
+    var surname: String = "",
     @Column(nullable = false)
-    val address: String = "",
+    var address: String = "",
 
     @Column(unique = true, nullable = false)
     @Email(message = "Email must be valid")
-    val email: String = ""
-) {
+    var email: String = ""
+): EntityBase<Long>() {
     @OneToMany(mappedBy = "customer", targetEntity = Wallet::class)
-    val wallets: MutableList<Wallet> = mutableListOf<Wallet>()
+    val wallets: MutableSet<Wallet> = mutableSetOf<Wallet>()
 }

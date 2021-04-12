@@ -7,12 +7,11 @@ import java.math.BigDecimal
 data class WalletDTO(
     val id: Long,
     val balance: BigDecimal,
-    val customer: CustomerDTO
-//    val transactionsSent: List<TransactionDTO>,
-//    val transactionsRecv: List<TransactionDTO>
+    val customerID: Long
 )
+
 fun Wallet.toDTO() = WalletDTO(
-    id = id!!,
+    id = getId()!!,
     balance = balance,
-    customer = customer.toDTO()
+    customerID = customer.getId()!!
 )
