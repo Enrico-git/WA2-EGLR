@@ -23,7 +23,7 @@ class WalletServiceImpl( val walletRepository: WalletRepository,
 
 ) : WalletService {
     override fun addWallet(customerDTO: CustomerDTO): WalletDTO {
-        val customerOpt = customerRepository.findById(customerDTO.id)
+        val customerOpt = customerRepository.findById(customerDTO.id!!)
         if(customerOpt.isEmpty)
             throw IllegalArgumentException("The Customer does not exist")
 
@@ -45,22 +45,24 @@ class WalletServiceImpl( val walletRepository: WalletRepository,
         if(transactionDTO.senderID == transactionDTO.receiverID)
             throw IllegalArgumentException("You can't send money to yourself")
 
-        val wallets = walletRepository.findAllById(listOf<Long>(transactionDTO.senderID!!, transactionDTO.receiverID))
+        val wallets = walletRepository.findAllById(listOf<Long>(transactionDTO.senderID!!, transactionDTO.receiverID!!))
         val senderWallet = wallets.find { it.getId() == transactionDTO.senderID }
         val receiverWallet = wallets.find { it.getId() == transactionDTO.receiverID }
         if(senderWallet == null || receiverWallet == null){
             throw IllegalArgumentException("Sender or receiver Wallet not Exists")
         }
 
-        if( isBalanceInsufficient(senderWallet, transactionDTO.amount)){
+        if( isBalanceInsufficient(senderWallet, transactionDTO.amount!!)){
             throw IllegalArgumentException("Balance not enough")
         }
 
+        transferMoney(senderWallet, receiverWallet, transactionDTO.amount)
+
         val transaction = Transaction(
             timestamp = Timestamp(System.currentTimeMillis()),
-            senderWallet, receiverWallet, transactionDTO.amount)
-
-        transferMoney(senderWallet, receiverWallet, transactionDTO.amount)
+            sender = senderWallet,
+            receiver = receiverWallet,
+            amount = transactionDTO.amount)
 
         return transactionRepository.save(transaction).toDTO()
     }
