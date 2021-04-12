@@ -10,6 +10,7 @@ import it.polito.ecommerce.repositories.CustomerRepository
 import it.polito.ecommerce.repositories.TransactionRepository
 import it.polito.ecommerce.repositories.WalletRepository
 import javassist.NotFoundException
+import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
 import java.sql.Timestamp
@@ -79,7 +80,11 @@ class WalletServiceImpl( val walletRepository: WalletRepository,
     }
 
 
-    override fun getWalletTransactions(walletID: Long, from: Long?, to: Long?): Set<TransactionDTO> {
+    override fun getWalletTransactions(walletID: Long,
+                                       from: Long?,
+                                       to: Long?,
+                                       pageable: Pageable
+    ): List<TransactionDTO> {
         val walletOpt = walletRepository.findById(walletID)
         if(walletOpt.isEmpty)
             throw IllegalArgumentException("Wallet not found")
@@ -99,8 +104,8 @@ class WalletServiceImpl( val walletRepository: WalletRepository,
 
         if(from != null && to != null){
             return transactionRepository
-                .findAllByWalletAndByTimestampBetween(walletOpt.get(), Timestamp(from), Timestamp(to))
-                .mapTo(HashSet<TransactionDTO>()){it.toDTO()}
+                .findAllByWalletAndByTimestampBetween(walletOpt.get(), Timestamp(from), Timestamp(to), pageable)
+                .map{it.toDTO()}
         }
 
         if( (from == null && to != null) || (from != null && to == null)){
@@ -108,8 +113,8 @@ class WalletServiceImpl( val walletRepository: WalletRepository,
         }
 
         return transactionRepository
-            .findAllByWallet(walletOpt.get())
-            .mapTo(HashSet<TransactionDTO>()){it.toDTO()}
+            .findAllByWallet(walletOpt.get(), pageable)
+            .map{it.toDTO()}
 //        return transactionRepository.findAllBySenderOrReceiver(walletOpt.get(), walletOpt.get())
     }
 

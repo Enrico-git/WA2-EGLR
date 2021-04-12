@@ -6,6 +6,7 @@ import it.polito.ecommerce.dto.TransactionDTO
 import it.polito.ecommerce.dto.WalletDTO
 import it.polito.ecommerce.services.WalletService
 import javassist.NotFoundException
+import org.springframework.data.domain.Pageable
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.validation.BindException
@@ -108,9 +109,10 @@ class WalletController(private val walletService: WalletService) {
     @GetMapping("/{walletID}/transactions")
     fun getWalletTransactions(@PathVariable @Min(0, message = "The wallet ID must be higher than 0") walletID: Long,
                               @RequestParam from: Long?,
-                              @RequestParam to: Long?
-    ): ResponseEntity<Set<TransactionDTO>> {
-        return ResponseEntity(walletService.getWalletTransactions(walletID, from, to), HttpStatus.OK)
+                              @RequestParam to: Long?,
+                              pageable: Pageable
+    ): ResponseEntity<List<TransactionDTO>> {
+        return ResponseEntity(walletService.getWalletTransactions(walletID, from, to, pageable), HttpStatus.OK)
     }
 
 
