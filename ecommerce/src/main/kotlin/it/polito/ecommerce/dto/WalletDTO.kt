@@ -7,7 +7,7 @@ data class WalletDTO(val id: Long,
                      val balance: BigDecimal,
                      val customerID: Long)
 
-fun Wallet.toDTO() = WalletDTO(id = id!!,
+fun Wallet.toDTO() = WalletDTO(id = getId()!!,
                          balance = balance,
-                         customerID = customer.id!!
+                         customerID = customer.getId()!!
                      )

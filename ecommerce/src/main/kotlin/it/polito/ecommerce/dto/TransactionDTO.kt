@@ -16,9 +16,9 @@ data class TransactionDTO(
     val amount: BigDecimal)
 
 fun Transaction.toDTO() = TransactionDTO(
-    id = id!!,
-    senderID = sender.id!!,
-    receiverID = receiver.id!!,
+    id = getId()!!,
+    senderID = sender.getId()!!,
+    receiverID = receiver.getId()!!,
     timestamp = timestamp,
     amount = amount
 )

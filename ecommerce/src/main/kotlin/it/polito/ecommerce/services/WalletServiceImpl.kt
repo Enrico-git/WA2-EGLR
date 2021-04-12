@@ -27,7 +27,9 @@ class WalletServiceImpl( val walletRepository: WalletRepository,
         if(customerOpt.isEmpty)
             throw IllegalArgumentException("The Customer does not exist")
 
-        val wallet = Wallet(null, BigDecimal(0.0), customerOpt.get() )
+        val wallet = Wallet(
+            customer = customerOpt.get()
+        )
         return walletRepository.save(wallet).toDTO()
     }
 
@@ -44,8 +46,8 @@ class WalletServiceImpl( val walletRepository: WalletRepository,
             throw IllegalArgumentException("You can't send money to yourself")
 
         val wallets = walletRepository.findAllById(listOf<Long>(transactionDTO.senderID!!, transactionDTO.receiverID))
-        val senderWallet = wallets.find { it.id == transactionDTO.senderID }
-        val receiverWallet = wallets.find { it.id == transactionDTO.receiverID }
+        val senderWallet = wallets.find { it.getId() == transactionDTO.senderID }
+        val receiverWallet = wallets.find { it.getId() == transactionDTO.receiverID }
         if(senderWallet == null || receiverWallet == null){
             throw IllegalArgumentException("Sender or receiver Wallet not Exists")
         }
@@ -54,8 +56,8 @@ class WalletServiceImpl( val walletRepository: WalletRepository,
             throw IllegalArgumentException("Balance not enough")
         }
 
-        val transaction = Transaction(null,
-            Timestamp(System.currentTimeMillis()),
+        val transaction = Transaction(
+            timestamp = Timestamp(System.currentTimeMillis()),
             senderWallet, receiverWallet, transactionDTO.amount)
 
         transferMoney(senderWallet, receiverWallet, transactionDTO.amount)
@@ -75,7 +77,7 @@ class WalletServiceImpl( val walletRepository: WalletRepository,
     }
 
 
-    override fun getWalletTransactions(walletID: Long, from: Long?, to: Long?): List<TransactionDTO> {
+    override fun getWalletTransactions(walletID: Long, from: Long?, to: Long?): Set<TransactionDTO> {
         val walletOpt = walletRepository.findById(walletID)
         if(walletOpt.isEmpty)
             throw IllegalArgumentException("Wallet not found")
@@ -96,7 +98,7 @@ class WalletServiceImpl( val walletRepository: WalletRepository,
         if(from != null && to != null){
             return transactionRepository
                 .findAllByWalletAndByTimestampBetween(walletOpt.get(), Timestamp(from), Timestamp(to))
-                .map{it.toDTO()}
+                .mapTo(HashSet<TransactionDTO>()){it.toDTO()}
         }
 
         if( (from == null && to != null) || (from != null && to == null)){
@@ -105,7 +107,7 @@ class WalletServiceImpl( val walletRepository: WalletRepository,
 
         return transactionRepository
             .findAllByWallet(walletOpt.get())
-            .map { it.toDTO() }
+            .mapTo(HashSet<TransactionDTO>()){it.toDTO()}
 //        return transactionRepository.findAllBySenderOrReceiver(walletOpt.get(), walletOpt.get())
     }
 

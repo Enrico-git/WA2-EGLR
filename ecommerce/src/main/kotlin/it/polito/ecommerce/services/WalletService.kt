@@ -12,7 +12,7 @@ interface WalletService {
     fun getWallet(walletID: Long): WalletDTO
     fun performTransaction(transactionDTO: TransactionDTO): TransactionDTO
     fun getWalletTransactions(walletID: Long, from: Long? = null,
-                              to: Long? = null) :List<TransactionDTO>
+                              to: Long? = null) : Set<TransactionDTO>
 
     fun getWalletTransaction(walletID: Long, transactionID: Long): TransactionDTO
 

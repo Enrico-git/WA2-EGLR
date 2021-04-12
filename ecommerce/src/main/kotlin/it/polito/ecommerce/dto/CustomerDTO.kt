@@ -9,4 +9,7 @@ data class CustomerDTO(
     val name: String?,
     val surname: String?)
 
-fun Customer.toDTO() = CustomerDTO(id!!, name, surname)
+fun Customer.toDTO() = CustomerDTO(
+    id = getId()!!,
+    name = name,
+    surname = surname)
