@@ -7,24 +7,19 @@ import javax.validation.constraints.Min
 
 @Entity
 class Transaction(
-    @Id
-  @GeneratedValue(strategy = GenerationType.AUTO)
-  @Column(nullable = false)
-  val id:Long? = null,
-
     @Column(nullable = false)
     val timestamp:Timestamp,
 
     @ManyToOne
     @JoinColumn(name="sender", referencedColumnName = "id", nullable = false)
-    var sender: Wallet,
+    val sender: Wallet,
 
     @ManyToOne
     @JoinColumn(name="receiver", referencedColumnName = "id", nullable = false)
-    var receiver: Wallet,
+    val receiver: Wallet,
 
     @Min(value=0, message = "Balance cannot be negative")
     @Column(nullable = false, columnDefinition = "DECIMAL(15, 2) default 0")
     val amount: BigDecimal =  BigDecimal(0.0)
-)
+)  : EntityBase<Long>()
 
