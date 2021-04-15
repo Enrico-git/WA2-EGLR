@@ -21,47 +21,6 @@ import javax.validation.constraints.Min
 @RequestMapping("/wallet")
 @Validated
 class WalletController(private val walletService: WalletService) {
-
-    @ExceptionHandler(value = [NotFoundException::class, IllegalArgumentException::class, ValidationException::class])
-    fun exceptionHandler(e: Exception): ResponseEntity<ErrorDTO> {
-        val errorDTO = ErrorDTO(
-            timestamp = Timestamp(System.currentTimeMillis()),
-            error = e.message!!
-        )
-
-        var status = HttpStatus.BAD_REQUEST
-
-        when(e){
-            is ValidationException -> {
-                errorDTO.status = 422
-                errorDTO.error = errorDTO.error.replace(Regex("\\w+\\."), "")
-                status = HttpStatus.UNPROCESSABLE_ENTITY
-            }
-            is NotFoundException -> {
-                errorDTO.status = 404
-                status = HttpStatus.NOT_FOUND
-            }
-            is IllegalArgumentException -> {
-                status = HttpStatus.BAD_REQUEST
-            }
-        }
-
-        return ResponseEntity(errorDTO, status)
-    }
-
-    @ExceptionHandler(value = [BindException::class])
-    fun bindExceptionHandler(e: BindException): ResponseEntity<ErrorDTO>{
-        val errorDTO = ErrorDTO(
-            timestamp = Timestamp(System.currentTimeMillis()),
-            error = e.fieldErrors
-                .map{"${it.field} - ${it.defaultMessage}"}
-                .reduce{acc, string -> "$acc; $string"},
-            status = 422
-        )
-
-        return ResponseEntity(errorDTO, HttpStatus.UNPROCESSABLE_ENTITY)
-    }
-
     /*
         /wallet [POST] à Create a new wallet for a given customer. In the Request Body there will be the
         Customer’s ID for which you want to create a wallet. The wallet created will initially have no money.
