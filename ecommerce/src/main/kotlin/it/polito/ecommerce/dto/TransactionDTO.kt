@@ -8,14 +8,14 @@ import javax.validation.constraints.NotNull
 
 data class TransactionDTO(
     val id: Long?,
-    @field:Min(0, message = "the sender ID must be higher than zero")
+    @field:Min(0)
     var senderID: Long?,
-    @field:Min(0, message = "the receiver ID must be higher than zero")
-    @field:NotNull(message = "the receiver must not be null")
+    @field:Min(0)
+    @field:NotNull
     val receiverID: Long?,
     var timestamp: Timestamp?,
-    @field:Min(0, message = "the transaction must be higher than zero")
-    @field:NotNull (message = "the amount must not be null")
+    @field:Min(0)
+    @field:NotNull
     val amount: BigDecimal?)
 
 fun Transaction.toDTO() = TransactionDTO(

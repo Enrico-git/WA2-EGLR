@@ -41,7 +41,7 @@ class WalletController(private val walletService: WalletService) {
     */
     @GetMapping("/{walletID}")
     fun getWallet(
-        @PathVariable @Min(0, message = "the wallet ID must be higher than zero") walletID: Long
+        @PathVariable @Min(0) walletID: Long
     ): ResponseEntity<WalletDTO>{
         return ResponseEntity(walletService.getWallet(walletID), HttpStatus.OK)
     }
@@ -54,7 +54,7 @@ class WalletController(private val walletService: WalletService) {
 
     @PostMapping("/{walletID}/transaction")
     fun createTransaction(
-        @PathVariable @Min(0, message = "the wallet (sender) ID must be higher than zero") walletID: Long,
+        @PathVariable @Min(0) walletID: Long,
         @RequestBody @Valid transactionDTO: TransactionDTO
     ) : ResponseEntity<TransactionDTO>{
         transactionDTO.senderID = walletID
@@ -66,7 +66,7 @@ class WalletController(private val walletService: WalletService) {
         transactions regarding a given wallet in a given time frame
      */
     @GetMapping("/{walletID}/transactions")
-    fun getWalletTransactions(@PathVariable @Min(0, message = "The wallet ID must be higher than 0") walletID: Long,
+    fun getWalletTransactions(@PathVariable @Min(0) walletID: Long,
                               @RequestParam from: Long?,
                               @RequestParam to: Long?,
                               pageable: Pageable
@@ -80,8 +80,8 @@ class WalletController(private val walletService: WalletService) {
     */
 
     @GetMapping("{walletID}/transactions/{transactionID}")
-    fun getWalletTransaction(@PathVariable @Min(0, message = "The wallet ID must be higher than 0") walletID: Long,
-                            @PathVariable @Min(0, message = "The transaction ID must be higher than 0") transactionID: Long
+    fun getWalletTransaction(@PathVariable @Min(0) walletID: Long,
+                            @PathVariable @Min(0) transactionID: Long
     ): ResponseEntity<TransactionDTO>{
         return ResponseEntity(walletService.getWalletSingleTransaction(walletID, transactionID), HttpStatus.OK)
     }

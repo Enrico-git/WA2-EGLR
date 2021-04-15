@@ -5,8 +5,8 @@ import javax.validation.constraints.Min
 import javax.validation.constraints.NotNull
 
 data class CustomerDTO(
-    @field:Min(0, message ="the customer ID must be higher than zero")
-    @field:NotNull (message = "the id must be not null")
+    @field:Min(0)
+    @field:NotNull
     val id:Long?,
     val name: String?,
     val surname: String?)

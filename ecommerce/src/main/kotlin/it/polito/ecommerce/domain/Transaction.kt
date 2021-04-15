@@ -18,7 +18,7 @@ class Transaction(
     @JoinColumn(name="receiver", referencedColumnName = "id", nullable = false)
     val receiver: Wallet,
 
-    @Min(value=0, message = "Balance cannot be negative")
+    @Min(value=0)
     @Column(nullable = false, columnDefinition = "DECIMAL(15, 2) default 0")
     val amount: BigDecimal =  BigDecimal(0.0)
 )  : EntityBase<Long>()
