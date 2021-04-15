@@ -13,7 +13,7 @@ class Customer(
     var address: String = "",
 
     @Column(unique = true, nullable = false)
-    @Email(message = "Email must be valid")
+    @Email
     var email: String = ""
 ): EntityBase<Long>() {
     @OneToMany(mappedBy = "customer", targetEntity = Wallet::class)

@@ -7,7 +7,7 @@ import javax.validation.constraints.Min
 @Entity
 class Wallet(
     @Column(nullable = false, columnDefinition = "DECIMAL(15,2) default 0")
-    @Min(value = 0, message = "Balance cannot be negative")
+    @Min(value = 0)
     var balance: BigDecimal = BigDecimal(0.0),
 
     @ManyToOne

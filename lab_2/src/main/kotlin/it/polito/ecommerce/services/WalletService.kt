@@ -9,5 +9,5 @@ interface WalletService {
     fun addWallet(customerDTO: CustomerDTO): WalletDTO
     fun performTransaction(transactionDTO: TransactionDTO): TransactionDTO
     fun getWalletTransactions(walletID: Long, from: Long? = null, to: Long? = null, pageable: Pageable): List<TransactionDTO>
-    fun getWalletTransaction(walletID: Long, transactionID: Long): TransactionDTO
+    fun getWalletSingleTransaction(walletID: Long, transactionID: Long): TransactionDTO
 }

@@ -14,7 +14,6 @@ import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
 import java.sql.Timestamp
-import java.util.*
 import javax.transaction.Transactional
 
 @Service
@@ -75,13 +74,11 @@ private val transactionRepository: TransactionRepository): WalletService{
         if ( from != null && to != null) {
             return transactionRepository
                     .findAllByWalletAndByTimestampBetween(walletOpt.get(), Timestamp(from), Timestamp(to), pageable)
-//                    .mapTo(HashSet<TransactionDTO>()){it.toDTO()}
                     .map{it.toDTO()}
         }
         if ( from != null || to != null)
             throw IllegalArgumentException("Invalid parameters")
 
-//        return transactionRepository.findAllByWallet(walletOpt.get(), pageable).mapTo(HashSet<TransactionDTO>()){it.toDTO()}
         return transactionRepository.findAllByWallet(walletOpt.get(), pageable).map{it.toDTO()}
     }
 
@@ -96,7 +93,7 @@ private val transactionRepository: TransactionRepository): WalletService{
         walletRepository.save(receiverWallet)
     }
 
-    override fun getWalletTransaction(walletID: Long, transactionID: Long): TransactionDTO {
+    override fun getWalletSingleTransaction(walletID: Long, transactionID: Long): TransactionDTO {
         val walletOpt = walletRepository.findById(walletID)
         if ( ! walletOpt.isPresent)
             throw IllegalArgumentException("Wallet does not exist")
