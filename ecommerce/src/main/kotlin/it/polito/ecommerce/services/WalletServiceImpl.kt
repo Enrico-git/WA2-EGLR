@@ -118,7 +118,7 @@ class WalletServiceImpl( val walletRepository: WalletRepository,
 //        return transactionRepository.findAllBySenderOrReceiver(walletOpt.get(), walletOpt.get())
     }
 
-    override fun getWalletTransaction(walletID: Long, transactionID: Long): TransactionDTO {
+    override fun getWalletSingleTransaction(walletID: Long, transactionID: Long): TransactionDTO {
         val walletOpt = walletRepository.findById(walletID)
         if (walletOpt.isEmpty)
             throw IllegalArgumentException("Wallet does not exit")

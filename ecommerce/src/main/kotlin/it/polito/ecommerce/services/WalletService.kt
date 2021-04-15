@@ -13,6 +13,6 @@ interface WalletService {
                               to: Long? = null,
                               pageable: Pageable ) : List<TransactionDTO>
 
-    fun getWalletTransaction(walletID: Long, transactionID: Long): TransactionDTO
+    fun getWalletSingleTransaction(walletID: Long, transactionID: Long): TransactionDTO
 
 }

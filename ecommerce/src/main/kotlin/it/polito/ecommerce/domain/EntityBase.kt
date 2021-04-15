@@ -11,12 +11,11 @@ abstract class EntityBase<T: Serializable> {
     }
 
     @Id
-    //@GeneratedValue(strategy= GenerationType.SEQUENCE, generator = "pk_generator")
-//    @GeneratedValue
-//    @SequenceGenerator(name="pk_generator",
-//        sequenceName = "pk_sequence",
-//        initialValue = 1,
-//        allocationSize = 1)
+    @GeneratedValue(strategy= GenerationType.SEQUENCE, generator = "pk_generator")
+    @SequenceGenerator(name="pk_generator",
+        sequenceName = "pk_sequence",
+        initialValue = 1,
+        allocationSize = 1)
     private val id:T?  = null
 
     fun getId(): T? = id

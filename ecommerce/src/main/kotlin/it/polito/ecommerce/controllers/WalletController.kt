@@ -83,7 +83,7 @@ class WalletController(private val walletService: WalletService) {
     fun getWalletTransaction(@PathVariable @Min(0, message = "The wallet ID must be higher than 0") walletID: Long,
                             @PathVariable @Min(0, message = "The transaction ID must be higher than 0") transactionID: Long
     ): ResponseEntity<TransactionDTO>{
-        return ResponseEntity(walletService.getWalletTransaction(walletID, transactionID), HttpStatus.OK)
+        return ResponseEntity(walletService.getWalletSingleTransaction(walletID, transactionID), HttpStatus.OK)
     }
 
 
