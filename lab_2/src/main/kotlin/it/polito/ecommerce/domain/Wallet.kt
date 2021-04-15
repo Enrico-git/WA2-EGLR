@@ -6,17 +6,18 @@ import javax.validation.constraints.Min
 
 @Entity
 class Wallet(
-    @Min(value=0)
-    @Column(nullable = false, columnDefinition = "DECIMAL(15, 2) default 0")
+    @Column(nullable = false, columnDefinition = "DECIMAL(15,2) default 0")
+    @Min(value = 0)
     var balance: BigDecimal = BigDecimal(0.0),
 
     @ManyToOne
-    @JoinColumn(name="customer", referencedColumnName = "id", nullable = false)
-    val customer: Customer
-) : EntityBase<Long>() {
-    @OneToMany(mappedBy="sender", targetEntity=Transaction::class)
+    @JoinColumn(name = "customer", referencedColumnName = "id", nullable = false)
+    val customer: Customer,
+): EntityBase<Long>() {
+    @OneToMany(mappedBy = "sender", targetEntity = Transaction::class)
     val transactionsSent: MutableSet<Transaction> = mutableSetOf<Transaction>()
 
-    @OneToMany(mappedBy="receiver", targetEntity=Transaction::class)
-    val transactionsRecv: MutableSet<Transaction> = mutableSetOf<Transaction>()
+    @OneToMany(mappedBy = "receiver", targetEntity = Transaction::class)
+    val transactionsReceived: MutableSet<Transaction> = mutableSetOf<Transaction>()
+
 }

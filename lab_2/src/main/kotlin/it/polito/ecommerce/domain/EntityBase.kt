@@ -10,10 +10,11 @@ abstract class EntityBase<T: Serializable> {
         private const val serialVersionUID = -43869754L
     }
 
+
     @Id
-    @GeneratedValue(strategy= GenerationType.SEQUENCE, generator = "pk_generator")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "pk_generator")
     @SequenceGenerator(name="pk_generator",
-        sequenceName = "pk_sequence",
+        sequenceName="pk_sequence",
         initialValue = 1,
         allocationSize = 1)
     private val id:T?  = null

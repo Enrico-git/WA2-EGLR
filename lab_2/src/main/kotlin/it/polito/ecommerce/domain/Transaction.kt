@@ -6,9 +6,9 @@ import javax.persistence.*
 import javax.validation.constraints.Min
 
 @Entity
-class Transaction(
+class Transaction (
     @Column(nullable = false)
-    val timestamp:Timestamp,
+    val timestamp: Timestamp,
 
     @ManyToOne
     @JoinColumn(name="sender", referencedColumnName = "id", nullable = false)
@@ -18,8 +18,7 @@ class Transaction(
     @JoinColumn(name="receiver", referencedColumnName = "id", nullable = false)
     val receiver: Wallet,
 
-    @Min(value=0)
-    @Column(nullable = false, columnDefinition = "DECIMAL(15, 2) default 0")
-    val amount: BigDecimal =  BigDecimal(0.0)
-)  : EntityBase<Long>()
-
+    @Column(nullable = false, columnDefinition = "DECIMAL(15,2) default 0")
+    @Min(value = 0)
+    val amount: BigDecimal = BigDecimal(0.0)
+): EntityBase<Long>()

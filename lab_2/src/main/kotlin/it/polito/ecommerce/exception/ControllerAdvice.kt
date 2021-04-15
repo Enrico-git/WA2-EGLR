@@ -40,7 +40,8 @@ class ControllerAdvice {
         return ResponseEntity(errorDTO, status)
     }
 
-    // DTO validation in post request
+
+    //    DTO validation in post request
     @ExceptionHandler(value = [BindException::class])
     fun bindExceptionHandler(e: BindException): ResponseEntity<ErrorDTO> {
         val errorDTO = ErrorDTO(
@@ -50,7 +51,6 @@ class ControllerAdvice {
                 .reduce{acc, string -> "$acc; $string"},
             status = 422
         )
-
         return ResponseEntity(errorDTO, HttpStatus.UNPROCESSABLE_ENTITY)
     }
 }

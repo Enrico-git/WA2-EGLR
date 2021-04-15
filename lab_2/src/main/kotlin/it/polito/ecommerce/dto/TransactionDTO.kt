@@ -13,15 +13,18 @@ data class TransactionDTO(
     @field:Min(0)
     @field:NotNull
     val receiverID: Long?,
-    var timestamp: Timestamp?,
+    val timestamp: Timestamp?,
     @field:Min(0)
     @field:NotNull
-    val amount: BigDecimal?)
-
-fun Transaction.toDTO() = TransactionDTO(
-    id = getId()!!,
-    senderID = sender.getId()!!,
-    receiverID = receiver.getId()!!,
-    timestamp = timestamp,
-    amount = amount
+    val amount: BigDecimal?
 )
+
+fun Transaction.toDTO(): TransactionDTO {
+    return TransactionDTO(
+        id = getId()!!,
+        timestamp = timestamp,
+        senderID =sender.getId()!!,
+        receiverID = receiver.getId()!!,
+        amount = amount
+    )
+}
