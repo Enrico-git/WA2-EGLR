@@ -2,6 +2,7 @@ package it.polito.ecommerce.domain
 
 import org.springframework.data.util.ProxyUtils
 import java.io.Serializable
+import java.sql.Timestamp
 import javax.persistence.*
 
 @MappedSuperclass
@@ -9,7 +10,6 @@ abstract class EntityBase<T: Serializable> {
     companion object {
         private const val serialVersionUID = -43869754L
     }
-
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "pk_generator")

@@ -2,13 +2,11 @@ package it.polito.ecommerce.services
 
 import it.polito.ecommerce.common.Rolename
 import it.polito.ecommerce.domain.User
-import it.polito.ecommerce.domain.Wallet
+import it.polito.ecommerce.dto.RegistrationDTO
 import it.polito.ecommerce.dto.UserDetailsDTO
 import it.polito.ecommerce.dto.toDTO
 import it.polito.ecommerce.repositories.UserRepository
-import javassist.NotFoundException
 import org.springframework.security.core.userdetails.UserDetails
-import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.security.core.userdetails.UsernameNotFoundException
 import org.springframework.stereotype.Service
 import javax.transaction.Transactional
@@ -16,30 +14,38 @@ import javax.transaction.Transactional
 @Service
 @Transactional
 class UserDetailsServiceImpl(
-    private val userRepository: UserRepository
-): UserDetailsService {
+    private val userRepository: UserRepository,
+    private val notificationService: NotificationServiceImpl,
+    private val mailService: MailServiceImpl
+): UserDetailsServiceExt {
 
     override fun loadUserByUsername(username: String?): UserDetails {
         val userOpt = userRepository.findByUsername(username!!)
         if ( ! userOpt.isPresent)
-            throw UsernameNotFoundException("Wallet not found")
+            throw UsernameNotFoundException("User not found")
         return userOpt.get().toDTO()
     }
 
-    fun addUser(userDetailsDTO: UserDetailsDTO): UserDetailsDTO{
+    override fun registerUser(registrationDTO: RegistrationDTO): UserDetailsDTO{
 //        TODO hash pw
-        val user = User(
-            username = userDetailsDTO.username,
-            password = userDetailsDTO.password,
+
+        var user = User(
+            username = registrationDTO.username,
+            password = registrationDTO.password,
             isEnabled = false,
-            email = userDetailsDTO.email,
+            email = registrationDTO.email,
             roles = Rolename.CUSTOMER.toString()
         )
 
-        return userRepository.save(user).toDTO()
+        user = userRepository.save(user)
+        val token = notificationService.createEmailVerificationToken(user)
+        mailService.sendMessage(registrationDTO.email, "Confirm registration", "Token: $token")
+//        username, email, roles, isEnabled
+//        TODO RETURN TYPE
+        return user.toDTO()
     }
 
-    fun addRole(username: String, role: String): UserDetailsDTO{
+    override fun addRole(username: String, role: String): UserDetailsDTO{
         val userOpt = userRepository.findByUsername(username)
         if (! userOpt.isPresent )
             throw IllegalArgumentException("The user does not exist")
@@ -48,7 +54,7 @@ class UserDetailsServiceImpl(
         return userRepository.save(user).toDTO()
     }
 
-    fun removeRole(username: String, role: String): UserDetailsDTO{
+    override fun removeRole(username: String, role: String): UserDetailsDTO{
         val userOpt = userRepository.findByUsername(username)
         if (! userOpt.isPresent )
             throw IllegalArgumentException("The user does not exist")
@@ -56,7 +62,7 @@ class UserDetailsServiceImpl(
         user.removeRole(Rolename.valueOf(role))
         return userRepository.save(user).toDTO()
     }
-    fun enableUser(username: String): UserDetailsDTO{
+    override fun enableUser(username: String): UserDetailsDTO{
         val userOpt = userRepository.findByUsername(username)
         if (! userOpt.isPresent )
             throw IllegalArgumentException("The user does not exist")
@@ -65,7 +71,7 @@ class UserDetailsServiceImpl(
         return userRepository.save(user).toDTO()
     }
 
-    fun disableUser(username: String): UserDetailsDTO{
+    override fun disableUser(username: String): UserDetailsDTO{
         val userOpt = userRepository.findByUsername(username)
         if (! userOpt.isPresent )
             throw IllegalArgumentException("The user does not exist")

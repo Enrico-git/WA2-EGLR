@@ -1,4 +1,5 @@
 package it.polito.ecommerce.dto
+import com.fasterxml.jackson.annotation.JsonIgnore
 import it.polito.ecommerce.common.Rolename
 import it.polito.ecommerce.domain.Transaction
 import it.polito.ecommerce.domain.User
@@ -9,11 +10,11 @@ import org.springframework.security.core.userdetails.UserDetails
 data class UserDetailsDTO(
     val id: Long?,
     private val username: String,
+//    @JsonIgnore
     private val password: String,
     private val isEnabled: Boolean,
     val email: String,
-    val roles: Set<Rolename>,
-    val confirmPassword: String? = null
+    val roles: Set<Rolename>
 
     ): UserDetails {
 

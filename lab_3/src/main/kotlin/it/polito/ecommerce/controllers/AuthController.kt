@@ -1,5 +1,6 @@
 package it.polito.ecommerce.controllers
 
+import it.polito.ecommerce.dto.RegistrationDTO
 import it.polito.ecommerce.dto.UserDetailsDTO
 import it.polito.ecommerce.services.UserDetailsServiceImpl
 import org.springframework.beans.factory.annotation.Qualifier
@@ -16,16 +17,15 @@ import javax.validation.Valid
 class AuthController(
     private val userService: UserDetailsServiceImpl
 ) {
-
     @PostMapping("/register")
-    fun createUser(@RequestBody @Valid userDetailsDTO: UserDetailsDTO): ResponseEntity<UserDetailsDTO>{
-        return ResponseEntity(userService.addUser(userDetailsDTO), HttpStatus.CREATED)
+    fun register(@RequestBody @Valid registrationDTO: RegistrationDTO): ResponseEntity<UserDetailsDTO>{
+        return ResponseEntity(userService.registerUser(registrationDTO), HttpStatus.CREATED)
     }
 
-    @PostMapping("/signin")
-    fun logIn(@RequestBody @Valid userDetailsDTO: UserDetailsDTO): ResponseEntity<UserDetailsDTO>{
+//    @PostMapping("/signin")
+//    fun logIn(@RequestBody @Valid userDetailsDTO: UserDetailsDTO): ResponseEntity<UserDetailsDTO>{
 //        return ResponseEntity(userService.addUser(userDetailsDTO), HttpStatus.CREATED)
-    }
+//    }
 
 
 }
