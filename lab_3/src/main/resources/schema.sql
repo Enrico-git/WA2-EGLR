@@ -2,6 +2,7 @@ DROP TABLE IF EXISTS transaction;
 DROP TABLE IF EXISTS wallet;
 DROP TABLE IF EXISTS customer;
 DROP TABLE IF EXISTS user;
+DROP TABLE IF EXISTS email_verification_token;
 
 CREATE OR REPLACE SEQUENCE pk_sequence START WITH 1 INCREMENT BY 1;
 
@@ -47,6 +48,16 @@ CREATE TABLE transaction(
                             CONSTRAINT fk_trans_wallet_receiver
                                 FOREIGN KEY (receiver) REFERENCES wallet(id),
                             primary key (id)
+);
+
+CREATE TABLE email_verification_token(
+                                         id BIGINT auto_increment,
+                                         expiry_date TIMESTAMP NOT NULL,
+                                         token VARCHAR(255) NOT NULL,
+                                         user BIGINT NOT NULL,
+                                         CONSTRAINT fk_verToken_user
+                                             FOREIGN KEY (user) REFERENCES user(id),
+                                         primary key (id)
 );
 
 -- CREATE OR REPLACE UNIQUE INDEX UserUsername ON user(username);

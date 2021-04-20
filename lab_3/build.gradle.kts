@@ -32,6 +32,7 @@ dependencies {
     implementation("org.hibernate.validator:hibernate-validator")
     implementation("javax.validation:validation-api")
     implementation("org.springframework.boot:spring-boot-starter-security")
+    implementation("org.springframework.boot:spring-boot-starter-mail")
     runtimeOnly("org.mariadb.jdbc:mariadb-java-client")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
 }

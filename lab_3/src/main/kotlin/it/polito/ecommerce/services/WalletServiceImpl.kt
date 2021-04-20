@@ -43,7 +43,7 @@ private val transactionRepository: TransactionRepository): WalletService{
     override fun performTransaction(transactionDTO: TransactionDTO): TransactionDTO {
         if (transactionDTO.senderID == transactionDTO.receiverID)
             throw IllegalArgumentException("You can't send money to yourself")
-        val wallets = walletRepository.findAllById(listOf<Long>(transactionDTO.senderID!!, transactionDTO.receiverID!!))
+        val wallets = walletRepository.findAllById(mutableSetOf<Long>(transactionDTO.senderID!!, transactionDTO.receiverID!!))
         val senderWallet: Wallet? = wallets.find{it.getId() == transactionDTO.senderID}
         val receiverWallet: Wallet? = wallets.find{it.getId() == transactionDTO.receiverID}
         if (senderWallet == null || receiverWallet == null)
