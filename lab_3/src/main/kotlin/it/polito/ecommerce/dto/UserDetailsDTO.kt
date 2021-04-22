@@ -1,7 +1,5 @@
 package it.polito.ecommerce.dto
-import com.fasterxml.jackson.annotation.JsonIgnore
 import it.polito.ecommerce.common.Rolename
-import it.polito.ecommerce.domain.Transaction
 import it.polito.ecommerce.domain.User
 import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.core.authority.SimpleGrantedAuthority

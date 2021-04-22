@@ -34,6 +34,7 @@ dependencies {
     implementation("javax.validation:validation-api")
     implementation("org.springframework.boot:spring-boot-starter-security")
     runtimeOnly("org.mariadb.jdbc:mariadb-java-client")
+    runtimeOnly("com.h2database:h2")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
 }
 
