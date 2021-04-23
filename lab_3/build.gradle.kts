@@ -34,8 +34,14 @@ dependencies {
     implementation("javax.validation:validation-api")
     implementation("org.springframework.boot:spring-boot-starter-security")
     runtimeOnly("org.mariadb.jdbc:mariadb-java-client")
-    runtimeOnly("com.h2database:h2")
-    testImplementation("org.springframework.boot:spring-boot-starter-test")
+    testImplementation("org.springframework.boot:spring-boot-starter-test") {
+        exclude(module = "junit")
+        exclude(module = "mockito-core")
+    }
+    testRuntimeOnly("com.h2database:h2")
+    testImplementation("org.junit.jupiter:junit-jupiter-api")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")
+    testImplementation("com.ninja-squad:springmockk:3.0.1")
 }
 
 tasks.withType<KotlinCompile> {

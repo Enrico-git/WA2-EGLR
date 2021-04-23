@@ -18,9 +18,11 @@ import javax.transaction.Transactional
 
 @Service
 @Transactional
-class WalletServiceImpl(private val walletRepository: WalletRepository,
-private val customerRepository: CustomerRepository,
-private val transactionRepository: TransactionRepository): WalletService{
+class WalletServiceImpl(
+    private val walletRepository: WalletRepository,
+    private val customerRepository: CustomerRepository,
+    private val transactionRepository: TransactionRepository
+    ): WalletService{
 
     override fun getWallet(walletID: Long): WalletDTO {
         val walletOpt = walletRepository.findById(walletID)

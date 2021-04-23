@@ -5,13 +5,13 @@ import java.math.BigDecimal
 
 
 data class WalletDTO(
-    val id: Long,
+    val id: Long?,
     val balance: BigDecimal,
-    val customerID: Long
+    val customerID: Long?
 )
 
 fun Wallet.toDTO() = WalletDTO(
-    id = getId()!!,
+    id = getId(),
     balance = balance,
-    customerID = customer.getId()!!
+    customerID = customer.getId()
 )
