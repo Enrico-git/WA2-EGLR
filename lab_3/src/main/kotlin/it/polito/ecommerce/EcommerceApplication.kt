@@ -1,21 +1,21 @@
 package it.polito.ecommerce
 
+import it.polito.ecommerce.security.JwtUtils
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
 import org.springframework.context.annotation.Bean
 import org.springframework.mail.javamail.JavaMailSender
 import org.springframework.mail.javamail.JavaMailSenderImpl
+import org.springframework.scheduling.annotation.EnableScheduling
 import org.springframework.security.crypto.factory.PasswordEncoderFactories
 import org.springframework.security.crypto.password.PasswordEncoder
 import java.util.*
 
 @SpringBootApplication
+@EnableScheduling
 class EcommerceApplication{
 
-//    spring.mail.properties.mail.smtp.auth=true
-//spring.mail.properties.mail.smtp.starttls.enable=true
-//spring.mail.properties.mail.debug=true
     @Value("\${spring.mail.host}")
     val host: String = ""
 
@@ -54,7 +54,6 @@ class EcommerceApplication{
     }
     @Bean
     fun passwordEncoder(): PasswordEncoder {
-        //tool for support hashing password
         return PasswordEncoderFactories.createDelegatingPasswordEncoder()
     }
 }

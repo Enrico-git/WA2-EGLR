@@ -1,4 +1,5 @@
 package it.polito.ecommerce.dto
+import com.fasterxml.jackson.annotation.JsonIgnore
 import it.polito.ecommerce.common.Rolename
 import it.polito.ecommerce.domain.User
 import org.springframework.security.core.GrantedAuthority
@@ -8,12 +9,11 @@ import org.springframework.security.core.userdetails.UserDetails
 data class UserDetailsDTO(
     val id: Long?,
     private val username: String,
-//    @JsonIgnore
-    private val password: String,
-    private val isEnabled: Boolean,
-    val email: String,
-    val roles: Set<Rolename>
-
+    @JsonIgnore
+    private val password: String?,
+    private val isEnabled: Boolean?,
+    val email: String?,
+    val roles: String
     ): UserDetails {
 
     override fun getAuthorities(): MutableCollection<out GrantedAuthority> {
@@ -23,7 +23,7 @@ data class UserDetailsDTO(
     }
 
     override fun getPassword(): String {
-        return password
+        return password!!
     }
 
     override fun getUsername(): String {
@@ -43,7 +43,7 @@ data class UserDetailsDTO(
     }
 
     override fun isEnabled(): Boolean {
-        return isEnabled
+        return isEnabled!!
     }
 
 }
@@ -55,6 +55,6 @@ fun User.toDTO(): UserDetailsDTO {
         password = password,
         email = email,
         isEnabled = isEnabled,
-        roles = this.getRoles()
+        roles = roles
     )
 }

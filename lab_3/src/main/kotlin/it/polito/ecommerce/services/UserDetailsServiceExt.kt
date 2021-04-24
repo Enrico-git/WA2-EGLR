@@ -12,5 +12,5 @@ interface UserDetailsServiceExt : UserDetailsService {
     fun removeRole(username: String, role: String): UserDetailsDTO
     fun enableUser(username: String): UserDetailsDTO
     fun disableUser(username: String): UserDetailsDTO
-
+    fun verifyToken(token: String)
     }
