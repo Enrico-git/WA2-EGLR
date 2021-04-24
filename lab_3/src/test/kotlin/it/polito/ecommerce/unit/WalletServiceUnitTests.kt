@@ -9,6 +9,7 @@ import it.polito.ecommerce.domain.Wallet
 import it.polito.ecommerce.dto.toDTO
 import it.polito.ecommerce.repositories.CustomerRepository
 import it.polito.ecommerce.repositories.TransactionRepository
+import it.polito.ecommerce.repositories.UserRepository
 import it.polito.ecommerce.repositories.WalletRepository
 import it.polito.ecommerce.services.WalletServiceImpl
 import javassist.NotFoundException
@@ -16,17 +17,29 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration
+import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration
+import org.springframework.boot.autoconfigure.security.servlet.SecurityFilterAutoConfiguration
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.boot.test.context.TestConfiguration
+import org.springframework.context.annotation.ComponentScan
+import org.springframework.context.annotation.FilterType
+import org.springframework.security.config.annotation.web.WebSecurityConfigurer
+import org.springframework.stereotype.Component
+import org.springframework.stereotype.Repository
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import java.util.*
 
 
 //@SpringBootTest
 //@ExtendWith(SpringExtension::class)
-@ExtendWith(SpringExtension::class)
-@WebMvcTest(WalletServiceImpl::class)
+//@ExtendWith(SpringExtension::class)
+//@EnableAutoConfiguration(exclude = [SecurityAutoConfiguration::class])
+@WebMvcTest(WalletServiceImpl::class,
+    excludeFilters = [ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, value = [WebSecurityConfigurer::class])],
+    excludeAutoConfiguration = [SecurityAutoConfiguration::class, SecurityFilterAutoConfiguration::class])
 class WalletServiceUnitTests(@Autowired private val walletServiceImpl: WalletServiceImpl){
 
     @MockkBean

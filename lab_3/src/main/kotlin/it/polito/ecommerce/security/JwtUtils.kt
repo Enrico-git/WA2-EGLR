@@ -5,13 +5,12 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.security.core.Authentication
 import org.springframework.stereotype.Component
 import io.jsonwebtoken.security.Keys
-import it.polito.ecommerce.common.Rolename
 import it.polito.ecommerce.dto.UserDetailsDTO
-import it.polito.ecommerce.services.UserDetailsServiceExtImpl
 import java.security.Key
 import java.util.*
 
 import java.security.SignatureException
+import javax.annotation.PostConstruct
 
 
 @Component
@@ -23,9 +22,15 @@ class JwtUtils {
     @Value("\${application.jwt.jwtExpirationMs}")
     private val jwtExpirationMs = 0
 
-    private val secretKey: Key = Keys.hmacShaKeyFor(jwtSecret!!.toByteArray())
+    private lateinit var secretKey: Key
+
+    @PostConstruct
+    fun post() {
+        secretKey = Keys.hmacShaKeyFor(jwtSecret!!.toByteArray())
+    }
 
     fun generateJwtToken (authentication: Authentication): String {
+
         val userPrincipal: UserDetailsDTO = authentication.principal as UserDetailsDTO
         val claims: Claims = Jwts.claims(mapOf(Pair("roles", userPrincipal.roles)))
         return Jwts.builder()
@@ -38,9 +43,10 @@ class JwtUtils {
     }
 
     fun validateJwtToken (authToken: String): Boolean {
+        val secretKey: Key = Keys.hmacShaKeyFor(jwtSecret!!.toByteArray())
+
         try {
             Jwts.parserBuilder().setSigningKey(secretKey).build().parse(authToken)
-//            Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(authToken)
             return true
         } catch (e: SignatureException) {
             println("Invalid JWT signature: ${e.message}")
@@ -58,7 +64,7 @@ class JwtUtils {
     }
 
     fun getDetailsFromJwtToken (authToken: String): UserDetailsDTO {
-        val parsedToken = Jwts.parserBuilder().setSigningKey(jwtSecret).build().parseClaimsJws(authToken).body
+        val parsedToken = Jwts.parserBuilder().setSigningKey(secretKey).build().parseClaimsJws(authToken).body
         return UserDetailsDTO(
             id = null,
             username = parsedToken.subject,
