@@ -6,9 +6,13 @@ import org.springframework.boot.runApplication
 import org.springframework.context.annotation.Bean
 import org.springframework.mail.javamail.JavaMailSender
 import org.springframework.mail.javamail.JavaMailSenderImpl
+import org.springframework.scheduling.annotation.EnableScheduling
+import org.springframework.security.crypto.factory.PasswordEncoderFactories
+import org.springframework.security.crypto.password.PasswordEncoder
 import java.util.*
 
 @SpringBootApplication
+@EnableScheduling
 class EcommerceApplication{
 
     @Value("\${spring.mail.host}")
@@ -47,6 +51,12 @@ class EcommerceApplication{
         props["mail.transport.protocol"] = debug
 
         return javaMailSender
+    }
+
+    @Bean
+    fun passwordEncoder(): PasswordEncoder {
+        //tool for support hashing password
+        return PasswordEncoderFactories.createDelegatingPasswordEncoder()
     }
 }
 

@@ -1,31 +1,39 @@
 package it.polito.ecommerce.services
 
 import it.polito.ecommerce.common.Rolename
+import it.polito.ecommerce.domain.EmailVerificationToken
 import it.polito.ecommerce.domain.User
 import it.polito.ecommerce.dto.RegistrationDTO
 import it.polito.ecommerce.dto.UserDetailsDTO
 import it.polito.ecommerce.dto.toDTO
+import it.polito.ecommerce.repositories.EmailVerificationTokenRepository
 import it.polito.ecommerce.repositories.UserRepository
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.security.core.userdetails.UsernameNotFoundException
 import org.springframework.stereotype.Service
 import java.lang.IllegalArgumentException
+import java.sql.Timestamp
 import javax.transaction.Transactional
 
 @Service
 @Transactional
-class UserDetailsServiceImpl(
+class UserDetailsServiceExtImpl(
     private val userRepository: UserRepository,
     private val notificationService: NotificationService,
-    private val mailService: MailService
+    private val mailService: MailService,
+    private val verificationRepository: EmailVerificationTokenRepository
 ) : UserDetailsServiceExt {
 
-    override fun loadUserByUsername(username: String?): UserDetails {
-        val userOpt = userRepository.findByUsername(username!!)
-        if ( ! userOpt.isPresent)
+    @Value("\${serverURL}")
+    private val serverURL: String = ""
+
+    override fun loadUserByUsername(username: String): UserDetails {
+        val userOpt = userRepository.findByUsername(username)
+        if (!userOpt.isPresent)
             throw UsernameNotFoundException("User not found")
         return userOpt.get().toDTO()
-    }
+   }
 
     override fun registerUser(registrationDTO: RegistrationDTO): UserDetailsDTO{
         var user = User(
@@ -35,10 +43,11 @@ class UserDetailsServiceImpl(
             roles = Rolename.CUSTOMER.toString()
         )
 
-        user = userRepository.save(user) //TODO do we save user before the confermation
+        user = userRepository.save(user) //We save the user with isEnable = false
 
         val token = notificationService.createEmailVerificationToken(user)
-        mailService.sendMessage(registrationDTO.email, "Confirm registration", "Token: $token")
+        mailService.sendMessage(registrationDTO.email, "Confirm registration",
+            "Click here: $serverURL/auth/registerConfermation?token=$token")
         return user.toDTO()
     }
 
@@ -84,5 +93,19 @@ class UserDetailsServiceImpl(
         val user = userOpt.get()
         user.isEnabled = false
         return userRepository.save(user).toDTO()
+    }
+
+    override fun verifyToken(token: String) {
+        val emailVerificationOpt = verificationRepository.findByToken(token)
+        if (! emailVerificationOpt.isPresent)
+            throw IllegalArgumentException("The token does not exist")
+
+        val emailVerificaitonToken = emailVerificationOpt.get()
+
+        if(Timestamp(System.currentTimeMillis()) >= emailVerificationOpt.get().expiry_date)
+            throw IllegalArgumentException("the token is expired")
+
+        //TODO double call to DB
+        enableUser(emailVerificaitonToken.user.username)
     }
 }

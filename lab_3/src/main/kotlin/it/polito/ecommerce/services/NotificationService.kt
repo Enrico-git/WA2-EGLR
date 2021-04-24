@@ -4,5 +4,5 @@ import it.polito.ecommerce.domain.User
 
 interface NotificationService {
 
-    fun createEmailVerificationToken(userID: User): String
+    fun createEmailVerificationToken(user: User): String
 }
