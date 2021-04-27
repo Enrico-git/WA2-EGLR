@@ -10,16 +10,16 @@ import org.springframework.security.core.userdetails.UserDetails
 data class UserDetailsDTO(
     val id: Long?,
     private val username: String,
-    @JsonIgnore
-    private val password: String?,
+    private var password: String?,
     private val isEnabled: Boolean?,
     val email: String?,
-    val roles: String
+    val roles: String?
     ) : UserDetails {
 
     override fun getAuthorities(): MutableCollection<out GrantedAuthority> {
         val grantedAuthorities = mutableSetOf<GrantedAuthority>()
-        roles.forEach { grantedAuthorities.add(SimpleGrantedAuthority(it.toString())) }
+        val setRoles = roles!!.split(",")
+        setRoles.forEach { grantedAuthorities.add(SimpleGrantedAuthority(it)) }
         return grantedAuthorities;
     }
 
@@ -32,23 +32,28 @@ data class UserDetailsDTO(
     }
 
     override fun isAccountNonExpired(): Boolean {
-        TODO("Not yet implemented")
+      //  TODO("Not yet implemented")
         return true
     }
 
     override fun isAccountNonLocked(): Boolean {
-        TODO("Not yet implemented")
+//        TODO("Not yet implemented")
         return true
     }
 
     override fun isCredentialsNonExpired(): Boolean {
-        TODO("Not yet implemented")
+  //      TODO("Not yet implemented")
         return true
     }
 
     override fun isEnabled(): Boolean {
-        TODO("Not yet implemented")
+    //    TODO("Not yet implemented")
         return isEnabled!!
+    }
+
+    fun clearSensibleData(): UserDetailsDTO {
+        password = null
+        return this
     }
 }
 
@@ -59,6 +64,6 @@ fun User.toDTO(): UserDetailsDTO {
         password = password,
         email = email,
         isEnabled = isEnabled,
-        roles = roles,
+        roles = roles
     )
 }

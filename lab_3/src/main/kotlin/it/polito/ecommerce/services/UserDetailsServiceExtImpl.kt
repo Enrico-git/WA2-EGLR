@@ -1,19 +1,26 @@
 package it.polito.ecommerce.services
 
 import it.polito.ecommerce.common.Rolename
-import it.polito.ecommerce.domain.EmailVerificationToken
 import it.polito.ecommerce.domain.User
+import it.polito.ecommerce.dto.LoginDTO
 import it.polito.ecommerce.dto.RegistrationDTO
 import it.polito.ecommerce.dto.UserDetailsDTO
 import it.polito.ecommerce.dto.toDTO
 import it.polito.ecommerce.repositories.EmailVerificationTokenRepository
 import it.polito.ecommerce.repositories.UserRepository
+import it.polito.ecommerce.security.JwtUtils
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.security.access.prepost.PreAuthorize
+import org.springframework.security.authentication.AuthenticationManager
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
+import org.springframework.security.core.Authentication
+import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.security.core.userdetails.UsernameNotFoundException
 import org.springframework.stereotype.Service
 import java.lang.IllegalArgumentException
 import java.sql.Timestamp
+import java.util.stream.Collectors
 import javax.transaction.Transactional
 
 @Service
@@ -22,7 +29,8 @@ class UserDetailsServiceExtImpl(
     private val userRepository: UserRepository,
     private val notificationService: NotificationService,
     private val mailService: MailService,
-    private val verificationRepository: EmailVerificationTokenRepository
+    private val verificationRepository: EmailVerificationTokenRepository,
+    private val jwtUtils: JwtUtils
 ) : UserDetailsServiceExt {
 
     @Value("\${serverURL}")
@@ -48,7 +56,7 @@ class UserDetailsServiceExtImpl(
         val token = notificationService.createEmailVerificationToken(user)
         mailService.sendMessage(registrationDTO.email, "Confirm registration",
             "Click here: $serverURL/auth/registerConfermation?token=$token")
-        return user.toDTO()
+        return user.toDTO().clearSensibleData()
     }
 
     override fun addRole(username: String, role: String): UserDetailsDTO{
@@ -107,5 +115,17 @@ class UserDetailsServiceExtImpl(
 
         //TODO double call to DB
         enableUser(emailVerificaitonToken.user.username)
+    }
+
+    override fun authAndCreateToken(loginDTO: LoginDTO, authenticationManager: AuthenticationManager): LoginDTO {
+        val authentication: Authentication = authenticationManager.authenticate(
+            UsernamePasswordAuthenticationToken(loginDTO.username, loginDTO.password)
+        )
+
+        SecurityContextHolder.getContext().authentication = authentication
+
+        loginDTO.token = jwtUtils.generateJwtToken(authentication)
+        loginDTO.roles = SecurityContextHolder.getContext().authentication.authorities.map{ it.authority }.toMutableSet()
+        return loginDTO.clearSensibleData()
     }
 }

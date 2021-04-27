@@ -1,11 +1,12 @@
 package it.polito.ecommerce.controllers
 
+import it.polito.ecommerce.dto.LoginDTO
 import it.polito.ecommerce.dto.RegistrationDTO
 import it.polito.ecommerce.dto.UserDetailsDTO
 import it.polito.ecommerce.services.UserDetailsServiceExt
-import org.hibernate.validator.constraints.Length
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
 import javax.validation.Valid
@@ -15,7 +16,8 @@ import javax.validation.Valid
 @RequestMapping("/auth")
 @Validated
 class AuthController(
-    private val userService: UserDetailsServiceExt
+    private val userService: UserDetailsServiceExt,
+    private val authenticationManager: AuthenticationManager
 ) {
 
     @PostMapping("/register")
@@ -26,6 +28,11 @@ class AuthController(
     @GetMapping("/registrationConfirm")
     fun confirmRegistration(@RequestParam token: String): ResponseEntity<Any>{
         return ResponseEntity(userService.verifyToken(token), HttpStatus.OK)
+    }
+
+    @PostMapping("/signin")
+    fun signIn(@RequestBody @Valid loginDTO: LoginDTO): ResponseEntity<LoginDTO>{
+        return ResponseEntity(userService.authAndCreateToken(loginDTO, authenticationManager), HttpStatus.OK)
     }
 
 }
