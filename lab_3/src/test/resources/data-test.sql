@@ -1,9 +1,12 @@
 -- Populate Database with
 -- -- 3 customers
 -- -- 3 wallets (1 per customer)
--- -- 2 transaction (from Customer1 to Customer2, from Customer1 to Customer3)
+-- -- -- 2 transaction (from Customer1 to Customer2, from Customer1 to Customer3)
+-- insert into user(id, username, password, email, is_enabled, roles) values(pk_sequence.nextval, 'alice_in_wonderland',
+--                                                                          'alices_password', 'alice_inwonderland@mail.com',
+--                                                                          0, 'CUSTOMER');
 insert into user(id, username, password, email, is_enabled, roles) values(pk_sequence.nextval, 'alice_in_wonderland',
-                                                                         'alices_password', 'alice_inwonderland@mail.com',
+                                                                         '$2y$12$wkxtInM./JlzaTnFAL8edukEf5xt/7tSEc2BCHEd0UYqy.tnphv4m', 'alice_inwonderland@mail.com',
                                                                          0, 'CUSTOMER');
 insert into user(id, username, password, email, is_enabled, roles) values(pk_sequence.nextval, 'the_march_hare',
                                                                          'hares_password', 'march_hare@mail.com',

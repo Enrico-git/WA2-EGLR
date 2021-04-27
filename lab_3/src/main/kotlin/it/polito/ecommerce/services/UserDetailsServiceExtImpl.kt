@@ -7,11 +7,18 @@ import it.polito.ecommerce.dto.UserDetailsDTO
 import it.polito.ecommerce.dto.toDTO
 import it.polito.ecommerce.repositories.EmailVerificationTokenRepository
 import it.polito.ecommerce.repositories.UserRepository
+import it.polito.ecommerce.security.JwtUtils
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.security.authentication.AbstractUserDetailsReactiveAuthenticationManager
+import org.springframework.security.authentication.AuthenticationManager
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
+import org.springframework.security.core.Authentication
+import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.security.core.userdetails.UsernameNotFoundException
 import org.springframework.stereotype.Service
 import java.sql.Timestamp
+import java.util.stream.Collectors
 import javax.transaction.Transactional
 
 @Service
@@ -20,6 +27,8 @@ class UserDetailsServiceExtImpl(
     private val userRepository: UserRepository,
     private val notificationService: NotificationServiceImpl,
     private val verificationRepository: EmailVerificationTokenRepository,
+//    private val authenticationManager: AuthenticationManager,
+//    private val jwtUtils: JwtUtils,
     private val mailService: MailServiceImpl
 ): UserDetailsServiceExt {
 
@@ -85,6 +94,12 @@ class UserDetailsServiceExtImpl(
         val user = userOpt.get()
         user.isEnabled = false
         return userRepository.save(user).toDTO()
+    }
+
+    override fun authAndCreateToken(userDetailsDTO: UserDetailsDTO): String {
+
+       return "uSADud"
+
     }
 
     override fun verifyToken(token: String) {

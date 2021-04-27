@@ -13,4 +13,5 @@ interface UserDetailsServiceExt : UserDetailsService {
     fun enableUser(username: String): UserDetailsDTO
     fun disableUser(username: String): UserDetailsDTO
     fun verifyToken(token: String)
+    fun authAndCreateToken(userDetailsDTO: UserDetailsDTO): String
     }

@@ -9,16 +9,20 @@ import org.springframework.security.core.userdetails.UserDetails
 data class UserDetailsDTO(
     val id: Long?,
     private val username: String,
-    @JsonIgnore
+//    @JsonIgnore
     private val password: String?,
     private val isEnabled: Boolean?,
     val email: String?,
-    val roles: String
+    val roles: String?
     ): UserDetails {
 
+//    TODO FIX FOREACH
     override fun getAuthorities(): MutableCollection<out GrantedAuthority> {
         val grantedAuthorities = mutableSetOf<GrantedAuthority>()
-        roles.forEach { grantedAuthorities.add(SimpleGrantedAuthority(it.toString())) }
+//        roles?.forEach { grantedAuthorities.add(SimpleGrantedAuthority(it.toString())) }
+//        return grantedAuthorities;
+        val setRoles = roles!!.split(",")
+        setRoles.forEach { grantedAuthorities.add(SimpleGrantedAuthority(it)) }
         return grantedAuthorities;
     }
 

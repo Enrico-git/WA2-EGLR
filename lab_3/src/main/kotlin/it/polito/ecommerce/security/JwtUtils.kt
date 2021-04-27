@@ -32,9 +32,9 @@ class JwtUtils {
     fun generateJwtToken (authentication: Authentication): String {
 
         val userPrincipal: UserDetailsDTO = authentication.principal as UserDetailsDTO
-        val claims: Claims = Jwts.claims(mapOf(Pair("roles", userPrincipal.roles)))
+        val claims: Claims = Jwts.claims(mapOf(Pair("roles", userPrincipal.roles), Pair("sub", userPrincipal.username)))
         return Jwts.builder()
-            .setSubject(userPrincipal.username)
+//            .setSubject(userPrincipal.username)
             .setClaims(claims)
             .setIssuedAt(Date())
             .setExpiration(Date(Date().time + jwtExpirationMs))
@@ -43,7 +43,7 @@ class JwtUtils {
     }
 
     fun validateJwtToken (authToken: String): Boolean {
-        val secretKey: Key = Keys.hmacShaKeyFor(jwtSecret!!.toByteArray())
+//        val secretKey: Key = Keys.hmacShaKeyFor(jwtSecret!!.toByteArray())
 
         try {
             Jwts.parserBuilder().setSigningKey(secretKey).build().parse(authToken)
@@ -65,9 +65,10 @@ class JwtUtils {
 
     fun getDetailsFromJwtToken (authToken: String): UserDetailsDTO {
         val parsedToken = Jwts.parserBuilder().setSigningKey(secretKey).build().parseClaimsJws(authToken).body
+        println(parsedToken)
         return UserDetailsDTO(
             id = null,
-            username = parsedToken.subject,
+            username = parsedToken["sub"].toString(),
             roles = parsedToken["roles"].toString(),
             isEnabled = null,
             password = null,
