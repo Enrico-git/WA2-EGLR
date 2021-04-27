@@ -1,5 +1,6 @@
 package it.polito.ecommerce.controllers
 
+import it.polito.ecommerce.dto.LoginDTO
 import it.polito.ecommerce.dto.RegistrationDTO
 import it.polito.ecommerce.dto.UserDetailsDTO
 import it.polito.ecommerce.security.JwtUtils
@@ -34,17 +35,16 @@ class AuthController(
     }
 
     @PostMapping("/signin")
-    fun signIn(@RequestBody @Valid userDetailsDTO: UserDetailsDTO): ResponseEntity<Any>{
-        println("ausduasd")
-        println(userDetailsDTO)
+    fun signIn(@RequestBody @Valid loginDTO: LoginDTO): ResponseEntity<LoginDTO>{
+        println("qua")
         val authentication: Authentication = authenticationManager.authenticate(
-            UsernamePasswordAuthenticationToken(userDetailsDTO.username, userDetailsDTO.password))
+            UsernamePasswordAuthenticationToken(loginDTO.username, loginDTO.password))
         SecurityContextHolder.getContext().authentication = authentication
-
-        println(SecurityContextHolder.getContext().authentication)
-
-        return ResponseEntity(jwtUtils.generateJwtToken(authentication), HttpStatus.OK)
+//        println(SecurityContextHolder.getContext().authentication)
+//        userService.enableUser("andonio")
+        println(authentication.principal)
+        loginDTO.token = jwtUtils.generateJwtToken(authentication)
+        loginDTO.roles = SecurityContextHolder.getContext().authentication.authorities.map{ it.authority }.toMutableSet()
+        return ResponseEntity(loginDTO.clearSensibleData(), HttpStatus.OK)
     }
-
-
 }

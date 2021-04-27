@@ -2,15 +2,16 @@ package it.polito.ecommerce.dto
 import com.fasterxml.jackson.annotation.JsonIgnore
 import it.polito.ecommerce.common.Rolename
 import it.polito.ecommerce.domain.User
+import org.springframework.security.core.CredentialsContainer
 import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.core.userdetails.UserDetails
 
+
 data class UserDetailsDTO(
     val id: Long?,
     private val username: String,
-//    @JsonIgnore
-    private val password: String?,
+    private var password: String?,
     private val isEnabled: Boolean?,
     val email: String?,
     val roles: String?
@@ -50,6 +51,11 @@ data class UserDetailsDTO(
         return isEnabled!!
     }
 
+
+    fun clearSensibleData(): UserDetailsDTO{
+        password = null
+        return this
+    }
 }
 
 fun User.toDTO(): UserDetailsDTO {

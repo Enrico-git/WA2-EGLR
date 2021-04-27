@@ -9,6 +9,7 @@ import it.polito.ecommerce.repositories.EmailVerificationTokenRepository
 import it.polito.ecommerce.repositories.UserRepository
 import it.polito.ecommerce.security.JwtUtils
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.security.authentication.AbstractUserDetailsReactiveAuthenticationManager
 import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
@@ -27,8 +28,6 @@ class UserDetailsServiceExtImpl(
     private val userRepository: UserRepository,
     private val notificationService: NotificationServiceImpl,
     private val verificationRepository: EmailVerificationTokenRepository,
-//    private val authenticationManager: AuthenticationManager,
-//    private val jwtUtils: JwtUtils,
     private val mailService: MailServiceImpl
 ): UserDetailsServiceExt {
 
@@ -58,7 +57,8 @@ class UserDetailsServiceExtImpl(
         mailService.sendMessage(registrationDTO.email, "Confirm registration", "Click here: $serverURL/auth/registerConfirmation?token=$token")
 //        username, email, roles, isEnabled
 //        TODO RETURN TYPE
-        return user.toDTO()
+
+        return user.toDTO().clearSensibleData()
     }
 
     override fun addRole(username: String, role: String): UserDetailsDTO{
@@ -78,6 +78,7 @@ class UserDetailsServiceExtImpl(
         user.removeRole(Rolename.valueOf(role))
         return userRepository.save(user).toDTO()
     }
+
     override fun enableUser(username: String): UserDetailsDTO{
         val userOpt = userRepository.findByUsername(username)
         if (! userOpt.isPresent )
@@ -94,12 +95,6 @@ class UserDetailsServiceExtImpl(
         val user = userOpt.get()
         user.isEnabled = false
         return userRepository.save(user).toDTO()
-    }
-
-    override fun authAndCreateToken(userDetailsDTO: UserDetailsDTO): String {
-
-       return "uSADud"
-
     }
 
     override fun verifyToken(token: String) {

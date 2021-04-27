@@ -24,7 +24,9 @@ class WalletServiceImpl(
     private val transactionRepository: TransactionRepository
     ): WalletService{
 
+
     override fun getWallet(walletID: Long): WalletDTO {
+
         val walletOpt = walletRepository.findById(walletID)
         if ( ! walletOpt.isPresent)
             throw NotFoundException("Wallet not found")

@@ -13,11 +13,13 @@ import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.security.web.AuthenticationEntryPoint
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
 import org.springframework.security.authentication.AuthenticationManager
+import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity
 import java.lang.Exception
 
 
 @Configuration
 @EnableWebSecurity
+@EnableGlobalMethodSecurity(prePostEnabled = true)
 //@Profile("test")
 class WebSecurityConfig(
     private val passwordEncoder: PasswordEncoder,
@@ -50,6 +52,8 @@ class WebSecurityConfig(
         http
             .authorizeRequests()
             .antMatchers("/auth/**")
+//            .hasRole("CUSTOMER")
+//            .hasAuthority("CUSTOMER")
             .permitAll()
             .and()
             .authorizeRequests()
