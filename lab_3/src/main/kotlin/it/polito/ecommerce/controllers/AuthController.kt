@@ -16,8 +16,7 @@ import javax.validation.Valid
 @RequestMapping("/auth")
 @Validated
 class AuthController(
-    private val userService: UserDetailsServiceExt,
-    private val authenticationManager: AuthenticationManager
+    private val userService: UserDetailsServiceExt
 ) {
 
     @PostMapping("/register")
@@ -32,7 +31,7 @@ class AuthController(
 
     @PostMapping("/signin")
     fun signIn(@RequestBody @Valid loginDTO: LoginDTO): ResponseEntity<LoginDTO>{
-        return ResponseEntity(userService.authAndCreateToken(loginDTO, authenticationManager), HttpStatus.OK)
+        return ResponseEntity(userService.authAndCreateToken(loginDTO), HttpStatus.OK)
     }
 
 }

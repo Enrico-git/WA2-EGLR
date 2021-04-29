@@ -10,17 +10,17 @@ import it.polito.ecommerce.repositories.EmailVerificationTokenRepository
 import it.polito.ecommerce.repositories.UserRepository
 import it.polito.ecommerce.security.JwtUtils
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.security.access.prepost.PreAuthorize
+import org.springframework.context.annotation.Lazy
 import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.security.core.userdetails.UsernameNotFoundException
+import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import java.lang.IllegalArgumentException
 import java.sql.Timestamp
-import java.util.stream.Collectors
 import javax.transaction.Transactional
 
 @Service
@@ -30,10 +30,12 @@ class UserDetailsServiceExtImpl(
     private val notificationService: NotificationService,
     private val mailService: MailService,
     private val verificationRepository: EmailVerificationTokenRepository,
-    private val jwtUtils: JwtUtils
+    @Lazy private val authenticationManager: AuthenticationManager,
+    private val jwtUtils: JwtUtils,
+    private val passwordEncoder: PasswordEncoder
 ) : UserDetailsServiceExt {
 
-    @Value("\${serverURL}")
+    @Value("\${application.serverURL}")
     private val serverURL: String = ""
 
     override fun loadUserByUsername(username: String): UserDetails {
@@ -46,7 +48,7 @@ class UserDetailsServiceExtImpl(
     override fun registerUser(registrationDTO: RegistrationDTO): UserDetailsDTO{
         var user = User(
             username = registrationDTO.username,
-            password = registrationDTO.password,
+            password = passwordEncoder.encode(registrationDTO.password),
             email = registrationDTO.email,
             roles = Rolename.CUSTOMER.toString()
         )
@@ -54,9 +56,9 @@ class UserDetailsServiceExtImpl(
         user = userRepository.save(user) //We save the user with isEnable = false
 
         val token = notificationService.createEmailVerificationToken(user)
-        mailService.sendMessage(registrationDTO.email, "Confirm registration",
-            "Click here: $serverURL/auth/registerConfermation?token=$token")
-        return user.toDTO().clearSensibleData()
+        mailService.sendMessage(registrationDTO.email, "Registration Confirm",
+            "<a href=http://\"$serverURL/auth/registrationConfirm?token=$token\">Click here</a>")
+        return user.toDTO()
     }
 
     override fun addRole(username: String, role: String): UserDetailsDTO{
@@ -113,11 +115,10 @@ class UserDetailsServiceExtImpl(
         if(Timestamp(System.currentTimeMillis()) >= emailVerificationOpt.get().expiry_date)
             throw IllegalArgumentException("the token is expired")
 
-        //TODO double call to DB
         enableUser(emailVerificaitonToken.user.username)
     }
 
-    override fun authAndCreateToken(loginDTO: LoginDTO, authenticationManager: AuthenticationManager): LoginDTO {
+    override fun authAndCreateToken(loginDTO: LoginDTO): LoginDTO {
         val authentication: Authentication = authenticationManager.authenticate(
             UsernamePasswordAuthenticationToken(loginDTO.username, loginDTO.password)
         )
@@ -126,6 +127,6 @@ class UserDetailsServiceExtImpl(
 
         loginDTO.token = jwtUtils.generateJwtToken(authentication)
         loginDTO.roles = SecurityContextHolder.getContext().authentication.authorities.map{ it.authority }.toMutableSet()
-        return loginDTO.clearSensibleData()
+        return loginDTO
     }
 }

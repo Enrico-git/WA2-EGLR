@@ -2,15 +2,13 @@ package it.polito.ecommerce.services
 
 import it.polito.ecommerce.domain.Transaction
 import it.polito.ecommerce.domain.Wallet
-import it.polito.ecommerce.dto.CustomerDTO
-import it.polito.ecommerce.dto.TransactionDTO
-import it.polito.ecommerce.dto.WalletDTO
-import it.polito.ecommerce.dto.toDTO
+import it.polito.ecommerce.dto.*
 import it.polito.ecommerce.repositories.CustomerRepository
 import it.polito.ecommerce.repositories.TransactionRepository
 import it.polito.ecommerce.repositories.WalletRepository
 import javassist.NotFoundException
 import org.springframework.data.domain.Pageable
+import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
 import java.sql.Timestamp
@@ -48,6 +46,10 @@ private val transactionRepository: TransactionRepository): WalletService{
         val receiverWallet: Wallet? = wallets.find{it.getId() == transactionDTO.receiverID}
         if (senderWallet == null || receiverWallet == null)
             throw IllegalArgumentException("One of the wallets doesn't exist")
+
+        val principal = SecurityContextHolder.getContext().authentication.principal as UserDetailsDTO
+        if( senderWallet.customer.user.toDTO() !=  principal)
+            throw SecurityException("you are not the user")
 
         if ( isBalanceInsufficient(senderWallet, transactionDTO.amount!!))
             throw IllegalArgumentException("Balance not high enough")

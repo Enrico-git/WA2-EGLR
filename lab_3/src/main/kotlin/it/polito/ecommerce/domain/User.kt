@@ -12,7 +12,7 @@ import javax.validation.constraints.NotNull
 @Table(indexes = [Index(name = "Username", columnList =
 "username", unique = true)])
 class User (
-    @Column(unique = true, nullable = false) //TODO
+    @Column(unique = true, nullable = false)
     @field:NotNull
     val username: String,
     @Column(nullable = false)

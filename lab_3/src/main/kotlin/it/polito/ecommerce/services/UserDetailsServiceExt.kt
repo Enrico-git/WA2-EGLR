@@ -11,19 +11,19 @@ interface UserDetailsServiceExt : UserDetailsService {
 
     fun registerUser(registrationDTO: RegistrationDTO): UserDetailsDTO
 
-    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN')")
     fun addRole(username: String, role: String): UserDetailsDTO
 
     //TODO understand why hasRole not work
-    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN')")
     fun removeRole(username: String, role:String): UserDetailsDTO
 
-    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN')")
     fun enableUser(username: String) : UserDetailsDTO
 
-    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN')")
     fun disableUser(username: String) : UserDetailsDTO
 
     fun verifyToken(token: String)
-    fun authAndCreateToken(loginDTO: LoginDTO, authenticationManager: AuthenticationManager): LoginDTO
+    fun authAndCreateToken(loginDTO: LoginDTO): LoginDTO
 }
