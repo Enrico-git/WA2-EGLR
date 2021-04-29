@@ -9,7 +9,7 @@ import javax.validation.constraints.Pattern
 
 
 data class RegistrationDTO(
-    @field:Length(min = 5, max = 15)
+    @field:Length(min = 5, max = 50)
     val username: String,
     @field:Pattern(regexp = "^(?=.*[a-z])(?=.*\\d)(?=.*[A-Z]).{8,50}\$", message="You must use at least 1 capital letter and one digit") //WITH WHITESPACES ;D
     val password: String,

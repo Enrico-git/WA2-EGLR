@@ -1,5 +1,6 @@
 package it.polito.ecommerce.security
 
+import it.polito.ecommerce.repositories.WalletRepository
 import it.polito.ecommerce.services.UserDetailsServiceExt
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -14,12 +15,17 @@ import org.springframework.security.web.AuthenticationEntryPoint
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
 import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity
+import org.springframework.security.config.annotation.method.configuration.GlobalMethodSecurityConfiguration
 import java.lang.Exception
+import org.springframework.security.access.expression.method.MethodSecurityExpressionHandler
+
+
+
 
 
 @Configuration
 @EnableWebSecurity
-@EnableGlobalMethodSecurity(prePostEnabled = true)
+//@EnableGlobalMethodSecurity(prePostEnabled = true)
 //@Profile("test")
 class WebSecurityConfig(
     private val passwordEncoder: PasswordEncoder,
@@ -46,37 +52,27 @@ class WebSecurityConfig(
 
     //define which URL are protected and which not
     override fun configure(http: HttpSecurity) {
-//        super.configure(http)
-        //tutti quelli che iniziano con secure devono essere autenticati
-        //.antMatchers("/secure/**")
         http
             .authorizeRequests()
             .antMatchers("/auth/**")
-//            .hasRole("CUSTOMER")
-//            .hasAuthority("CUSTOMER")
             .permitAll()
             .and()
             .authorizeRequests()
             .antMatchers("/wallet/**")
             .hasAuthority("CUSTOMER")
-//            .hasRole("CUSTOMER")
-//        .and()
-//            .formLogin()
-//            .loginPage("/auth/signin")
-//            .loginProcessingUrl("/auth/login")
-//        .and()
-//            .logout()
-//            .logoutUrl("/auth/logout")
-
-
-        http.csrf().disable() //value not sent in logout form
-        http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-
-        http.exceptionHandling().authenticationEntryPoint(authenticationEntryPoint)
-
-        http.addFilterBefore(jwtAuthenticationTokenFilter,
+            .and()
+            .csrf()
+            .disable()
+            .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+            .and()
+            .exceptionHandling().authenticationEntryPoint(authenticationEntryPoint)
+            .and()
+            .addFilterBefore(jwtAuthenticationTokenFilter,
             UsernamePasswordAuthenticationFilter::class.java)
+
 //        http.cors().disable()
         //http.cors() //only javascript can make request because coming from us
     }
+
+
 }

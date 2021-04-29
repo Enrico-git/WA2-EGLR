@@ -1,27 +1,23 @@
 package it.polito.ecommerce.dto
-import com.fasterxml.jackson.annotation.JsonIgnore
-import it.polito.ecommerce.common.Rolename
+import com.fasterxml.jackson.annotation.JsonProperty
 import it.polito.ecommerce.domain.User
-import org.springframework.security.core.CredentialsContainer
 import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.core.userdetails.UserDetails
 
-
 data class UserDetailsDTO(
     val id: Long?,
     private val username: String,
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private var password: String?,
     private val isEnabled: Boolean?,
     val email: String?,
     val roles: String?
     ): UserDetails {
 
-//    TODO FIX FOREACH
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     override fun getAuthorities(): MutableCollection<out GrantedAuthority> {
         val grantedAuthorities = mutableSetOf<GrantedAuthority>()
-//        roles?.forEach { grantedAuthorities.add(SimpleGrantedAuthority(it.toString())) }
-//        return grantedAuthorities;
         val setRoles = roles!!.split(",")
         setRoles.forEach { grantedAuthorities.add(SimpleGrantedAuthority(it)) }
         return grantedAuthorities;
@@ -35,26 +31,23 @@ data class UserDetailsDTO(
         return username
     }
 
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     override fun isAccountNonExpired(): Boolean {
         return true
     }
 
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     override fun isAccountNonLocked(): Boolean {
         return true
     }
 
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     override fun isCredentialsNonExpired(): Boolean {
         return true
     }
 
     override fun isEnabled(): Boolean {
         return isEnabled!!
-    }
-
-
-    fun clearSensibleData(): UserDetailsDTO{
-        password = null
-        return this
     }
 }
 

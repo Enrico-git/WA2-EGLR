@@ -11,6 +11,8 @@ import it.polito.ecommerce.repositories.CustomerRepository
 import it.polito.ecommerce.repositories.TransactionRepository
 import it.polito.ecommerce.repositories.UserRepository
 import it.polito.ecommerce.repositories.WalletRepository
+import it.polito.ecommerce.security.JwtAuthenticationTokenFilter
+import it.polito.ecommerce.security.MethodSecurityConfig
 import it.polito.ecommerce.services.WalletServiceImpl
 import javassist.NotFoundException
 import org.junit.jupiter.api.Test
@@ -38,10 +40,14 @@ import java.util.*
 //@ExtendWith(SpringExtension::class)
 //@EnableAutoConfiguration(exclude = [SecurityAutoConfiguration::class])
 @WebMvcTest(WalletServiceImpl::class,
-    excludeFilters = [ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, value = [WebSecurityConfigurer::class])],
+    excludeFilters = [ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, value =
+    [WebSecurityConfigurer::class, MethodSecurityConfig::class, JwtAuthenticationTokenFilter::class])],
     excludeAutoConfiguration = [SecurityAutoConfiguration::class, SecurityFilterAutoConfiguration::class])
 class WalletServiceUnitTests(@Autowired private val walletServiceImpl: WalletServiceImpl){
 
+
+//    @MockkBean
+//    private lateinit var walletServiceImpl: WalletServiceImpl
     @MockkBean
     private lateinit var walletRepository: WalletRepository
 

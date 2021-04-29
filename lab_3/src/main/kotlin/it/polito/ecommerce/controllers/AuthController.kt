@@ -20,9 +20,7 @@ import javax.validation.Valid
 @RequestMapping("/auth")
 @Validated
 class AuthController(
-    private val userService: UserDetailsServiceExt,
-    private val authenticationManager: AuthenticationManager,
-    private val jwtUtils: JwtUtils,
+    private val userService: UserDetailsServiceExt
 ) {
     @PostMapping("/register")
     fun register(@RequestBody @Valid registrationDTO: RegistrationDTO): ResponseEntity<UserDetailsDTO>{
@@ -36,15 +34,6 @@ class AuthController(
 
     @PostMapping("/signin")
     fun signIn(@RequestBody @Valid loginDTO: LoginDTO): ResponseEntity<LoginDTO>{
-        println("qua")
-        val authentication: Authentication = authenticationManager.authenticate(
-            UsernamePasswordAuthenticationToken(loginDTO.username, loginDTO.password))
-        SecurityContextHolder.getContext().authentication = authentication
-//        println(SecurityContextHolder.getContext().authentication)
-//        userService.enableUser("andonio")
-        println(authentication.principal)
-        loginDTO.token = jwtUtils.generateJwtToken(authentication)
-        loginDTO.roles = SecurityContextHolder.getContext().authentication.authorities.map{ it.authority }.toMutableSet()
-        return ResponseEntity(loginDTO.clearSensibleData(), HttpStatus.OK)
+        return ResponseEntity(userService.authAndCreateToken(loginDTO), HttpStatus.OK)
     }
 }

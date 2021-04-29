@@ -6,17 +6,14 @@ import org.springframework.data.domain.Pageable
 import org.springframework.security.access.prepost.PreAuthorize
 
 interface WalletService {
-    @PreAuthorize("hasAuthority(\"CUSTOMER\")")
-//    @PreAuthorize("hasAuthority(\"CUSTOMER\") and authorization.principal.customer.wallet == walletID")
-//    TODO check hasPermission
-//    https://docs.spring.io/spring-security/site/docs/3.0.x/reference/el-access.html
+    @PreAuthorize("hasAuthority(\"CUSTOMER\") and isOwner(authentication, #walletID)")
     fun getWallet(walletID: Long): WalletDTO
-    @PreAuthorize("hasAuthority(\"CUSTOMER\")")
+    @PreAuthorize("hasAuthority(\"CUSTOMER\") and isCustomer(authentication, #customerDTO.id)")
     fun addWallet(customerDTO: CustomerDTO): WalletDTO
-    @PreAuthorize("hasAuthority(\"CUSTOMER\")")
+    @PreAuthorize("hasAuthority(\"CUSTOMER\") and isOwner(authentication, #transactionDTO.senderID)")
     fun performTransaction(transactionDTO: TransactionDTO): TransactionDTO
-    @PreAuthorize("hasAuthority(\"CUSTOMER\")")
+    @PreAuthorize("hasAuthority(\"CUSTOMER\") and isOwner(authentication, #walletID)")
     fun getWalletTransactions(walletID: Long, from: Long? = null, to: Long? = null, pageable: Pageable): List<TransactionDTO>
-    @PreAuthorize("hasAuthority(\"CUSTOMER\")")
+    @PreAuthorize("hasAuthority(\"CUSTOMER\") and isOwner(authentication, #walletID)")
     fun getWalletSingleTransaction(walletID: Long, transactionID: Long): TransactionDTO
 }

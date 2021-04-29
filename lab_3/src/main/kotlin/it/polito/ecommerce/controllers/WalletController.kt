@@ -1,9 +1,6 @@
 package it.polito.ecommerce.controllers
 
-import it.polito.ecommerce.common.Rolename
-import it.polito.ecommerce.domain.User
 import it.polito.ecommerce.dto.*
-import it.polito.ecommerce.repositories.UserRepository
 import it.polito.ecommerce.services.WalletService
 import org.springframework.data.domain.Pageable
 import org.springframework.http.HttpStatus
@@ -16,19 +13,10 @@ import javax.validation.constraints.Min
 @RestController
 @RequestMapping("/wallet")
 @Validated
-class WalletController(private val service: WalletService, private val repo: UserRepository) {
+class WalletController(private val service: WalletService) {
 
     @GetMapping("/{walletID}")
     fun getWallet(@PathVariable @Min(0) walletID: Long): ResponseEntity<WalletDTO> {
-//        var andonio = User("andonio", "password", "a@b.com", false, "CUSTOMER")
-//        repo.save(andonio)
-//        println(andonio)
-//        andonio.addRole(Rolename.ADMIN)
-//        repo.save(andonio)
-//        println(repo.findByUsername("andonio"))
-//        andonio.removeRole(Rolename.CUSTOMER)
-//        repo.save(andonio)
-//        println(repo.findByUsername("andonio"))
         return ResponseEntity(service.getWallet(walletID), HttpStatus.OK)
     }
 

@@ -1,5 +1,6 @@
 package it.polito.ecommerce.services
 
+import it.polito.ecommerce.dto.LoginDTO
 import it.polito.ecommerce.dto.RegistrationDTO
 import it.polito.ecommerce.dto.UserDetailsDTO
 import org.springframework.security.access.prepost.PreAuthorize
@@ -18,4 +19,5 @@ interface UserDetailsServiceExt : UserDetailsService {
     @PreAuthorize("hasAuthority(\"ADMIN\")")
     fun disableUser(username: String): UserDetailsDTO
     fun verifyToken(token: String)
+    fun authAndCreateToken(loginDTO: LoginDTO): LoginDTO
     }
