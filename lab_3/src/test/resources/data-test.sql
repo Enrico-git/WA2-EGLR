@@ -2,18 +2,19 @@
 -- -- 3 customers
 -- -- 3 wallets (1 per customer)
 -- -- -- 2 transaction (from Customer1 to Customer2, from Customer1 to Customer3)
--- insert into user(id, username, password, email, is_enabled, roles) values(pk_sequence.nextval, 'alice_in_wonderland',
---                                                                          'alices_password', 'alice_inwonderland@mail.com',
---                                                                          0, 'CUSTOMER');
+--- passwords: Alices_password1
+--              Hares_password1
+--              Hatters_password1
 insert into user(id, username, password, email, is_enabled, roles) values(pk_sequence.nextval, 'alice_in_wonderland',
-                                                                         '$2y$12$wkxtInM./JlzaTnFAL8edukEf5xt/7tSEc2BCHEd0UYqy.tnphv4m', 'alice_inwonderland@mail.com',
-                                                                         0, 'CUSTOMER');
+                                                                          '{bcrypt}$2a$10$PBp/YvYi0NoYnG/erDcn4uHSREj0cYmDAgl4yWD86mnSPcFRg1NMe', 'alice_inwonderland@mail.com',
+                                                                          1, 'CUSTOMER');
 insert into user(id, username, password, email, is_enabled, roles) values(pk_sequence.nextval, 'the_march_hare',
-                                                                         'hares_password', 'march_hare@mail.com',
-                                                                         0, 'CUSTOMER');
+                                                                          '{bcrypt}$2a$10$2LK2qJA8A85zLGZNEtAnQuy2l5ts5WlGvZiA/VO7iyEwFB8NE2QeS', 'march_hare@mail.com',
+                                                                         1, 'CUSTOMER');
+
 insert into user(id, username, password, email, is_enabled, roles) values(pk_sequence.nextval, 'mad_hatter',
-                                                                         'hatters_password', 'mad_hatter@mail.com',
-                                                                         0, 'CUSTOMER');
+                                                                         '{bcrypt}$2a$10$ZpJLsDK9JDGtwGfVA0x79eaz.2Duue/9N2hFm0LaLbPDJJNGWdGgS', 'mad_hatter@mail.com',
+                                                                         1, 'CUSTOMER');
 
 insert into customer(id, name, surname, address, email, user) values(pk_sequence.nextval, 'Alice', 'Pleasance Liddell', 'Wonderland, 2', 'alice_inwonderland@mail.com', 1);
 insert into customer(id, name, surname, address, email, user) values(pk_sequence.nextval, 'The March', 'Hare', 'Dining Table, 1', 'march_hare@mail.com', 2);
