@@ -2,6 +2,7 @@ package it.polito.ecommerce.security
 
 import it.polito.ecommerce.dto.UserDetailsDTO
 import it.polito.ecommerce.repositories.CustomerRepository
+import it.polito.ecommerce.repositories.UserRepository
 import it.polito.ecommerce.repositories.WalletRepository
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Lazy
@@ -23,7 +24,10 @@ import org.springframework.stereotype.Component
 //    private lateinit var customerRepository: CustomerRepository
 
 
-class CustomMethodSecurityExpressionRoot(authentication: Authentication, private val walletRepository: WalletRepository, private val customerRepository: CustomerRepository)
+class CustomMethodSecurityExpressionRoot(authentication: Authentication,
+    private val walletRepository: WalletRepository,
+    private val customerRepository: CustomerRepository,
+    private val userRepository: UserRepository)
     : SecurityExpressionRoot(authentication), MethodSecurityExpressionOperations {
 
 
@@ -37,6 +41,11 @@ class CustomMethodSecurityExpressionRoot(authentication: Authentication, private
         val principal = authentication.principal as UserDetailsDTO
         val customerOpt = customerRepository.findByUserAndID(principal.username, customerID)
         return customerOpt.isPresent
+    }
+
+    fun isUser(authentication: Authentication, userID: Long): Boolean {
+        val principal = authentication.principal as UserDetailsDTO
+        return userRepository.findByUsername(principal.username).get().getId() == userID
     }
 
     override fun setFilterObject(filterObject: Any?) {

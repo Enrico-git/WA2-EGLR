@@ -36,4 +36,5 @@ class AuthController(
     fun signIn(@RequestBody @Valid loginDTO: LoginDTO): ResponseEntity<LoginDTO>{
         return ResponseEntity(userService.authAndCreateToken(loginDTO), HttpStatus.OK)
     }
+
 }
