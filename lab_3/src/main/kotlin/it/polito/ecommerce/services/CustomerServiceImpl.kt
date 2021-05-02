@@ -14,14 +14,17 @@ import javax.transaction.Transactional
 class CustomerServiceImpl(private val customerRepository: CustomerRepository, private val userRepository: UserRepository) : CustomerService {
 
     override fun addCustomer(customerDTO: CustomerDTO) : CustomerDTO {
-        val user = userRepository.findById(customerDTO.userID).get()
+        val userOpt = userRepository.findById(customerDTO.userID!!)
+
+        if (! userOpt.isPresent)
+            throw IllegalArgumentException("User does not exist")
 
         val customer = Customer(
             name = customerDTO.name,
             surname = customerDTO.surname,
             address = customerDTO.address,
             email = customerDTO.email,
-            user = user
+            user = userOpt.get()
         )
         return customerRepository.save(customer).toDTO()
     }
@@ -35,8 +38,12 @@ class CustomerServiceImpl(private val customerRepository: CustomerRepository, pr
     }
 
     override fun updateCustomer(customerDTO: CustomerDTO, customerID: Long): CustomerDTO {
-        val customer = customerRepository.findById(customerID).get()
+        val customerOpt = customerRepository.findById(customerID)
 
+        if (! customerOpt.isPresent)
+            throw IllegalArgumentException("Customer does not exist")
+
+        val customer = customerOpt.get()
         customer.address = customerDTO.address
         customer.name = customerDTO.name
         customer.surname = customerDTO.surname

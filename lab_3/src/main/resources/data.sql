@@ -24,3 +24,8 @@ insert into wallet(id, balance, customer) values(NEXTVAL(pk_sequence), 750, 5);
 insert into wallet(id, balance, customer) values(NEXTVAL(pk_sequence), 500, 6);
 insert into transaction(id, amount, timestamp, sender, receiver) values (NEXTVAL(pk_sequence), 50, "2020-01-01 00:00:00", 7, 8);
 insert into transaction(id, amount, timestamp, sender, receiver) values (NEXTVAL(pk_sequence), 250, "2020-01-01 00:00:00", 7, 9);
+
+-- Alices_password1
+-- insert into user(id, username, password, email, is_enabled, roles) values(NEXTVAL(pk_sequence), "asdasd",
+--                                                                           "{bcrypt}$2a$10$PBp/YvYi0NoYnG/erDcn4uHSREj0cYmDAgl4yWD86mnSPcFRg1NMe", "alisce_inwonderland@mail.com",
+--                                                                           1, "CUSTOMER");

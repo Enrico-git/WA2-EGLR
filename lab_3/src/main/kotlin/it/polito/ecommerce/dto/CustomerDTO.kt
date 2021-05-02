@@ -14,7 +14,6 @@ data class CustomerDTO(
     val name: String,
     @field:Length(min = 2, max = 50)
     val surname: String,
-    @field:Length(min = 2)
     val address: String,
     @field:Email
     val email: String,

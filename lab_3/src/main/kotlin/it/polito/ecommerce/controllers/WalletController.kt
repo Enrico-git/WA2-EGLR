@@ -21,8 +21,8 @@ class WalletController(private val service: WalletService) {
     }
 
     @PostMapping("/")
-    fun createWallet(@RequestBody @Valid customerDTO: CustomerDTO): ResponseEntity<WalletDTO> {
-        return ResponseEntity(service.addWallet(customerDTO), HttpStatus.CREATED)
+    fun createWallet(@RequestBody @Valid createWalletDTO: CreateWalletDTO): ResponseEntity<WalletDTO> {
+        return ResponseEntity(service.addWallet(createWalletDTO), HttpStatus.CREATED)
     }
 
     @PostMapping("/{walletID}/transaction")

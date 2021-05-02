@@ -38,18 +38,6 @@ class AuthControllerUnitTests(@Autowired private val authController: AuthControl
 
     @MockkBean
     private lateinit var userDetailsServiceExtImpl: UserDetailsServiceExtImpl
-//    @MockkBean
-//    private lateinit var notificationService: NotificationServiceImpl
-//    @MockkBean
-//    private lateinit var verificationRepository: EmailVerificationTokenRepository
-//    @MockkBean
-//    private lateinit var authenticationManager: AuthenticationManager
-//    @MockkBean
-//    private lateinit var passwordEncoder: PasswordEncoder
-//    @MockkBean
-//    private lateinit var jwtUtils: JwtUtils
-//    @MockkBean
-//    private lateinit var mailService: MailServiceImpl
 
     @Test
     fun `Assert get wallet successfully retrieves existing wallet`(){

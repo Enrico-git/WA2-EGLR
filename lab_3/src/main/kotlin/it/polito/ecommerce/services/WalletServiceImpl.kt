@@ -2,10 +2,7 @@ package it.polito.ecommerce.services
 
 import it.polito.ecommerce.domain.Transaction
 import it.polito.ecommerce.domain.Wallet
-import it.polito.ecommerce.dto.CustomerDTO
-import it.polito.ecommerce.dto.TransactionDTO
-import it.polito.ecommerce.dto.WalletDTO
-import it.polito.ecommerce.dto.toDTO
+import it.polito.ecommerce.dto.*
 import it.polito.ecommerce.repositories.CustomerRepository
 import it.polito.ecommerce.repositories.TransactionRepository
 import it.polito.ecommerce.repositories.WalletRepository
@@ -33,8 +30,8 @@ class WalletServiceImpl(
         return wallet.toDTO()
     }
 
-    override fun addWallet(customerDTO: CustomerDTO): WalletDTO {
-        val customerOpt = customerRepository.findById(customerDTO.id!!)
+    override fun addWallet(createWalletDTO: CreateWalletDTO): WalletDTO {
+        val customerOpt = customerRepository.findById(createWalletDTO.id)
         if (  ! customerOpt.isPresent )
             throw IllegalArgumentException("The customer does not exist")
         val wallet = Wallet(
