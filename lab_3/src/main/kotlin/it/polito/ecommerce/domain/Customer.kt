@@ -7,8 +7,10 @@ import javax.validation.constraints.Email
 class Customer(
     @Column(nullable = false)
     var name: String = "",
+
     @Column(nullable = false)
     var surname: String = "",
+
     @Column(nullable = false)
     var address: String = "",
 

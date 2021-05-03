@@ -1,5 +1,5 @@
 package it.polito.ecommerce.services
-import it.polito.ecommerce.dto.CustomerDTO
+import it.polito.ecommerce.dto.CreateWalletDTO
 import it.polito.ecommerce.dto.TransactionDTO
 import it.polito.ecommerce.dto.WalletDTO
 import org.springframework.data.domain.Pageable
@@ -10,7 +10,7 @@ interface WalletService {
     fun getWallet(walletID: Long): WalletDTO
 
     @PreAuthorize("hasAuthority(\"CUSTOMER\") and isCustomer(authentication, #customerDTO.id)")
-    fun addWallet(customerDTO: CustomerDTO): WalletDTO
+    fun addWallet(createWalletDTO: CreateWalletDTO): WalletDTO
 
     @PreAuthorize("hasAuthority(\"CUSTOMER\") and isOwner(authentication,#transactionDTO.senderID)")
     fun performTransaction(transactionDTO: TransactionDTO): TransactionDTO

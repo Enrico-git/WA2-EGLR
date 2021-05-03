@@ -16,9 +16,11 @@ import javax.transaction.Transactional
 
 @Service
 @Transactional
-class WalletServiceImpl(private val walletRepository: WalletRepository,
-private val customerRepository: CustomerRepository,
-private val transactionRepository: TransactionRepository): WalletService{
+class WalletServiceImpl(
+    private val walletRepository: WalletRepository,
+    private val customerRepository: CustomerRepository,
+    private val transactionRepository: TransactionRepository
+    ): WalletService{
 
     override fun getWallet(walletID: Long): WalletDTO {
         val walletOpt = walletRepository.findById(walletID)
@@ -28,8 +30,8 @@ private val transactionRepository: TransactionRepository): WalletService{
         return wallet.toDTO()
     }
 
-    override fun addWallet(customerDTO: CustomerDTO): WalletDTO {
-        val customerOpt = customerRepository.findById(customerDTO.id!!)
+    override fun addWallet(createWalletDTO: CreateWalletDTO): WalletDTO {
+        val customerOpt = customerRepository.findById(createWalletDTO.id)
         if (  ! customerOpt.isPresent )
             throw IllegalArgumentException("The customer does not exist")
         val wallet = Wallet(
