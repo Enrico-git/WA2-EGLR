@@ -12,23 +12,19 @@ import org.springframework.security.access.expression.method.MethodSecurityExpre
 import org.springframework.security.core.Authentication
 import org.springframework.stereotype.Component
 
-//@Component
-//@Scope(value = "prototype")
-//class CustomMethodSecurityExpressionRoot(@Lazy authentication: Authentication) : SecurityExpressionRoot(authentication), MethodSecurityExpressionOperations {
-//
-//
-//    @Autowired
-//    private lateinit var walletRepository: WalletRepository
-//
-//    @Autowired
-//    private lateinit var customerRepository: CustomerRepository
+@Component
+@Scope(value = "prototype")
+class CustomMethodSecurityExpressionRoot(authentication: Authentication) : SecurityExpressionRoot(authentication), MethodSecurityExpressionOperations {
 
 
-class CustomMethodSecurityExpressionRoot(authentication: Authentication,
-    private val walletRepository: WalletRepository,
-    private val customerRepository: CustomerRepository,
-    private val userRepository: UserRepository)
-    : SecurityExpressionRoot(authentication), MethodSecurityExpressionOperations {
+    @Autowired
+    private lateinit var walletRepository: WalletRepository
+
+    @Autowired
+    private lateinit var customerRepository: CustomerRepository
+
+    @Autowired
+    private lateinit var userRepository: UserRepository
 
 
     fun isOwner(authentication: Authentication, walletID: Long): Boolean {

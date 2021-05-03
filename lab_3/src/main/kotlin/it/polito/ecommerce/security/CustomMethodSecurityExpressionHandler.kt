@@ -14,18 +14,14 @@ import org.springframework.stereotype.Component
 
 @Component
 class CustomMethodSecurityExpressionHandler(
-    private val walletRepository: WalletRepository,
-    private val customerRepository: CustomerRepository,
-    private val userRepository: UserRepository
-//private val beanFactory: AbstractAutowireCapableBeanFactory,
+private val beanFactory: AbstractAutowireCapableBeanFactory,
 ) : DefaultMethodSecurityExpressionHandler() {
     private val trustResolver: AuthenticationTrustResolverImpl = AuthenticationTrustResolverImpl()
     override fun createSecurityExpressionRoot(
         authentication: Authentication?,
         invocation: MethodInvocation?
     ): MethodSecurityExpressionOperations {
-//        val root = beanFactory.getBean(CustomMethodSecurityExpressionRoot::class.java, authentication!!) as CustomMethodSecurityExpressionRoot
-        val root = CustomMethodSecurityExpressionRoot(authentication!!, walletRepository, customerRepository, userRepository)
+        val root = beanFactory.getBean(CustomMethodSecurityExpressionRoot::class.java, authentication!!)
         root.setPermissionEvaluator(permissionEvaluator)
         root.setTrustResolver(this.trustResolver)
         root.setRoleHierarchy(roleHierarchy)
