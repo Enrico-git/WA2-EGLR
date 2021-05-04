@@ -86,7 +86,7 @@ class WalletServiceImpl(
         return wallet.balance < amount
     }
 
-    fun transferMoney(senderWallet: Wallet, receiverWallet: Wallet, amount: BigDecimal): Unit {
+    fun transferMoney(senderWallet: Wallet, receiverWallet: Wallet, amount: BigDecimal){
         senderWallet.balance -= amount
         walletRepository.save(senderWallet)
         receiverWallet.balance += amount
