@@ -24,3 +24,4 @@ insert into wallet(id, balance, customer) values(pk_sequence.nextval, 750, 5);
 insert into wallet(id, balance, customer) values(pk_sequence.nextval, 500, 6);
 insert into transaction(id, amount, timestamp, sender, receiver) values (pk_sequence.nextval, 50, '2020-01-01 00:00:00', 7, 8);
 insert into transaction(id, amount, timestamp, sender, receiver) values (pk_sequence.nextval, 250, '2020-01-01 00:00:00', 7, 9);
+insert into transaction(id, amount, timestamp, sender, receiver) values (pk_sequence.nextval, 250, '1970-01-01 05:00:00', 7, 9);

@@ -48,6 +48,7 @@ dependencies {
     testImplementation("com.ninja-squad:springmockk:3.0.1")
 //    MAYBE ADD THIS TO USE SECURITY MOCKS
     testImplementation("org.springframework.security:spring-security-test")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-core")
 }
 
 tasks.withType<KotlinCompile> {

@@ -7,35 +7,34 @@ import it.polito.ecommerce.warehouse.services.ProductService
 import kotlinx.coroutines.flow.Flow
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
-import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
-import javax.validation.constraints.Min
 
 @RestController
 @RequestMapping("/warehouse")
-@Validated
+//@Validated
 class ProductController(
     private val productRepository: ProductRepository,
     private val productService : ProductService
 ) {
     @PostMapping("/products")
-    fun createProduct(@RequestBody productDTO: Product): ResponseEntity<Any> {
-        return ResponseEntity( HttpStatus.CREATED)
+    suspend fun createProduct(@RequestBody productDTO: ProductDTO): ResponseEntity<Any> {
+        return ResponseEntity( productService.addProduct(productDTO), HttpStatus.CREATED)
     }
 
     @PatchMapping("/products/{productID}")
-    fun updateProduct(@RequestBody productDTO: Product): ResponseEntity<Any> {
-        return ResponseEntity( HttpStatus.CREATED)
+    suspend fun updateProduct(@PathVariable productID: Long, @RequestBody productDTO: ProductDTO): ResponseEntity<ProductDTO> {
+        return ResponseEntity(productService.updateProduct(productID, productDTO) ,HttpStatus.CREATED)
     }
 
     @GetMapping("/products/{productID}")
-    suspend fun getProductByID(@PathVariable @Min(0) productID: Long): ResponseEntity<ProductDTO> {
+    suspend fun getProductByID(@PathVariable productID: Long): ResponseEntity<ProductDTO> {
+        println(productID)
         return ResponseEntity(productService.getProductById(productID), HttpStatus.OK)
     }
 
     @GetMapping("/products")
-    fun getAllProducts(): ResponseEntity<Any> {
-        return ResponseEntity( HttpStatus.OK)
+    fun getAllProducts(): ResponseEntity<Flow<ProductDTO>> {
+        return ResponseEntity( productService.getAllProducts() ,HttpStatus.OK)
     }
 
     @GetMapping("/productsByCategory")
