@@ -8,7 +8,7 @@ data class ProductDTO (
     val name: String?,
     val category: String?,
     val price: BigDecimal?,
-    val quantity: Int
+    val quantity: Long
 )
 
 fun Product.toDTO(): ProductDTO {

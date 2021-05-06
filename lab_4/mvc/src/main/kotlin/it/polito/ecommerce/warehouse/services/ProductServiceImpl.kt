@@ -3,12 +3,10 @@ package it.polito.ecommerce.warehouse.services
 import it.polito.ecommerce.warehouse.domain.Product
 import it.polito.ecommerce.warehouse.dto.ProductDTO
 import it.polito.ecommerce.warehouse.dto.toDTO
-import it.polito.ecommerce.warehouse.exceptions.*
 import it.polito.ecommerce.warehouse.repositories.ProductRepository
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import org.springframework.data.domain.Pageable
 import java.math.BigDecimal
 
 @Service
@@ -16,10 +14,9 @@ import java.math.BigDecimal
 class ProductServiceImpl(
     private val productRepository: ProductRepository
 ): ProductService {
-    override suspend fun addProduct(productDTO: ProductDTO): ProductDTO {
+    override fun addProduct(productDTO: ProductDTO): ProductDTO {
 
         val product = Product(
-            id = productDTO.id,
             name = productDTO.name!!,
             category = productDTO.category!!,
             price = productDTO.price!!,
@@ -28,8 +25,12 @@ class ProductServiceImpl(
         return productRepository.save(product).toDTO()
     }
 
-    override suspend fun updateProduct(productID: Long, productDTO: ProductDTO): ProductDTO {
-        val product = productRepository.findById(productID) ?: throw IllegalArgumentException("Product not found")
+    override fun updateProduct(productID: Long, productDTO: ProductDTO): ProductDTO {
+        val productOpt = productRepository.findById(productID)
+            if(! productOpt.isPresent)
+                throw IllegalArgumentException("Product not found")
+
+        val product = productOpt.get()
 
         product.quantity += productDTO.quantity
         if(product.quantity < 0)
@@ -38,20 +39,25 @@ class ProductServiceImpl(
         return productRepository.save(product).toDTO()
     }
 
-    override suspend fun getProductById(productID: Long): ProductDTO {
-        val product = productRepository.findById(productID) ?: throw IllegalArgumentException("Product not found")
+    override fun getProductById(productID: Long): ProductDTO {
+        val productOpt = productRepository.findById(productID)
+        if(! productOpt.isPresent)
+            throw IllegalArgumentException("Product not found")
+
+        val product = productOpt.get()
+
         return product.toDTO()
     }
 
-    override suspend fun getAllProducts(): Flow<ProductDTO> {
+    override fun getAllProducts(pageable: Pageable): List<ProductDTO> {
         return productRepository
-            .findAll()
+            .findAllWithPageable(pageable)
             .map { it.toDTO() }
     }
 
-    override suspend fun getProductsByCategory(category: String): Flow<ProductDTO> {
+    override fun getProductsByCategory(category: String, pageable: Pageable): List<ProductDTO> {
         return productRepository
-            .findAllByCategory(category)
+            .findAllByCategory(category, pageable)
             .map { it.toDTO() }
     }
 }

@@ -9,5 +9,5 @@ data class Product (
     val name: String,
     val category: String,
     val price: BigDecimal,
-    var quantity: Int
+    var quantity: Long
 )
