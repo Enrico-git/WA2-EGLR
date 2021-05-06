@@ -9,7 +9,7 @@ import java.sql.Timestamp
 @ControllerAdvice
 class ControllerAdvice {
 
-    @ExceptionHandler(value = [NotFoundException::class])
+    @ExceptionHandler(value = [NotFoundException::class, IllegalArgumentException::class])
     fun genericExceptionHandler(e: Exception): ResponseEntity<ErrorDTO> {
         val errorDTO = ErrorDTO(
             timestamp = Timestamp(System.currentTimeMillis()),
@@ -28,9 +28,9 @@ class ControllerAdvice {
                 errorDTO.status = 404
                 status = HttpStatus.NOT_FOUND
             }
-//            is IllegalArgumentException -> {
-//                status = HttpStatus.BAD_REQUEST
-//            }
+            is IllegalArgumentException -> {
+                status = HttpStatus.BAD_REQUEST
+            }
         }
 
         return ResponseEntity(errorDTO, status)

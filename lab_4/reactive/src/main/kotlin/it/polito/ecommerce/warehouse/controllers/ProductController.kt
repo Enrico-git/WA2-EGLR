@@ -1,11 +1,11 @@
 package it.polito.ecommerce.warehouse.controllers
 
-import it.polito.ecommerce.warehouse.domain.Product
 import it.polito.ecommerce.warehouse.dto.ProductDTO
 import it.polito.ecommerce.warehouse.repositories.ProductRepository
 import it.polito.ecommerce.warehouse.services.ProductService
 import kotlinx.coroutines.flow.Flow
 import org.springframework.http.HttpStatus
+import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 
@@ -32,13 +32,13 @@ class ProductController(
         return ResponseEntity(productService.getProductById(productID), HttpStatus.OK)
     }
 
-    @GetMapping("/products")
+    @GetMapping("/products", produces = [MediaType.APPLICATION_NDJSON_VALUE])
     fun getAllProducts(): ResponseEntity<Flow<ProductDTO>> {
-        return ResponseEntity( productService.getAllProducts() ,HttpStatus.OK)
+        return ResponseEntity( productService.getAllProducts(),HttpStatus.OK)
     }
 
-    @GetMapping("/productsByCategory")
-    fun getProductsByCategory(@RequestParam category: String): ResponseEntity<Flow<Product>> {
-        return ResponseEntity( productRepository.findAllByCategory(category), HttpStatus.OK )
+    @GetMapping("/productsByCategory", produces = [MediaType.APPLICATION_NDJSON_VALUE])
+    fun getProductsByCategory(@RequestParam category: String): ResponseEntity<Flow<ProductDTO>> {
+        return ResponseEntity( productService.getProductsByCategory(category), HttpStatus.OK )
     }
 }

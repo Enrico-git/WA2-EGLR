@@ -3,10 +3,9 @@ package it.polito.ecommerce.warehouse.services
 import it.polito.ecommerce.warehouse.domain.Product
 import it.polito.ecommerce.warehouse.dto.ProductDTO
 import it.polito.ecommerce.warehouse.dto.toDTO
-import it.polito.ecommerce.warehouse.exceptions.NotFoundException
 import it.polito.ecommerce.warehouse.repositories.ProductRepository
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
+import javassist.NotFoundException
+import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -14,9 +13,8 @@ import org.springframework.transaction.annotation.Transactional
 @Transactional
 @Service
 class ProductServiceImpl(private val productRepository: ProductRepository) : ProductService{
-    override suspend fun addProduct(productDTO: ProductDTO): ProductDTO {
+    override fun addProduct(productDTO: ProductDTO): ProductDTO {
         val product = Product(
-            id = null,
             name = productDTO.name!!,
             category = productDTO.category!!,
             price = productDTO.price!!,
@@ -24,11 +22,12 @@ class ProductServiceImpl(private val productRepository: ProductRepository) : Pro
         )
         return productRepository.save(product).toDTO()
     }
-
-// TODO ADD LOCKS SOMEHOW
-    override suspend fun updateProduct(productID: Long, productDTO: ProductDTO): ProductDTO {
-//        TODO why are we fetching the product before updating it? make custom query productRepository.update(productID, quantity)
-        val product = productRepository.findById(productID) ?: throw IllegalArgumentException("Product not found")
+    
+    override fun updateProduct(productID: Long, productDTO: ProductDTO): ProductDTO {
+        val productOpt = productRepository.findByIdWithLock(productID)
+        if ( ! productOpt.isPresent)
+            throw IllegalArgumentException("Product does not exist")
+        val product = productOpt.get()
         product.quantity += productDTO.quantity
         if(product.quantity < 0)
             throw IllegalArgumentException("Product quantity is not enough")
@@ -36,21 +35,22 @@ class ProductServiceImpl(private val productRepository: ProductRepository) : Pro
         return productRepository.save(product).toDTO()
     }
 
-    override suspend fun getProductById(productID: Long): ProductDTO {
-        println(productID)
-        val product = productRepository.findById(productID) ?: throw NotFoundException("Product was not found")
-        return product.toDTO()
+    override fun getProductById(productID: Long): ProductDTO {
+        val productOpt = productRepository.findById(productID)
+        if ( ! productOpt.isPresent)
+            throw NotFoundException("Product does not exist")
+        return productOpt.get().toDTO()
     }
 
-    override fun getAllProducts(): Flow<ProductDTO> {
+    override fun getAllProducts(pageable: Pageable): List<ProductDTO> {
         return productRepository
-            .findAll()
+            .findAllWithPageable(pageable)
             .map{ it.toDTO() }
     }
 
-    override fun getProductsByCategory(category: String): Flow<ProductDTO> {
+    override fun getProductsByCategory(category: String, pageable: Pageable): List<ProductDTO> {
         return productRepository
-            .findAllByCategory(category)
+            .findAllByCategory(category, pageable)
             .map { it.toDTO() }
     }
 }

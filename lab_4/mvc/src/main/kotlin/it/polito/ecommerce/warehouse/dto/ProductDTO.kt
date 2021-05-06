@@ -7,17 +7,17 @@ import javax.validation.constraints.Positive
 
 data class ProductDTO(
     val id: Long?,
-//    @field:Length(min = 2)
+    @field:Length(min = 2)
     val name: String?,
-//    @field:Length(min = 2)
+    @field:Length(min = 2)
     val category: String?,
-//    @field:Positive
+    @field:Positive
     val price: BigDecimal?,
     val quantity: Long
 )
 
 fun Product.toDTO() = ProductDTO(
-    id = id,
+    id = getId(),
     name = name,
     category = category,
     price = price,
