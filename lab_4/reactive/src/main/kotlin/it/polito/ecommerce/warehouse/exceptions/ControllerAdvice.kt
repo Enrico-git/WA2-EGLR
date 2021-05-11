@@ -18,7 +18,7 @@ class ControllerAdvice {
 
         var status = HttpStatus.BAD_REQUEST
 
-        when(e){
+        when (e) {
 //            is ValidationException -> {
 //                errorDTO.status = 422
 //                errorDTO.error = errorDTO.error.replace(Regex("\\w+\\."), "")

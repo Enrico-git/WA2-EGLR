@@ -7,7 +7,7 @@ import org.springframework.stereotype.Repository
 import javax.persistence.LockModeType
 
 @Repository
-interface WalletRepository: CrudRepository<Wallet, Long> {
+interface WalletRepository : CrudRepository<Wallet, Long> {
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     override fun findAllById(ids: MutableIterable<Long>): Set<Wallet>

@@ -32,7 +32,7 @@ class JwtAuthenticationTokenFilter(
                     .buildDetails(request)
                 SecurityContextHolder.getContext().authentication = authentication
             }
-        } catch (e: Exception){
+        } catch (e: Exception) {
             println("Cannot set user authentication: $e")
         }
 

@@ -1,8 +1,8 @@
-#Web Applications 2
+# Web Applications 2
 
-##Ecommerce
+## Ecommerce
 
-###GROUP: WA2-EGLR
+### GROUP: WA2-EGLR
 
 280141 - DE LUCA LUIGI
 

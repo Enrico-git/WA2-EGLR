@@ -14,7 +14,8 @@ import org.springframework.stereotype.Component
 
 @Component
 @Scope(value = "prototype")
-class CustomMethodSecurityExpressionRoot(authentication: Authentication) : SecurityExpressionRoot(authentication), MethodSecurityExpressionOperations {
+class CustomMethodSecurityExpressionRoot(authentication: Authentication) : SecurityExpressionRoot(authentication),
+    MethodSecurityExpressionOperations {
 
 
     @Autowired

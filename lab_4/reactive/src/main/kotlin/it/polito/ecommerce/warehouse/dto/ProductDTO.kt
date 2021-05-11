@@ -14,7 +14,8 @@ data class ProductDTO(
 //    @field:Positive
     val price: BigDecimal?,
     val quantity: Long
-)
+) {
+}
 
 fun Product.toDTO() = ProductDTO(
     id = id,

@@ -13,7 +13,7 @@ import org.springframework.r2dbc.connection.init.ResourceDatabasePopulator
 @EnableR2dbcRepositories
 class WarehouseApplication {
     @Bean
-    fun initializer (connectionFactory: ConnectionFactory): ConnectionFactoryInitializer {
+    fun initializer(connectionFactory: ConnectionFactory): ConnectionFactoryInitializer {
         val cfi = ConnectionFactoryInitializer()
         cfi.setConnectionFactory(connectionFactory)
         cfi.setDatabasePopulator(

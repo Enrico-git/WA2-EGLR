@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component
 
 @Component
 class CustomMethodSecurityExpressionHandler(
-private val beanFactory: AbstractAutowireCapableBeanFactory,
+    private val beanFactory: AbstractAutowireCapableBeanFactory,
 ) : DefaultMethodSecurityExpressionHandler() {
     private val trustResolver: AuthenticationTrustResolverImpl = AuthenticationTrustResolverImpl()
     override fun createSecurityExpressionRoot(

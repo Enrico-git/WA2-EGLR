@@ -42,13 +42,18 @@ import kotlinx.coroutines.*
 
 //@SpringBootTest
 @Transactional
-@DataJpaTest(includeFilters = [ComponentScan.Filter(type = FilterType.ANNOTATION, classes = [Repository::class, Component::class, Service::class])])
+@DataJpaTest(
+    includeFilters = [ComponentScan.Filter(
+        type = FilterType.ANNOTATION,
+        classes = [Repository::class, Component::class, Service::class]
+    )]
+)
 //@ExtendWith(SpringExtension::class)
 //@TestPropertySource(properties = ["classpath:application.properties"])
 class WalletServiceIntTests @Autowired constructor(
     private val service: WalletService,
     private val walletRepository: WalletRepository
-){
+) {
 
     @Test
     @WithUserDetails(value = "alice_in_wonderland")
@@ -59,7 +64,7 @@ class WalletServiceIntTests @Autowired constructor(
     @Test
     @WithUserDetails(value = "alice_in_wonderland")
     fun `Assert get wallet throws access denied if user is not owner`() {
-        assertThrows<AccessDeniedException> { service.getWallet(8).customerID}
+        assertThrows<AccessDeniedException> { service.getWallet(8).customerID }
     }
 
     @Test
@@ -80,7 +85,7 @@ class WalletServiceIntTests @Autowired constructor(
 
     @Test
     @WithUserDetails(value = "alice_in_wonderland")
-    fun `assert get wallet transactions returns a list of transactions if parameters are valid`(){
+    fun `assert get wallet transactions returns a list of transactions if parameters are valid`() {
         var pageable = PageRequest.of(0, 2)
         val t1 = System.currentTimeMillis()
         var transactions = service.getWalletTransactions(7, 0, t1, pageable)
@@ -90,20 +95,20 @@ class WalletServiceIntTests @Autowired constructor(
         assert(transactions[1].id == 11L)
         assert(transactions[1].timestamp!! <= Timestamp(t1) && transactions[1].timestamp!! >= Timestamp(0))
         pageable = PageRequest.of(0, 1)
-        val t2 = 1000*60*60*24L // 1 day
+        val t2 = 1000 * 60 * 60 * 24L // 1 day
         transactions = service.getWalletTransactions(7, -t2, t2, pageable)
         assert(transactions.size == 1)
         assert(transactions[0].id == 12L)
         assert(transactions[0].timestamp!! <= Timestamp(t2) && transactions[0].timestamp!! >= Timestamp(-t2))
 
         assert(
-            service.getWalletTransactions(7, -1000*60*60*24*11, -1000*60*60*24*10, pageable).isEmpty()
+            service.getWalletTransactions(7, -1000 * 60 * 60 * 24 * 11, -1000 * 60 * 60 * 24 * 10, pageable).isEmpty()
         )
     }
 
     @Test
     @WithUserDetails(value = "alice_in_wonderland")
-    fun `assert get wallet transactions returns all the transactions if the time range is not specified`(){
+    fun `assert get wallet transactions returns all the transactions if the time range is not specified`() {
         val pageable = PageRequest.of(0, 2)
         val transactions = service.getWalletTransactions(7, null, null, pageable)
         assert(transactions.size == 2)
@@ -113,32 +118,32 @@ class WalletServiceIntTests @Autowired constructor(
 
     @Test
     @WithUserDetails(value = "alice_in_wonderland")
-    fun `assert get wallet transactions throws access denied exception if user is not owner of wallet`(){
+    fun `assert get wallet transactions throws access denied exception if user is not owner of wallet`() {
         val pageable = PageRequest.of(0, 2)
-        assertThrows<AccessDeniedException> {  service.getWalletTransactions(8, null, null, pageable) }
+        assertThrows<AccessDeniedException> { service.getWalletTransactions(8, null, null, pageable) }
     }
 
     @Test
     @WithUserDetails(value = "alice_in_wonderland")
-    fun `assert get wallet single transaction successfully returns a transaction dto if transaction exists`(){
+    fun `assert get wallet single transaction successfully returns a transaction dto if transaction exists`() {
         assertDoesNotThrow { service.getWalletSingleTransaction(7L, 12L) }
     }
 
     @Test
     @WithUserDetails(value = "alice_in_wonderland")
-    fun `assert get wallet single transaction throws not found exception if transaction does not exist`(){
+    fun `assert get wallet single transaction throws not found exception if transaction does not exist`() {
         assertThrows<NotFoundException> { service.getWalletSingleTransaction(7L, 200L) }
     }
 
     @Test
     @WithUserDetails(value = "alice_in_wonderland")
-    fun `assert get wallet single transaction throws access denied exception if user is not owner of wallet`(){
+    fun `assert get wallet single transaction throws access denied exception if user is not owner of wallet`() {
         assertThrows<AccessDeniedException> { service.getWalletSingleTransaction(8L, 200L) }
     }
 
     @Test
     @WithUserDetails(value = "alice_in_wonderland")
-    fun `assert perform transaction successfully adds transaction to db`(){
+    fun `assert perform transaction successfully adds transaction to db`() {
         val transactionDTO = TransactionDTO(
             id = null,
             senderID = 7,
@@ -146,15 +151,15 @@ class WalletServiceIntTests @Autowired constructor(
             timestamp = null,
             amount = BigDecimal(20)
         )
-        var wallets = walletRepository.findAllById(mutableSetOf(7L,8L))
+        var wallets = walletRepository.findAllById(mutableSetOf(7L, 8L))
         val senderBalanceBefore = wallets.find { it.getId() == 7L }!!.balance
-        val receiverBalanceBefore = wallets.find{it.getId() == 8L }!!.balance
+        val receiverBalanceBefore = wallets.find { it.getId() == 8L }!!.balance
 
         val result = service.performTransaction(transactionDTO)
 
-        wallets = walletRepository.findAllById(mutableSetOf(7L,8L))
+        wallets = walletRepository.findAllById(mutableSetOf(7L, 8L))
         val senderBalanceAfter = wallets.find { it.getId() == 7L }!!.balance
-        val receiverBalanceAfter = wallets.find{it.getId() == 8L }!!.balance
+        val receiverBalanceAfter = wallets.find { it.getId() == 8L }!!.balance
 
         assert(result.id != null && result.amount == BigDecimal(20) && result.timestamp != null)
         assert(senderBalanceAfter == senderBalanceBefore - BigDecimal(20))
@@ -163,7 +168,7 @@ class WalletServiceIntTests @Autowired constructor(
 
     @Test
     @WithUserDetails(value = "alice_in_wonderland")
-    fun `assert perform transaction throws Illegal argument exception if receiver wallet doesn't exist`(){
+    fun `assert perform transaction throws Illegal argument exception if receiver wallet doesn't exist`() {
         val transactionDTO = TransactionDTO(
             id = null,
             senderID = 7,
@@ -176,7 +181,7 @@ class WalletServiceIntTests @Autowired constructor(
 
     @Test
     @WithUserDetails(value = "alice_in_wonderland")
-    fun `assert perform transaction throws Illegal argument exception if sender's balance is not high enough`(){
+    fun `assert perform transaction throws Illegal argument exception if sender's balance is not high enough`() {
         val transactionDTO = TransactionDTO(
             id = null,
             senderID = 7,
@@ -189,7 +194,7 @@ class WalletServiceIntTests @Autowired constructor(
 
     @Test
     @WithUserDetails(value = "alice_in_wonderland")
-    fun `assert perform transaction throws access denied exception if user is not sender's wallet owner`(){
+    fun `assert perform transaction throws access denied exception if user is not sender's wallet owner`() {
         val transactionDTO = TransactionDTO(
             id = null,
             senderID = 9,
@@ -202,7 +207,7 @@ class WalletServiceIntTests @Autowired constructor(
 
     @Test
     @WithUserDetails(value = "alice_in_wonderland")
-    fun `assert concurrent calls of perform transaction yield correct results`() = runBlocking<Unit>{
+    fun `assert concurrent calls of perform transaction yield correct results`() = runBlocking<Unit> {
 
         val transactionDTO = TransactionDTO(
             id = null,
@@ -220,20 +225,20 @@ class WalletServiceIntTests @Autowired constructor(
             amount = BigDecimal(20)
         )
 
-        var wallets = walletRepository.findAllById(mutableSetOf(7L,8L, 9L))
+        var wallets = walletRepository.findAllById(mutableSetOf(7L, 8L, 9L))
         val senderBalanceBefore = wallets.find { it.getId() == 7L }!!.balance
-        val receiverBalanceBefore = wallets.find {it.getId() == 8L }!!.balance
-        val receiverBalanceBefore2 = wallets.find {it.getId() == 9L }!!.balance
+        val receiverBalanceBefore = wallets.find { it.getId() == 8L }!!.balance
+        val receiverBalanceBefore2 = wallets.find { it.getId() == 9L }!!.balance
 
         val a1 = async { doTransaction(transactionDTO) }
         val a2 = async { doTransaction(transactionDTO2) }
         val t2 = a2.await()
         val t1 = a1.await()
 
-        wallets = walletRepository.findAllById(mutableSetOf(7L,8L,9L))
+        wallets = walletRepository.findAllById(mutableSetOf(7L, 8L, 9L))
         val senderBalanceAfter = wallets.find { it.getId() == 7L }!!.balance
-        val receiverBalanceAfter = wallets.find{it.getId() == 8L }!!.balance
-        val receiverBalanceAfter2 = wallets.find{it.getId() == 9L }!!.balance
+        val receiverBalanceAfter = wallets.find { it.getId() == 8L }!!.balance
+        val receiverBalanceAfter2 = wallets.find { it.getId() == 9L }!!.balance
 
         assert(t1.id != null && t1.amount == BigDecimal(20) && t1.timestamp != null)
         assert(t2.id != null && t2.amount == BigDecimal(20) && t2.timestamp != null)
@@ -243,7 +248,7 @@ class WalletServiceIntTests @Autowired constructor(
 
     }
 
-    suspend fun doTransaction(transactionDTO: TransactionDTO): TransactionDTO{
+    suspend fun doTransaction(transactionDTO: TransactionDTO): TransactionDTO {
         return service.performTransaction(transactionDTO)
     }
 

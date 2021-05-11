@@ -22,32 +22,33 @@ import org.springframework.web.context.WebApplicationContext
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 //@DataJpaTest(includeFilters = [ComponentScan.Filter(type = FilterType.ANNOTATION, classes = [Repository::class, Component::class, Service::class, Configuration::class])])
 class WalletControllerIntTests @Autowired constructor(
-    private val context : WebApplicationContext,
+    private val context: WebApplicationContext,
     private val jwtUtils: JwtUtils,
-    private val authenticationManager : AuthenticationManager
+    private val authenticationManager: AuthenticationManager
 ) {
-    lateinit var mockMvc : MockMvc
-    lateinit var token : String
+    lateinit var mockMvc: MockMvc
+    lateinit var token: String
 
     @BeforeEach
     fun setup() {
         mockMvc = MockMvcBuilders.webAppContextSetup(context).apply<DefaultMockMvcBuilder>(springSecurity()).build()
         val authentication = authenticationManager.authenticate(
-            UsernamePasswordAuthenticationToken("alice_in_wonderland", "Alices_password1"))
+            UsernamePasswordAuthenticationToken("alice_in_wonderland", "Alices_password1")
+        )
         token = jwtUtils.generateJwtToken(authentication)
     }
 
     @Test
-    fun `Alice can retrieve her wallet`(){
-       mockMvc.perform(get("/wallet/7").header("Authorization", "Bearer $token"))
+    fun `Alice can retrieve her wallet`() {
+        mockMvc.perform(get("/wallet/7").header("Authorization", "Bearer $token"))
             .andExpect(status().isOk)
             .andExpect(content().contentType("application/json"))
             .andExpect(jsonPath("$.id").value(7))
     }
 
     @Test
-    fun `Alice cannot retrieve other customers wallet`(){
-       mockMvc.perform(get("/wallet/8").header("Authorization", "Bearer $token"))
+    fun `Alice cannot retrieve other customers wallet`() {
+        mockMvc.perform(get("/wallet/8").header("Authorization", "Bearer $token"))
             .andExpect(status().isForbidden)
     }
 }

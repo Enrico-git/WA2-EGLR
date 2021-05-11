@@ -15,7 +15,7 @@ import java.util.*
 
 @SpringBootApplication
 @EnableScheduling
-class EcommerceApplication{
+class EcommerceApplication {
 
     @Value("\${spring.mail.host}")
     val host: String = ""
@@ -39,7 +39,7 @@ class EcommerceApplication{
     val debug: String = ""
 
     @Bean
-    fun getMailSender(): JavaMailSender{
+    fun getMailSender(): JavaMailSender {
         val javaMailSender = JavaMailSenderImpl()
         javaMailSender.host = host
         javaMailSender.port = port
@@ -53,6 +53,7 @@ class EcommerceApplication{
 
         return javaMailSender
     }
+
     @Bean
     fun passwordEncoder(): PasswordEncoder {
         return PasswordEncoderFactories.createDelegatingPasswordEncoder()

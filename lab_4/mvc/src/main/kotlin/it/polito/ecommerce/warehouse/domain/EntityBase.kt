@@ -5,7 +5,7 @@ import java.io.Serializable
 import javax.persistence.*
 
 @MappedSuperclass
-abstract class EntityBase<T: Serializable> {
+abstract class EntityBase<T : Serializable> {
     companion object {
         private const val serialVersionUID = -43869754L
     }
@@ -13,11 +13,13 @@ abstract class EntityBase<T: Serializable> {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "pk_generator")
-    @SequenceGenerator(name="pk_generator",
-        sequenceName="pk_sequence",
+    @SequenceGenerator(
+        name = "pk_generator",
+        sequenceName = "pk_sequence",
         initialValue = 1,
-        allocationSize = 1)
-    private val id:T?  = null
+        allocationSize = 1
+    )
+    private val id: T? = null
 
     fun getId(): T? = id
 

@@ -22,7 +22,7 @@ class ControllerAdvice {
 
         var status = HttpStatus.BAD_REQUEST
 
-        when(e){
+        when (e) {
             is ValidationException -> {
                 errorDTO.status = 422
                 errorDTO.error = errorDTO.error.replace(Regex("\\w+\\."), "")
@@ -47,8 +47,8 @@ class ControllerAdvice {
         val errorDTO = ErrorDTO(
             timestamp = Timestamp(System.currentTimeMillis()),
             error = e.fieldErrors
-                .map{"${it.field} - ${it.defaultMessage}"}
-                .reduce{acc, string -> "$acc; $string"},
+                .map { "${it.field} - ${it.defaultMessage}" }
+                .reduce { acc, string -> "$acc; $string" },
             status = 422
         )
         return ResponseEntity(errorDTO, HttpStatus.UNPROCESSABLE_ENTITY)

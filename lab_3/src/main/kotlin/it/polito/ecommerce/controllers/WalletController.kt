@@ -26,25 +26,28 @@ class WalletController(private val service: WalletService) {
     }
 
     @PostMapping("/{walletID}/transaction")
-    fun createTransaction(@PathVariable @Min(0) walletID: Long,
-                          @RequestBody @Valid transactionDTO: TransactionDTO): ResponseEntity<TransactionDTO>
-    {
+    fun createTransaction(
+        @PathVariable @Min(0) walletID: Long,
+        @RequestBody @Valid transactionDTO: TransactionDTO
+    ): ResponseEntity<TransactionDTO> {
         transactionDTO.senderID = walletID
         return ResponseEntity(service.performTransaction(transactionDTO), HttpStatus.CREATED)
     }
 
     @GetMapping("/{walletID}/transactions")
-    fun getWalletTransactions(@PathVariable @Min(0) walletID: Long,
-                              @RequestParam from: Long?,
-                              @RequestParam to: Long?,
-                              pageable: Pageable
+    fun getWalletTransactions(
+        @PathVariable @Min(0) walletID: Long,
+        @RequestParam from: Long?,
+        @RequestParam to: Long?,
+        pageable: Pageable
     ): ResponseEntity<List<TransactionDTO>> {
         return ResponseEntity(service.getWalletTransactions(walletID, from, to, pageable), HttpStatus.OK)
     }
 
     @GetMapping("/{walletID}/transactions/{transactionID}")
-    fun getWalletTransaction(@PathVariable @Min(0) walletID: Long,
-                             @PathVariable @Min(0) transactionID: Long
+    fun getWalletTransaction(
+        @PathVariable @Min(0) walletID: Long,
+        @PathVariable @Min(0) transactionID: Long
     ): ResponseEntity<TransactionDTO> {
         return ResponseEntity(service.getWalletSingleTransaction(walletID, transactionID), HttpStatus.OK)
     }

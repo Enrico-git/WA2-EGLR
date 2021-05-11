@@ -15,7 +15,7 @@ class Customer(
     @Column(unique = true, nullable = false)
     @Email
     var email: String = ""
-): EntityBase<Long>() {
+) : EntityBase<Long>() {
     @OneToMany(mappedBy = "customer", targetEntity = Wallet::class)
     val wallets: MutableSet<Wallet> = mutableSetOf<Wallet>()
 }

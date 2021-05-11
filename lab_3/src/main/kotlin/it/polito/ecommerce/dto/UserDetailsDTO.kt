@@ -1,4 +1,5 @@
 package it.polito.ecommerce.dto
+
 import com.fasterxml.jackson.annotation.JsonProperty
 import it.polito.ecommerce.domain.User
 import org.springframework.security.core.GrantedAuthority
@@ -13,7 +14,7 @@ data class UserDetailsDTO(
     private val isEnabled: Boolean?,
     val email: String?,
     val roles: String?
-    ): UserDetails {
+) : UserDetails {
 
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     override fun getAuthorities(): MutableCollection<out GrantedAuthority> {

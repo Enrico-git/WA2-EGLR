@@ -24,18 +24,23 @@ import org.springframework.web.context.WebApplicationContext
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 //@DataJpaTest(includeFilters = [ComponentScan.Filter(type = FilterType.ANNOTATION, classes = [Repository::class, Component::class, Service::class])])
 class AuthControllerIntTests @Autowired constructor(
-    private val context : WebApplicationContext,
+    private val context: WebApplicationContext,
 
     ) {
-    lateinit var mockMvc : MockMvc
+    lateinit var mockMvc: MockMvc
+
     @BeforeEach
     fun setup() {
-        mockMvc = MockMvcBuilders.webAppContextSetup(context).apply<DefaultMockMvcBuilder>(SecurityMockMvcConfigurers.springSecurity()).build()
+        mockMvc = MockMvcBuilders.webAppContextSetup(context)
+            .apply<DefaultMockMvcBuilder>(SecurityMockMvcConfigurers.springSecurity()).build()
     }
 
     @Test
-    fun `Assert the post signin correctly returns user DTO with JWT token`(){
-        mockMvc.perform(post("/auth/signin").contentType("application/json").content("{\"username\": \"alice_in_wonderland\", \"password\": \"Alices_password1\"}"))
+    fun `Assert the post signin correctly returns user DTO with JWT token`() {
+        mockMvc.perform(
+            post("/auth/signin").contentType("application/json")
+                .content("{\"username\": \"alice_in_wonderland\", \"password\": \"Alices_password1\"}")
+        )
             .andExpect(status().isOk)
             .andExpect(content().contentType("application/json"))
             .andExpect(jsonPath("$.token").isNotEmpty)

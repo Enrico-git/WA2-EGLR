@@ -23,17 +23,17 @@ class AuthController(
     private val userService: UserDetailsServiceExt
 ) {
     @PostMapping("/register")
-    fun register(@RequestBody @Valid registrationDTO: RegistrationDTO): ResponseEntity<UserDetailsDTO>{
+    fun register(@RequestBody @Valid registrationDTO: RegistrationDTO): ResponseEntity<UserDetailsDTO> {
         return ResponseEntity(userService.registerUser(registrationDTO), HttpStatus.CREATED)
     }
 
     @GetMapping("/registrationConfirm")
-    fun confirmRegistration(@RequestParam token: String): ResponseEntity<Unit>{
+    fun confirmRegistration(@RequestParam token: String): ResponseEntity<Unit> {
         return ResponseEntity(userService.verifyToken(token), HttpStatus.OK)
     }
 
     @PostMapping("/signin")
-    fun signIn(@RequestBody @Valid loginDTO: LoginDTO): ResponseEntity<LoginDTO>{
+    fun signIn(@RequestBody @Valid loginDTO: LoginDTO): ResponseEntity<LoginDTO> {
         return ResponseEntity(userService.authAndCreateToken(loginDTO), HttpStatus.OK)
     }
 

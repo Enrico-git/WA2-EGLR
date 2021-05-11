@@ -8,7 +8,7 @@ import java.sql.Timestamp
 import javax.persistence.*
 
 @Entity
-class Product (
+class Product(
     @Column
     val name: String,
     @Column

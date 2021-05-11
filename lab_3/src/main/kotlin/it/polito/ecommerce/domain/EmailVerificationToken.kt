@@ -15,6 +15,6 @@ class EmailVerificationToken(
     val token: String,
 
     @OneToOne
-    @JoinColumn(name = "user", referencedColumnName = "id", nullable = false, )
+    @JoinColumn(name = "user", referencedColumnName = "id", nullable = false)
     val user: User
-    ): EntityBase<Long>() {}
+) : EntityBase<Long>() {}

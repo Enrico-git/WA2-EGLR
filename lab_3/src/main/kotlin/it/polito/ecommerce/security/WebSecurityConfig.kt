@@ -20,9 +20,6 @@ import java.lang.Exception
 import org.springframework.security.access.expression.method.MethodSecurityExpressionHandler
 
 
-
-
-
 @Configuration
 @EnableWebSecurity
 //@EnableGlobalMethodSecurity(prePostEnabled = true)
@@ -32,7 +29,7 @@ class WebSecurityConfig(
     private val userDetailsServiceExt: UserDetailsServiceExt,
     private val authenticationEntryPoint: AuthenticationEntryPoint,
     private val jwtAuthenticationTokenFilter: JwtAuthenticationTokenFilter
-): WebSecurityConfigurerAdapter() {
+) : WebSecurityConfigurerAdapter() {
 
     @Bean
     override fun authenticationManagerBean(): AuthenticationManager? {
@@ -56,23 +53,25 @@ class WebSecurityConfig(
             .authorizeRequests()
             .antMatchers("/auth/**")
             .permitAll()
-        .and()
+            .and()
             .authorizeRequests()
             .antMatchers("/user/**")
             .hasAuthority("CUSTOMER")
-        .and()
+            .and()
             .authorizeRequests()
             .antMatchers("/wallet/**")
             .hasAuthority("CUSTOMER")
-        .and()
+            .and()
             .csrf()
             .disable()
             .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-        .and()
+            .and()
             .exceptionHandling().authenticationEntryPoint(authenticationEntryPoint)
-        .and()
-            .addFilterBefore(jwtAuthenticationTokenFilter,
-            UsernamePasswordAuthenticationFilter::class.java)
+            .and()
+            .addFilterBefore(
+                jwtAuthenticationTokenFilter,
+                UsernamePasswordAuthenticationFilter::class.java
+            )
             .cors().disable()
 
 //        http.cors().disable()

@@ -11,12 +11,15 @@ import javax.transaction.Transactional
 
 @Service
 @Transactional
-class CustomerServiceImpl(private val customerRepository: CustomerRepository, private val userRepository: UserRepository) : CustomerService {
+class CustomerServiceImpl(
+    private val customerRepository: CustomerRepository,
+    private val userRepository: UserRepository
+) : CustomerService {
 
-    override fun addCustomer(customerDTO: CustomerDTO) : CustomerDTO {
+    override fun addCustomer(customerDTO: CustomerDTO): CustomerDTO {
         val userOpt = userRepository.findById(customerDTO.userID!!)
 
-        if (! userOpt.isPresent)
+        if (!userOpt.isPresent)
             throw IllegalArgumentException("User does not exist")
 
         val customer = Customer(
@@ -31,7 +34,7 @@ class CustomerServiceImpl(private val customerRepository: CustomerRepository, pr
 
     override fun getCustomer(customerID: Long): CustomerDTO {
         val customerOpt = customerRepository.findById(customerID)
-        if ( ! customerOpt.isPresent)
+        if (!customerOpt.isPresent)
             throw NotFoundException("Customer not found")
         val customer = customerOpt.get()
         return customer.toDTO()
@@ -40,7 +43,7 @@ class CustomerServiceImpl(private val customerRepository: CustomerRepository, pr
     override fun updateCustomer(customerDTO: CustomerDTO, customerID: Long): CustomerDTO {
         val customerOpt = customerRepository.findById(customerID)
 
-        if (! customerOpt.isPresent)
+        if (!customerOpt.isPresent)
             throw IllegalArgumentException("Customer does not exist")
 
         val customer = customerOpt.get()

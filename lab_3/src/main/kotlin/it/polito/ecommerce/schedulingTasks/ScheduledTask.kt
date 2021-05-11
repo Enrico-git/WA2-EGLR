@@ -8,10 +8,10 @@ import java.sql.Timestamp
 @Component
 class ScheduledTask(
     private val emailVerificationTokenRepository: EmailVerificationTokenRepository
-    ) {
+) {
 
-    @Scheduled(fixedRate = 1000*60*60*12) // 12 hours
-    fun clearExpiredTokens(){
+    @Scheduled(fixedRate = 1000 * 60 * 60 * 12) // 12 hours
+    fun clearExpiredTokens() {
         emailVerificationTokenRepository.deleteAllByExpiryDate(Timestamp(System.currentTimeMillis()))
     }
 }

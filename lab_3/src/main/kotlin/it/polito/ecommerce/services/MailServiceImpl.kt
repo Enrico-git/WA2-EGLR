@@ -8,12 +8,10 @@ import org.springframework.stereotype.Service
 import org.springframework.mail.javamail.MimeMessageHelper
 
 
-
-
 @Service
 class MailServiceImpl(
-    private val mailSender : JavaMailSender
-) : MailService{
+    private val mailSender: JavaMailSender
+) : MailService {
     override fun sendMessage(toMail: String, subject: String, mailBody: String) {
         val message = mailSender.createMimeMessage()
         val helper = MimeMessageHelper(message, "utf-8")

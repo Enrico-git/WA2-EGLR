@@ -16,17 +16,20 @@ class CustomerController(
     private val customerService: CustomerService
 ) {
     @PostMapping("/")
-    fun createCustomer(@RequestBody @Valid customerDTO: CustomerDTO) : ResponseEntity<CustomerDTO> {
+    fun createCustomer(@RequestBody @Valid customerDTO: CustomerDTO): ResponseEntity<CustomerDTO> {
         return ResponseEntity(customerService.addCustomer(customerDTO), HttpStatus.CREATED)
     }
 
     @GetMapping("/{customerID}")
-    fun getCustomer(@PathVariable @Min(0) customerID: Long) : ResponseEntity<CustomerDTO> {
+    fun getCustomer(@PathVariable @Min(0) customerID: Long): ResponseEntity<CustomerDTO> {
         return ResponseEntity(customerService.getCustomer(customerID), HttpStatus.OK)
     }
 
     @PutMapping("/{customerID}")
-    fun updateCustomer(@RequestBody @Valid customerDTO: CustomerDTO, @PathVariable @Min(0) customerID: Long) : ResponseEntity<CustomerDTO> {
+    fun updateCustomer(
+        @RequestBody @Valid customerDTO: CustomerDTO,
+        @PathVariable @Min(0) customerID: Long
+    ): ResponseEntity<CustomerDTO> {
         return ResponseEntity(customerService.updateCustomer(customerDTO, customerID), HttpStatus.OK)
     }
 

@@ -18,9 +18,9 @@ data class TransactionDTO(
     @field:Min(0)
     @field:NotNull
     val amount: BigDecimal?
-){
-    @AssertTrue(message="The sender ID and receiver ID are different")
-    fun isValid():Boolean {
+) {
+    @AssertTrue(message = "The sender ID and receiver ID are different")
+    fun isValid(): Boolean {
         return this.senderID != this.receiverID
     }
 }
@@ -29,7 +29,7 @@ fun Transaction.toDTO(): TransactionDTO {
     return TransactionDTO(
         id = getId(),
         timestamp = timestamp,
-        senderID =sender.getId(),
+        senderID = sender.getId(),
         receiverID = receiver.getId(),
         amount = amount
     )

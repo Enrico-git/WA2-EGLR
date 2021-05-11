@@ -32,19 +32,19 @@ class UserDetailsServiceExtImpl(
     private val passwordEncoder: PasswordEncoder,
     private val jwtUtils: JwtUtils,
     private val mailService: MailServiceImpl
-): UserDetailsServiceExt {
+) : UserDetailsServiceExt {
 
     @Value("\${application.serverURL}")
     private val serverURL = ""
 
     override fun loadUserByUsername(username: String): UserDetails {
         val userOpt = userRepository.findByUsername(username)
-        if ( ! userOpt.isPresent)
+        if (!userOpt.isPresent)
             throw UsernameNotFoundException("User not found")
         return userOpt.get().toDTO()
     }
 
-    override fun registerUser(registrationDTO: RegistrationDTO): UserDetailsDTO{
+    override fun registerUser(registrationDTO: RegistrationDTO): UserDetailsDTO {
 
         var user = User(
             username = registrationDTO.username,
@@ -56,42 +56,43 @@ class UserDetailsServiceExtImpl(
 
         user = userRepository.save(user)
         val token = notificationService.createEmailVerificationToken(user)
-        mailService.sendMessage(registrationDTO.email, "Confirm registration", "" +
-                "<a href='http://$serverURL/auth/registrationConfirm?token=$token'>Click here</a>"
+        mailService.sendMessage(
+            registrationDTO.email, "Confirm registration", "" +
+                    "<a href='http://$serverURL/auth/registrationConfirm?token=$token'>Click here</a>"
         )
         return user.toDTO()
     }
 
-    override fun addRole(username: String, role: String): UserDetailsDTO{
+    override fun addRole(username: String, role: String): UserDetailsDTO {
         val userOpt = userRepository.findByUsername(username)
-        if (! userOpt.isPresent )
+        if (!userOpt.isPresent)
             throw IllegalArgumentException("The user does not exist")
         val user = userOpt.get()
         user.addRole(Rolename.valueOf(role))
         return userRepository.save(user).toDTO()
     }
 
-    override fun removeRole(username: String, role: String): UserDetailsDTO{
+    override fun removeRole(username: String, role: String): UserDetailsDTO {
         val userOpt = userRepository.findByUsername(username)
-        if (! userOpt.isPresent )
+        if (!userOpt.isPresent)
             throw IllegalArgumentException("The user does not exist")
         val user = userOpt.get()
         user.removeRole(Rolename.valueOf(role))
         return userRepository.save(user).toDTO()
     }
 
-    override fun enableUser(username: String): UserDetailsDTO{
+    override fun enableUser(username: String): UserDetailsDTO {
         val userOpt = userRepository.findByUsername(username)
-        if (! userOpt.isPresent )
+        if (!userOpt.isPresent)
             throw IllegalArgumentException("The user does not exist")
         val user = userOpt.get()
         user.isEnabled = true
         return userRepository.save(user).toDTO()
     }
 
-    override fun disableUser(username: String): UserDetailsDTO{
+    override fun disableUser(username: String): UserDetailsDTO {
         val userOpt = userRepository.findByUsername(username)
-        if (! userOpt.isPresent )
+        if (!userOpt.isPresent)
             throw IllegalArgumentException("The user does not exist")
         val user = userOpt.get()
         user.isEnabled = false
@@ -100,7 +101,7 @@ class UserDetailsServiceExtImpl(
 
     override fun verifyToken(token: String) {
         val emailVerificationOpt = verificationRepository.findByToken(token)
-        if (! emailVerificationOpt.isPresent )
+        if (!emailVerificationOpt.isPresent)
             throw IllegalArgumentException("The token does not exist")
 
         val emailVerificationToken = emailVerificationOpt.get()
@@ -114,10 +115,12 @@ class UserDetailsServiceExtImpl(
 
     override fun authAndCreateToken(loginDTO: LoginDTO): LoginDTO {
         val authentication: Authentication = authenticationManager.authenticate(
-            UsernamePasswordAuthenticationToken(loginDTO.username, loginDTO.password))
+            UsernamePasswordAuthenticationToken(loginDTO.username, loginDTO.password)
+        )
         SecurityContextHolder.getContext().authentication = authentication
         loginDTO.token = jwtUtils.generateJwtToken(authentication)
-        loginDTO.roles = SecurityContextHolder.getContext().authentication.authorities.map{ it.authority }.toMutableSet()
+        loginDTO.roles =
+            SecurityContextHolder.getContext().authentication.authorities.map { it.authority }.toMutableSet()
         return loginDTO
     }
 }

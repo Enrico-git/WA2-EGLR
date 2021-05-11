@@ -29,7 +29,7 @@ class JwtUtils {
         secretKey = Keys.hmacShaKeyFor(jwtSecret!!.toByteArray())
     }
 
-    fun generateJwtToken (authentication: Authentication): String {
+    fun generateJwtToken(authentication: Authentication): String {
 
         val userPrincipal: UserDetailsDTO = authentication.principal as UserDetailsDTO
         val claims: Claims = Jwts.claims(mapOf(Pair("roles", userPrincipal.roles), Pair("sub", userPrincipal.username)))
@@ -38,11 +38,11 @@ class JwtUtils {
             .setClaims(claims)
             .setIssuedAt(Date())
             .setExpiration(Date(Date().time + jwtExpirationMs))
-            .signWith( secretKey, SignatureAlgorithm.HS512)
+            .signWith(secretKey, SignatureAlgorithm.HS512)
             .compact()
     }
 
-    fun validateJwtToken (authToken: String): Boolean {
+    fun validateJwtToken(authToken: String): Boolean {
 //        val secretKey: Key = Keys.hmacShaKeyFor(jwtSecret!!.toByteArray())
 
         try {
@@ -63,7 +63,7 @@ class JwtUtils {
         return false
     }
 
-    fun getDetailsFromJwtToken (authToken: String): UserDetailsDTO {
+    fun getDetailsFromJwtToken(authToken: String): UserDetailsDTO {
         val parsedToken = Jwts.parserBuilder().setSigningKey(secretKey).build().parseClaimsJws(authToken).body
         println(parsedToken)
         return UserDetailsDTO(

@@ -13,26 +13,25 @@ import org.springframework.transaction.annotation.Transactional
 
 @Transactional
 @Service
-class ProductServiceImpl(private val productRepository: ProductRepository) : ProductService{
+class ProductServiceImpl(private val productRepository: ProductRepository) : ProductService {
     override suspend fun addProduct(productDTO: ProductDTO): ProductDTO {
         val product = Product(
             id = null,
             name = productDTO.name!!,
             category = productDTO.category!!,
             price = productDTO.price!!,
-            quantity = productDTO.quantity
+            quantity = productDTO.quantity,
         )
         return productRepository.save(product).toDTO()
     }
 
-// TODO ADD LOCKS SOMEHOW
+    // TODO ADD LOCKS SOMEHOW
     override suspend fun updateProduct(productID: Long, productDTO: ProductDTO): ProductDTO {
 //        TODO why are we fetching the product before updating it? make custom query productRepository.update(productID, quantity)
         val product = productRepository.findById(productID) ?: throw IllegalArgumentException("Product not found")
         product.quantity += productDTO.quantity
-        if(product.quantity < 0)
+        if (product.quantity < 0)
             throw IllegalArgumentException("Product quantity is not enough")
-
         return productRepository.save(product).toDTO()
     }
 
@@ -45,7 +44,7 @@ class ProductServiceImpl(private val productRepository: ProductRepository) : Pro
     override fun getAllProducts(): Flow<ProductDTO> {
         return productRepository
             .findAll()
-            .map{ it.toDTO() }
+            .map { it.toDTO() }
     }
 
     override fun getProductsByCategory(category: String): Flow<ProductDTO> {

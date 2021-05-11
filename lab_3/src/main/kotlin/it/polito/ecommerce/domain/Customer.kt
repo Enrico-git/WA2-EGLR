@@ -17,10 +17,10 @@ class Customer(
     var email: String = "",
 
     @OneToOne
-    @JoinColumn(name="user", referencedColumnName = "id", nullable = false)
+    @JoinColumn(name = "user", referencedColumnName = "id", nullable = false)
     val user: User
 
-): EntityBase<Long>() {
+) : EntityBase<Long>() {
     @OneToMany(mappedBy = "customer", targetEntity = Wallet::class)
     val wallets: MutableSet<Wallet> = mutableSetOf<Wallet>()
 }

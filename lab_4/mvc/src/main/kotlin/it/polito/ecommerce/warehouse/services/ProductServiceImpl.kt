@@ -12,7 +12,7 @@ import org.springframework.transaction.annotation.Transactional
 
 @Transactional
 @Service
-class ProductServiceImpl(private val productRepository: ProductRepository) : ProductService{
+class ProductServiceImpl(private val productRepository: ProductRepository) : ProductService {
     override fun addProduct(productDTO: ProductDTO): ProductDTO {
         val product = Product(
             name = productDTO.name!!,
@@ -22,14 +22,14 @@ class ProductServiceImpl(private val productRepository: ProductRepository) : Pro
         )
         return productRepository.save(product).toDTO()
     }
-    
+
     override fun updateProduct(productID: Long, productDTO: ProductDTO): ProductDTO {
-        val productOpt = productRepository.findByIdWithLock(productID)
-        if ( ! productOpt.isPresent)
+        val productOpt = productRepository.findById(productID)
+        if (!productOpt.isPresent)
             throw IllegalArgumentException("Product does not exist")
         val product = productOpt.get()
         product.quantity += productDTO.quantity
-        if(product.quantity < 0)
+        if (product.quantity < 0)
             throw IllegalArgumentException("Product quantity is not enough")
 
         return productRepository.save(product).toDTO()
@@ -37,7 +37,7 @@ class ProductServiceImpl(private val productRepository: ProductRepository) : Pro
 
     override fun getProductById(productID: Long): ProductDTO {
         val productOpt = productRepository.findById(productID)
-        if ( ! productOpt.isPresent)
+        if (!productOpt.isPresent)
             throw NotFoundException("Product does not exist")
         return productOpt.get().toDTO()
     }
@@ -45,7 +45,7 @@ class ProductServiceImpl(private val productRepository: ProductRepository) : Pro
     override fun getAllProducts(pageable: Pageable): List<ProductDTO> {
         return productRepository
             .findAllWithPageable(pageable)
-            .map{ it.toDTO() }
+            .map { it.toDTO() }
     }
 
     override fun getProductsByCategory(category: String, pageable: Pageable): List<ProductDTO> {

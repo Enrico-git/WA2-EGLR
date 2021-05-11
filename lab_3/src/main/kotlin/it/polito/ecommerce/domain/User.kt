@@ -10,35 +10,35 @@ import javax.validation.constraints.Email
 @Table(indexes = [Index(name = "Username", columnList = "username", unique = true)])
 @Entity
 class User(
-        @Column(unique = true, nullable = false)
-        val username: String,
+    @Column(unique = true, nullable = false)
+    val username: String,
 
-        @Column(nullable = false)
-        var password: String,
+    @Column(nullable = false)
+    var password: String,
 
-        @Column(unique = true, nullable = false)
-        @Email
-        val email: String,
+    @Column(unique = true, nullable = false)
+    @Email
+    val email: String,
 
-        @Column(nullable = false, columnDefinition = "BIT default 0")
-        var isEnabled: Boolean = false,
+    @Column(nullable = false, columnDefinition = "BIT default 0")
+    var isEnabled: Boolean = false,
 
-        @Column(nullable = false)
-        var roles: String
-    ): EntityBase<Long>() {
+    @Column(nullable = false)
+    var roles: String
+) : EntityBase<Long>() {
 
-    fun getRoles(): Set<Rolename>{
-        return this.roles.split(",").map{ Rolename.valueOf(it) }.toSet()
+    fun getRoles(): Set<Rolename> {
+        return this.roles.split(",").map { Rolename.valueOf(it) }.toSet()
     }
 
     fun addRole(role: Rolename) {
         this.roles = "$roles,$role"
     }
 
-    fun removeRole(role: Rolename){
+    fun removeRole(role: Rolename) {
         this.roles = this.roles.split(",")
-            .filter{ it != role.toString() }
-            .reduce{acc, string -> "$acc,$string"}
+            .filter { it != role.toString() }
+            .reduce { acc, string -> "$acc,$string" }
     }
 
     override fun toString(): String {

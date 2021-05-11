@@ -23,7 +23,7 @@ fun Transaction.toDTO(): TransactionDTO {
     return TransactionDTO(
         id = getId()!!,
         timestamp = timestamp,
-        senderID =sender.getId()!!,
+        senderID = sender.getId()!!,
         receiverID = receiver.getId()!!,
         amount = amount
     )
