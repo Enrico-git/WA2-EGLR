@@ -7,5 +7,6 @@ CREATE TABLE product(
                         category VARCHAR(255) NOT NULL,
                         price DECIMAL(15,2) NOT NULL,
                         quantity BIGINT NOT NULL,
+                        version BIGINT NOT NULL,
                         primary key (id)
 );

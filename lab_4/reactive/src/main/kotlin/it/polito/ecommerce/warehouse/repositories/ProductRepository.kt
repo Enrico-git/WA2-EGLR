@@ -8,5 +8,5 @@ import org.springframework.stereotype.Repository
 @Repository
 interface ProductRepository: CoroutineCrudRepository<Product,  Long> {
 
-    fun findAllByCategory(category: String): Flow<Product>
+    suspend fun findAllByCategory(category: String): Flow<Product>
 }

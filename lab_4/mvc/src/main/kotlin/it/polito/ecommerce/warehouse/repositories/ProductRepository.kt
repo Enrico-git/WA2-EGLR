@@ -12,11 +12,9 @@ import javax.persistence.LockModeType
 @Repository
 interface ProductRepository: PagingAndSortingRepository<Product, Long> {
 
-    @Lock(LockModeType.OPTIMISTIC)
-    @Query("SELECT p FROM Product p WHERE p.id=?1")
-    fun findByIfWithLock(productID: Long): Optional<Product>
-
-
+//    @Lock(LockModeType.OPTIMISTIC)
+//    @Query("SELECT p FROM Product p WHERE p.id=?1")
+//    fun findByIfWithLock(productID: Long): Optional<Product>
 
     @Query("SELECT p FROM Product p")
     fun findAllWithPageable(pageable: Pageable): List<Product>

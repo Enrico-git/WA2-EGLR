@@ -9,7 +9,11 @@ data class ProductDTO (
     val category: String?,
     val price: BigDecimal?,
     val quantity: Long
-)
+){
+//    fun isValid(): Boolean{
+//        return id ==null || (id != null && id > 0)
+//    }
+}
 
 fun Product.toDTO(): ProductDTO {
     return ProductDTO(
