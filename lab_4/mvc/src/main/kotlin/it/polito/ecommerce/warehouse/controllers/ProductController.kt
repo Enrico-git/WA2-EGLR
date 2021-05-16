@@ -29,7 +29,7 @@ class ProductController(
         var counter = 5
         while (counter-- > 0) {
             try {
-                return ResponseEntity(productService.updateProduct(productID, productDTO), HttpStatus.CREATED)
+                return ResponseEntity(productService.updateProduct(productID, productDTO), HttpStatus.OK)
             } catch (e: ObjectOptimisticLockingFailureException) {
                 Thread.sleep(1000)
             }
@@ -43,7 +43,7 @@ class ProductController(
     }
 
     @GetMapping("/products")
-    fun getAllProducts(pageable: Pageable): ResponseEntity<List<ProductDTO>> {
+    fun getAllProducts( pageable: Pageable): ResponseEntity<List<ProductDTO>> {
         return ResponseEntity(productService.getAllProducts(pageable), HttpStatus.OK)
     }
 

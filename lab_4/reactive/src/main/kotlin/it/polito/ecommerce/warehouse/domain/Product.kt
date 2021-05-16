@@ -14,5 +14,5 @@ data class Product(
     var price: BigDecimal,
     var quantity: Long,
     @Version
-    val version: Long = 0
+    val version: Long? = null
 )

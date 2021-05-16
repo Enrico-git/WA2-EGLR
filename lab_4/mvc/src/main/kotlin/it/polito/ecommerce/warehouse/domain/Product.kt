@@ -9,15 +9,15 @@ import javax.persistence.*
 
 @Entity
 class Product(
-    @Column
+    @Column(nullable = false)
     val name: String,
-    @Column
+    @Column(nullable = false)
     val category: String,
-    @Column
+    @Column(nullable = false)
     var price: BigDecimal,
-    @Column
+    @Column(nullable = false)
     var quantity: Long,
-    @Column
+    @Column(nullable = false)
     @Version
     val version: Long = Long.MIN_VALUE
 ) : EntityBase<Long>()

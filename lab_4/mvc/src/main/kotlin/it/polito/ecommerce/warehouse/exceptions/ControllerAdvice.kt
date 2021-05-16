@@ -1,7 +1,6 @@
 package it.polito.ecommerce.warehouse.exceptions
 
 import javassist.NotFoundException
-import org.hibernate.StaleObjectStateException
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.orm.ObjectOptimisticLockingFailureException
