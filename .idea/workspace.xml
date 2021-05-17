@@ -1,13 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="244c644c-ea97-4b49-aa2d-3304961dbbe6" name="Default Changelist" comment="first three exercises done" />
+    <list default="true" id="244c644c-ea97-4b49-aa2d-3304961dbbe6" name="Default Changelist" comment="first three exercises done">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
   <component name="Git.Settings">
+    <option name="PUSH_TAGS">
+      <GitPushTagMode>
+        <option name="argument" value="--follow-tags" />
+        <option name="title" value="Current Branch" />
+      </GitPushTagMode>
+    </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="ProjectId" id="1ppzc3kNjbWnG8z3aAf5FA5eWzx" />
@@ -24,6 +32,7 @@
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="aspect.path.notification.shown" value="true" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="nodejs_package_manager_path" value="npm" />
     <property name="settings.editor.selected.configurable" value="preferences.language.Kotlin.scripting" />
   </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
@@ -43,7 +52,7 @@
       <workItem from="1617122913785" duration="191000" />
       <workItem from="1617896477043" duration="211000" />
       <workItem from="1621256047059" duration="792000" />
-      <workItem from="1621257389843" duration="1667000" />
+      <workItem from="1621257389843" duration="2302000" />
     </task>
     <task id="LOCAL-00001" summary="first three exercises done">
       <created>1615895927549</created>
@@ -136,7 +145,21 @@
       <option name="project" value="LOCAL" />
       <updated>1621259062859</updated>
     </task>
-    <option name="localTasksCounter" value="14" />
+    <task id="LOCAL-00014" summary="lab 5 started">
+      <created>1621259186754</created>
+      <option name="number" value="00014" />
+      <option name="presentableId" value="LOCAL-00014" />
+      <option name="project" value="LOCAL" />
+      <updated>1621259186754</updated>
+    </task>
+    <task id="LOCAL-00015" summary="lab 5 started">
+      <created>1621259275724</created>
+      <option name="number" value="00015" />
+      <option name="presentableId" value="LOCAL-00015" />
+      <option name="project" value="LOCAL" />
+      <updated>1621259275724</updated>
+    </task>
+    <option name="localTasksCounter" value="16" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -173,9 +196,9 @@
     <MESSAGE value="lab 1 done" />
     <MESSAGE value="Lab 2 - point 14" />
     <MESSAGE value="All five endpoints done (missing pagination, fix exception)" />
-    <MESSAGE value="lab 5 started" />
     <MESSAGE value="begin of lab 5" />
-    <option name="LAST_COMMIT_MESSAGE" value="begin of lab 5" />
+    <MESSAGE value="lab 5 started" />
+    <option name="LAST_COMMIT_MESSAGE" value="lab 5 started" />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />
