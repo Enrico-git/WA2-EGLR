@@ -1,7 +1,7 @@
-class Node<T>(value: T){
-    var value:T = value
+class Node<T>(value: T) {
+    var value: T = value
     var next: Node<T>? = null
-    var previous:Node<T>? = null
+    var previous: Node<T>? = null
 }
 
 class Deque<T> {
@@ -33,9 +33,8 @@ class Deque<T> {
     fun pop(): T? {
         var node = this.getLastNode()
         if (node != null) {
-            if(node==this.head)
-            {
-                this.head=null
+            if (node == this.head) {
+                this.head = null
                 return node.value
             }
             var prevNode = node.previous

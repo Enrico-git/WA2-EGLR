@@ -11,11 +11,12 @@ object DiffieHellman {
     }
 
     fun publicKey(p: BigInteger, g: BigInteger, privKey: BigInteger): BigInteger {
-        return g.modPow(privKey,p)
+        return g.modPow(privKey, p)
 
     }
+
     fun secret(prime: BigInteger, publicKey: BigInteger, privateKey: BigInteger): BigInteger {
-        return publicKey.modPow(privateKey,prime)
+        return publicKey.modPow(privateKey, prime)
     }
 }
 
@@ -28,13 +29,13 @@ fun main() {
     println(alicePrivateKey)
     val bobPrivateKey = bob.privateKey(p)
     println(bobPrivateKey)
-    val alicePublicKey = alice.publicKey(p,g,alicePrivateKey)
+    val alicePublicKey = alice.publicKey(p, g, alicePrivateKey)
     println(alicePublicKey)
-    val bobPublicKey = bob.publicKey(p,g,bobPrivateKey)
+    val bobPublicKey = bob.publicKey(p, g, bobPrivateKey)
     println(bobPublicKey)
-    val aliceSecret = alice.secret(p,bobPublicKey,alicePrivateKey)
+    val aliceSecret = alice.secret(p, bobPublicKey, alicePrivateKey)
     println(aliceSecret)
-    val bobSecret = bob.secret(p,alicePublicKey,bobPrivateKey)
+    val bobSecret = bob.secret(p, alicePublicKey, bobPrivateKey)
     println(bobSecret)
-    println(aliceSecret==bobSecret)
+    println(aliceSecret == bobSecret)
 }

@@ -3,15 +3,17 @@ package it.polito.ecommerce.dto
 import it.polito.ecommerce.domain.Wallet
 import java.math.BigDecimal
 
-data class WalletDTO(val id: Long,
-                     val balance: BigDecimal,
-                     val customer: CustomerDTO) {
+data class WalletDTO(
+    val id: Long,
+    val balance: BigDecimal,
+    val customerID: Long
+) {
 }
 
 fun Wallet.toDTO(): WalletDTO {
     return WalletDTO(
-        id = id!!,
+        id = getId()!!,
         balance = balance,
-        customer = customer.toDTO()
+        customerID = customer.getId()!!
     )
 }

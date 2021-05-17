@@ -6,23 +6,20 @@ import javax.persistence.*
 import javax.validation.constraints.Min
 
 @Entity
-class Wallet(@Id
-             @GeneratedValue(strategy = GenerationType.AUTO)
-             @Column(nullable = false)
-             val id: Long? = null,
+class Wallet(
+    @Min(value = 0)
+    @Column(nullable = false, columnDefinition = "DECIMAL(15,2) default 0")
+    var balance: BigDecimal = BigDecimal(0.0),
 
-             @Min(value=0, message = "Balance cannot be negative")
-             @Column(nullable = false, columnDefinition = "DECIMAL(15,2) default 0")
-             var balance: BigDecimal = BigDecimal(0.0),
+    @ManyToOne
+    @JoinColumn(name = "customer", referencedColumnName = "id", nullable = false)
+    val customer: Customer
+) : EntityBase<Long>() {
 
-             @ManyToOne
-            @JoinColumn(name="customer", referencedColumnName = "id", nullable = false)
-            val customer: Customer) {
+    @OneToMany(mappedBy = "sender", targetEntity = Transaction::class)
+    val transactionsSent: MutableSet<Transaction> = mutableSetOf<Transaction>()
 
-    @OneToMany(mappedBy="sender", targetEntity=Transaction::class)
-    val transactionsSent: MutableList<Transaction> = mutableListOf<Transaction>()
-
-    @OneToMany(mappedBy="receiver", targetEntity=Transaction::class)
-    val transactionsRecv: MutableList<Transaction> = mutableListOf<Transaction>()
+    @OneToMany(mappedBy = "receiver", targetEntity = Transaction::class)
+    val transactionsRecv: MutableSet<Transaction> = mutableSetOf<Transaction>()
 
 }
