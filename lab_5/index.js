@@ -1,8 +1,11 @@
+'use strict'
+
 import express from 'express'
 import {makeExecutableSchema} from 'graphql-tools'
 import {graphqlHTTP} from 'express-graphql'
-import mongoose from 'mongoose'
-import Product from './product.js'
+import './db.js'
+import * as ProductService from './services/ProductService.js'
+import * as CommentService from './services/CommentService.js'
 
 const typeDefs = `
     scalar DateTime
@@ -88,36 +91,43 @@ const resolvers = {
         hello: () => {
             return 'Hello Graphql....'
         },
-        product: async (parent, args) => { //args contains the ID
-            return await Product.findOne({_id: mongoose.Types.ObjectId(args.id)}).exec()
+        product: async (parent, args, context, info) => {
+            // TODO {
+            //   "errors": [
+            //     {
+            //       "message": "Cannot read property 'value' of undefined",
+            //       "locations": [
+            //         {
+            //           "line": 33,
+            //           "column": 3
+            //         }
+            //       ],
+            //       "path": [
+            //         "product"
+            //       ]
+            //     }
+            //   ],
+            //   "data": {
+            //     "product": null
+            //   }
+            //  }
+
+            // const numOfComments = info.fieldNodes[0]
+            //     .selectionSet
+            //     .selections
+            //     .find(e=> e.name.value == "comments")
+            //     ?.arguments[0]
+            //     .value
+            //     .value
+
+            return await ProductService.getProductById(args.id)//, numOfComments)
         }
     },
-    //TODO
     Product: {
-        comments: (product, args, context, info) => {
-            // locate comments for the given product
-            console.log(args)
-            console.log(product)
+        comments: async (product) => {
+            return await CommentService.getCommentsById(product.comments)
         }
     }
-}
-
-try {
-    await mongoose.connect(
-        'mongodb://localhost:27017/catalogue',
-        {
-            useNewUrlParser: true,
-            useUnifiedTopology: true
-        }
-    )
-    mongoose.connection.on('error', err => {
-        //handle here disconnections that may happen later
-    });
-    //here the connection is ready to be used
-
-} catch (error) {
-    //problems in establishing the connection
-    //handleError(error)
 }
 
 const schema = makeExecutableSchema({typeDefs, resolvers})
@@ -125,7 +135,6 @@ const schema = makeExecutableSchema({typeDefs, resolvers})
 const app = express()
 
 app.use('/graphql', graphqlHTTP({schema, graphiql: true}))
-
 
 app.listen(3000)
 
