@@ -2,28 +2,10 @@
 import express from "express"
 import { makeExecutableSchema } from "graphql-tools"
 import { graphqlHTTP } from "express-graphql"
-import mongoose from "mongoose"
 import morgan from "morgan"
-
-mongoose.connect('mongodb://127.0.0.1:27017/catalog', {useNewUrlParser: true, useUnifiedTopology: true});
-const db = mongoose.connection;
-db.on('error', console.error.bind(console, 'connection error:'));
-db.once('open', function() {
-  console.log('connected to db');
-});
-
-const Product = mongoose.model('Product', {
-    _id: mongoose.ObjectId,
-    name: String,
-    createdAt: Date,
-    description: String,
-    price: Number,
-    // comments (numberOfLastRecentComments: Int) : [Comment],
-    category: String,
-    stars: Number,
-    comments: Array
-}, "product");
-
+import "./db.js"
+import * as ProductService from "./services/ProductService.js"
+import * as CommentService from "./services/CommentService.js"
 
 const typeDefs = `
     scalar DateTime
@@ -75,7 +57,6 @@ const typeDefs = `
         category: ProductCategory!,
         stars: Float,
         comments (numberOfLastRecentComments: Int) : [Comment],
-
     }
     
     input FilterProductInput {
@@ -106,28 +87,35 @@ const typeDefs = `
 
 const resolvers = {
     Query: {
-        product: async (parent, args) => {
-            return await Product.findOne({_id: args.id}).exec()
+        product: async (parent, args, context, info) => {
+            const numOfComments = info.fieldNodes[0]
+            .selectionSet
+            .selections
+            .find(e=> e.name.value == "comments")
+            ?.arguments[0]
+            .value
+            .value
+                
+            return await ProductService.getProductById(args.id, numOfComments)
         },
-        products: async (parent, args) => {
+        products: async (parent, args, context, info) => {
             const filter = args.filter
             const sort = args.sort
-            return await Product.find({
-                category: {
-                    $in: filter.categories
-                },
-                stars: {
-                    $gt: filter.minStars
-                },
-                price: {
-                    $gt: filter.minPrice,
-                    $lt: filter.maxPrice
-                }
-            })
-            .sort ({
-                [sort.value]: sort.order
-            })
-            .exec()
+            
+            const numOfComments = info.fieldNodes[0]
+            .selectionSet
+            .selections
+            .find(e=> e.name.value == "comments")
+            ?.arguments[0]
+            .value
+            .value
+            
+            return await ProductService.getProducts(filter, sort, numOfComments)
+        }
+    },
+    Product: {
+        comments: async (product) => {
+            return await CommentService.getCommentsById(product.comments)
         }
     }
 }
