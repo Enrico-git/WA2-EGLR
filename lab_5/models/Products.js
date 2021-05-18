@@ -1,5 +1,7 @@
+'use strict'
+
 import mongoose from 'mongoose'
-import Comment from './comment.js'
+import Comment from './Comments.js'
 
 const productSchema = new mongoose.Schema({
     _id: mongoose.ObjectId,
@@ -7,7 +9,7 @@ const productSchema = new mongoose.Schema({
     createdAt: Date,
     description: String,
     price: Number,
-    comments: [Comment.schema],
+    comments: [mongoose.ObjectId],
     category: String,
     stars: Number
 })
