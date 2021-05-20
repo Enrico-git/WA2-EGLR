@@ -92,40 +92,27 @@ const resolvers = {
             return 'Hello Graphql....'
         },
         product: async (parent, args, context, info) => {
-            // TODO {
-            //   "errors": [
-            //     {
-            //       "message": "Cannot read property 'value' of undefined",
-            //       "locations": [
-            //         {
-            //           "line": 33,
-            //           "column": 3
-            //         }
-            //       ],
-            //       "path": [
-            //         "product"
-            //       ]
-            //     }
-            //   ],
-            //   "data": {
-            //     "product": null
-            //   }
-            //  }
-
-            // const numOfComments = info.fieldNodes[0]
-            //     .selectionSet
-            //     .selections
-            //     .find(e=> e.name.value == "comments")
-            //     ?.arguments[0]
-            //     .value
-            //     .value
-
-            return await ProductService.getProductById(args.id)//, numOfComments)
+            const numOfComments = info.fieldNodes[0]
+                .selectionSet
+                .selections
+                .find(e => e.name.value == "comments")
+                ?.arguments[0]
+                .value
+                .value
+            return await ProductService.getProductById(args.id, numOfComments)
         }
     },
     Product: {
         comments: async (product) => {
-            return await CommentService.getCommentsById(product.comments)
+            return CommentService.getCommentsById(product.comments)
+        }
+    },
+    Mutation: {
+        createProduct: async (parent, args) => {
+            return await ProductService.addProduct(args.createProductInput)
+        },
+        createComment: async (parent, args) => {
+            return await CommentService.addComment(args.createCommentInput, args.productId)
         }
     }
 }
