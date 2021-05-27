@@ -1,5 +1,5 @@
+'use strict'
 import mongoose from "mongoose";
-import Comment from './comment.js'
 
 const productSchema = new mongoose.Schema( {
     _id: mongoose.ObjectId,
@@ -7,19 +7,9 @@ const productSchema = new mongoose.Schema( {
     createdAt: Date,
     description:String,
     price: Number,
-    comments: [Comment.schema],
+    comments: [mongoose.ObjectId],
     category: String,
     stars: Number
 });
-
-/*
-productSchema.findOne({'name': "andonio"}, function(err, product) {
-    if(err) //do som
-        console.log("andonio wasted");
-    else{
-
-    }
-
-});*/
 
 export default mongoose.model('product', productSchema, 'products');

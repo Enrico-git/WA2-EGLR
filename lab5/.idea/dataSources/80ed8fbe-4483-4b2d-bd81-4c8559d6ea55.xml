@@ -38,7 +38,7 @@
       <DataType>String(0)|12s</DataType>
     </column>
     <column id="16" parent="7" name="stars">
-      <DataType>Double(0)|8s</DataType>
+      <DataType>Integer|4s</DataType>
     </column>
     <column id="17" parent="7" name="comments">
       <Position>1</Position>
@@ -54,7 +54,7 @@
     </column>
     <column id="20" parent="7" name="price">
       <Position>2</Position>
-      <DataType>Double(0)|8s</DataType>
+      <DataType>Integer|4s</DataType>
     </column>
   </database-model>
 </dataSource>
