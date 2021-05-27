@@ -23,14 +23,14 @@ enum SortingOrder {
 input ProductCreateInput {
     name : String!,
     description : String,
-    price : Float!,
+    price : Float! @constraint(min: 0),
     category: ProductCategory!
 }
 
 input CommentCreateInput {
     title: String!,
     body: String,
-    stars: Int!
+    stars: Int! @constraint(min: 0, max: 5)
 }
 
 type Comment {
@@ -54,9 +54,9 @@ type Product {
 
 input FilterProductInput {
     categories: [ProductCategory],
-    minStars: Int,
-    minPrice: Float,
-    maxPrice: Float
+    minStars: Int @constraint(min: 0, max: 5),
+    minPrice: Float @constraint(min: 0),
+    maxPrice: Float @constraint(min: 0)
 }
 
 input SortProductInput {

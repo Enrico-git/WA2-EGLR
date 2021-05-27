@@ -8,22 +8,28 @@ export const getProductById = (id, numOfComments = 0) => {
 
 export const getProducts = (filter, sort, numOfComments = 0) => {
     return Product.find({
-        category: {
-            $in: filter.categories
+        ...filter?.categories && {
+            category: { // if filter.categories is present we add the category filter
+                $in: filter.categories
+            }
         },
-        stars: {
-            $gte: filter.minStars
+        ...filter?.stars && {
+            stars: {
+                $gte: filter.minStars
+            }
         },
-        price: {
-            $gte: filter.minPrice,
-            $lte: filter.maxPrice
+        ...(filter?.minPrice || filter?.maxPrice) && {
+            price: {
+                ...filter.minPrice && {$gte: filter.minPrice},
+                ...filter.maxPrice && {$lte: filter.maxPrice}
+            }
         }
     },
         {
             comments: { $slice: Number(-numOfComments) }
         })
         .sort({
-            [sort.value]: sort.order
+            [sort?.value]: sort?.order
         })
         .exec()
 }
@@ -33,8 +39,6 @@ export const addProduct = product => {
 }
 
 export const addCommentToProduct = (productID, commentID, stars) => {
-    // const product = await Product.findById(productID).exec()
-    // const numOfComments = product.comments.length
     return Product.findByIdAndUpdate(productID,
         [{
             $set: {
@@ -61,10 +65,6 @@ export const addCommentToProduct = (productID, commentID, stars) => {
                 }
             }
         }
-        ]
+        ], {useFindAndModify: false}
         ).exec()
-    // return product.update({
-        // $push: {comments: commentID}, 
-        // stars: ((numOfComments*product.stars + stars) / (numOfComments+1))
-    // }).exec()
 }

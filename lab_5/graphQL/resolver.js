@@ -13,7 +13,12 @@ export const resolvers = {
             .value
             .value
                 
-            return await ProductService.getProductById(args.id, numOfComments)
+            try {
+                return await ProductService.getProductById(args.id, numOfComments)
+            } catch (e) {
+                console.error(e)
+                throw e
+            }
         },
         products: async (parent, args, context, info) => {
             const filter = args.filter
@@ -27,20 +32,40 @@ export const resolvers = {
             .value
             .value
             
-            return await ProductService.getProducts(filter, sort, numOfComments)
+            try{
+                return await ProductService.getProducts(filter, sort, numOfComments)
+            } catch (e){
+                console.error(e)
+                throw e
+            }
         }
     },
     Mutation: {
         createProduct: async (parent, args, context, info) => {
-            return await ProductService.addProduct(args.createProductInput)
+            try {
+                return await ProductService.addProduct(args.createProductInput)
+            } catch (e) {
+                console.error(e)
+                throw e
+            }
         },
         createComment: async (parent, args) => {
-            return await CommentService.addComment(args.createCommentInput, args.productId)
+            try {
+                return await CommentService.addComment(args.createCommentInput, args.productId)
+            } catch (e) {
+                console.error(e)
+                throw e
+            }
         }
     },
     Product: {
         comments: async (product) => {
-            return await CommentService.getCommentsById(product.comments)
+            try {
+                return await CommentService.getCommentsById(product.comments)
+            } catch (e){
+                console.error(e)
+                throw e
+            }
         }
     }
 }

@@ -6,8 +6,13 @@ import morgan from "morgan"
 import "./db.js"
 import {typeDefs} from "./graphQL/typedef.js"
 import {resolvers} from "./graphQL/resolver.js"
+import { constraintDirective, constraintDirectiveTypeDefs } from "graphql-constraint-directive"
 
-const schema = makeExecutableSchema({ typeDefs, resolvers })
+const schema = makeExecutableSchema({
+    typeDefs: [constraintDirectiveTypeDefs, typeDefs],
+    resolvers,
+    schemaTransforms: [constraintDirective()] 
+})
 
 const app = express()
 
