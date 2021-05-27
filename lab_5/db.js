@@ -2,7 +2,7 @@
 
 import mongoose from "mongoose";
 
-try {
+/*try {
     await mongoose.connect(
         'mongodb://localhost:27017/catalogue',
         {
@@ -18,4 +18,18 @@ try {
 } catch (error) {
     //problems in establishing the connection
     //handleError(error)
-}
+}*/
+
+export const db = mongoose.connection;
+db.on('error', console.error.bind(console, 'connection errro: '));
+db.once('open', function () {
+    console.log('connected to db')
+})
+
+await mongoose.connect(
+    'mongodb://localhost:27017/catalogue',
+    {
+        useNewUrlParser: true,
+        useUnifiedTopology: true
+    }
+)
