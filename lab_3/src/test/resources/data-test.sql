@@ -37,3 +37,15 @@ insert into transaction(id, amount, timestamp, sender, receiver)
 values (pk_sequence.nextval, 250, '2020-01-01 00:00:00', 7, 9);
 insert into transaction(id, amount, timestamp, sender, receiver)
 values (pk_sequence.nextval, 250, '1970-01-01 05:00:00', 7, 9);
+
+insert into user(id, username, password, email, is_enabled, roles)
+values (pk_sequence.nextval, 'admin',
+        '{bcrypt}$2a$10$ZpJLsDK9JDGtwGfVA0x79eaz.2Duue/9N2hFm0LaLbPDJJNGWdGgS', 'admin@mail.com',
+        1, 'ADMIN');
+
+insert into email_verification_token(id, expiry_date, token, user)
+values (pk_sequence.nextval, CURRENT_TIMESTAMP + INTERVAL 1 HOUR, 'token_alice', 1);
+
+insert into email_verification_token(id, expiry_date, token, user)
+values (pk_sequence.nextval, '2007-04-30 13:10:02.047', 'token_alice_expired', 1);
+

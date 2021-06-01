@@ -17,7 +17,7 @@ class CustomerServiceImpl(
 ) : CustomerService {
 
     override fun addCustomer(customerDTO: CustomerDTO): CustomerDTO {
-        val userOpt = userRepository.findById(customerDTO.userID!!)
+        val userOpt = userRepository.findById(customerDTO.userID)
 
         if (!userOpt.isPresent)
             throw IllegalArgumentException("User does not exist")

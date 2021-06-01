@@ -9,8 +9,8 @@ export const getCommentsById = (listOfIDS) => {
 }
 
 export const addComment = async (comment, productID) => {
-    const session = await db.startSession();
-    session.startTransaction();
+    const session = await db.startSession()
+    session.startTransaction()
     const commentID = mongoose.Types.ObjectId()
     const createdComment = await Comment.create({_id: commentID, ...comment, date: new Date()})
     if ( ! await ProductService.addCommentToProduct(productID, commentID, comment.stars ))
