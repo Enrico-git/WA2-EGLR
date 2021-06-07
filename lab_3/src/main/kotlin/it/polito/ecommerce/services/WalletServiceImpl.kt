@@ -9,6 +9,7 @@ import it.polito.ecommerce.repositories.WalletRepository
 import javassist.NotFoundException
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Propagation
 import java.math.BigDecimal
 import java.sql.Timestamp
 import javax.transaction.Transactional
@@ -47,11 +48,13 @@ class WalletServiceImpl(
             walletRepository.findAllById(mutableSetOf<Long>(transactionDTO.senderID!!, transactionDTO.receiverID!!))
         val senderWallet: Wallet? = wallets.find { it.getId() == transactionDTO.senderID }
         val receiverWallet: Wallet? = wallets.find { it.getId() == transactionDTO.receiverID }
+
         if (senderWallet == null || receiverWallet == null)
             throw IllegalArgumentException("One of the wallets doesn't exist")
 
         if (isBalanceInsufficient(senderWallet, transactionDTO.amount!!))
             throw IllegalArgumentException("Balance not high enough")
+
 
         transferMoney(senderWallet, receiverWallet, transactionDTO.amount)
 
@@ -63,7 +66,6 @@ class WalletServiceImpl(
         )
 
         return transactionRepository.save(transaction).toDTO()
-
     }
 
     override fun getWalletTransactions(
@@ -94,9 +96,9 @@ class WalletServiceImpl(
 
     fun transferMoney(senderWallet: Wallet, receiverWallet: Wallet, amount: BigDecimal) {
         senderWallet.balance -= amount
-        walletRepository.save(senderWallet)
+        walletRepository.saveAndFlush(senderWallet)
         receiverWallet.balance += amount
-        walletRepository.save(receiverWallet)
+        walletRepository.saveAndFlush(receiverWallet)
     }
 
     override fun getWalletSingleTransaction(walletID: Long, transactionID: Long): TransactionDTO {

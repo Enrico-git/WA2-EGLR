@@ -198,11 +198,11 @@ class WalletServiceUnitTests(@Autowired private val walletServiceImpl: WalletSer
         mockkObject(senderWallet)
         val receiverWallet = Wallet(BigDecimal(80), customer = alice_customer)
         mockkObject(receiverWallet)
-        every { walletRepository.findAllById(mutableSetOf(1, 2)) } returns mutableSetOf(senderWallet, receiverWallet)
+        every { walletRepository.findAllById(mutableSetOf(1, 2)) } returns mutableListOf(senderWallet, receiverWallet)
         every { senderWallet.getId() } returns 1
         every { receiverWallet.getId() } returns 2
-        every { walletRepository.save(senderWallet) } returns senderWallet
-        every { walletRepository.save(receiverWallet) } returns receiverWallet
+        every { walletRepository.saveAndFlush(senderWallet) } returns senderWallet
+        every { walletRepository.saveAndFlush(receiverWallet) } returns receiverWallet
         every { transactionRepository.save(any()) } returns transaction
 
         assert(
@@ -239,7 +239,7 @@ class WalletServiceUnitTests(@Autowired private val walletServiceImpl: WalletSer
         mockkObject(senderWallet)
         val receiverWallet = Wallet(BigDecimal(80), customer = alice_customer)
         mockkObject(receiverWallet)
-        every { walletRepository.findAllById(mutableSetOf(1, 2)) } returns mutableSetOf(receiverWallet)
+        every { walletRepository.findAllById(mutableSetOf(1, 2)) } returns mutableListOf(receiverWallet)
         every { senderWallet.getId() } returns 1
         every { receiverWallet.getId() } returns 2
         assertThrows<IllegalArgumentException> {
@@ -253,7 +253,7 @@ class WalletServiceUnitTests(@Autowired private val walletServiceImpl: WalletSer
                 )
             )
         }
-        every { walletRepository.findAllById(mutableSetOf(1, 2)) } returns mutableSetOf(senderWallet)
+        every { walletRepository.findAllById(mutableSetOf(1, 2)) } returns mutableListOf(senderWallet)
         assertThrows<IllegalArgumentException> {
             walletServiceImpl.performTransaction(
                 TransactionDTO(
@@ -265,7 +265,7 @@ class WalletServiceUnitTests(@Autowired private val walletServiceImpl: WalletSer
                 )
             )
         }
-        every { walletRepository.findAllById(mutableSetOf(1, 2)) } returns mutableSetOf()
+        every { walletRepository.findAllById(mutableSetOf(1, 2)) } returns mutableListOf()
         assertThrows<IllegalArgumentException> {
             walletServiceImpl.performTransaction(
                 TransactionDTO(
@@ -286,7 +286,7 @@ class WalletServiceUnitTests(@Autowired private val walletServiceImpl: WalletSer
         mockkObject(senderWallet)
         val receiverWallet = Wallet(BigDecimal(80), customer = alice_customer)
         mockkObject(receiverWallet)
-        every { walletRepository.findAllById(mutableSetOf(1, 2)) } returns mutableSetOf(senderWallet, receiverWallet)
+        every { walletRepository.findAllById(mutableSetOf(1, 2)) } returns mutableListOf(senderWallet, receiverWallet)
         every { senderWallet.getId() } returns 1
         every { receiverWallet.getId() } returns 2
         assertThrows<IllegalArgumentException> {

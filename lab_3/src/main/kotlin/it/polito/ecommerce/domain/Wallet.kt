@@ -13,6 +13,9 @@ class Wallet(
     @ManyToOne
     @JoinColumn(name = "customer", referencedColumnName = "id", nullable = false)
     val customer: Customer,
+    @Version
+    val version: Long = 0
+
 ) : EntityBase<Long>() {
     @OneToMany(mappedBy = "sender", targetEntity = Transaction::class)
     val transactionsSent: MutableSet<Transaction> = mutableSetOf<Transaction>()

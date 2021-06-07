@@ -2,9 +2,11 @@ package it.polito.ecommerce.controllers
 
 import it.polito.ecommerce.dto.*
 import it.polito.ecommerce.services.WalletService
+import org.springframework.dao.OptimisticLockingFailureException
 import org.springframework.data.domain.Pageable
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.orm.ObjectOptimisticLockingFailureException
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
 import javax.validation.Valid
@@ -31,7 +33,18 @@ class WalletController(private val service: WalletService) {
         @RequestBody @Valid transactionDTO: TransactionDTO
     ): ResponseEntity<TransactionDTO> {
         transactionDTO.senderID = walletID
-        return ResponseEntity(service.performTransaction(transactionDTO), HttpStatus.CREATED)
+        var counter = 5
+        while (counter-- > 0){
+            try{
+                return ResponseEntity(service.performTransaction(transactionDTO), HttpStatus.CREATED)
+
+            } catch (e: ObjectOptimisticLockingFailureException){
+                println(e)
+                Thread.sleep(1000)
+            }
+        }
+
+        throw ObjectOptimisticLockingFailureException("Wallet", 1)
     }
 
     @GetMapping("/{walletID}/transactions")

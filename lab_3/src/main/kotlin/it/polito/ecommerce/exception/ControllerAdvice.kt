@@ -4,6 +4,7 @@ import it.polito.ecommerce.dto.ErrorDTO
 import javassist.NotFoundException
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.orm.ObjectOptimisticLockingFailureException
 import org.springframework.validation.BindException
 import org.springframework.web.bind.annotation.ControllerAdvice
 import org.springframework.web.bind.annotation.ExceptionHandler
@@ -13,7 +14,7 @@ import javax.validation.ValidationException
 @ControllerAdvice
 class ControllerAdvice {
 
-    @ExceptionHandler(value = [NotFoundException::class, IllegalArgumentException::class, ValidationException::class])
+    @ExceptionHandler(value = [NotFoundException::class, IllegalArgumentException::class, ValidationException::class, ObjectOptimisticLockingFailureException::class])
     fun genericExceptionHandler(e: Exception): ResponseEntity<ErrorDTO> {
         val errorDTO = ErrorDTO(
             timestamp = Timestamp(System.currentTimeMillis()),
@@ -34,6 +35,11 @@ class ControllerAdvice {
             }
             is IllegalArgumentException -> {
                 status = HttpStatus.BAD_REQUEST
+            }
+            is ObjectOptimisticLockingFailureException -> {
+                errorDTO.status = 500
+                errorDTO.error = "Database concurrency error"
+                status = HttpStatus.INTERNAL_SERVER_ERROR
             }
         }
 

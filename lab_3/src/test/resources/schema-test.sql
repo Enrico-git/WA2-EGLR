@@ -37,6 +37,7 @@ CREATE TABLE wallet
     id       BIGINT auto_increment,
     balance  DECIMAL(15, 2) UNSIGNED DEFAULT 0 NOT NULL,
     customer BIGINT NOT NULL,
+    version BIGINT NOT NULL,
     CONSTRAINT fk_wallet_customer
         FOREIGN KEY (customer) REFERENCES customer (id),
     primary key (id)
