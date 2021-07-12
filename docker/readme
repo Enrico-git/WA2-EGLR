@@ -1,0 +1,13 @@
+// start all containers as written in the docker-compose.yml file
+// use -d to detach the process
+sudo docker-compose up 
+
+// initialize mongo replicas, users and add debezium connector
+// run only when previous command is done
+./script.sh
+
+
+// docker.sh is a script to use docker shortcuts (i.e. stop all containers etc)
+./docker.sh
+
+// rsconfig is the configuration for mongo replicas. do not touch it
