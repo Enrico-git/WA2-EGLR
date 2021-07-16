@@ -1,0 +1,14 @@
+server:
+  port: 8761
+eureka:
+  instance:
+    hostname: localhost #otherwise it will use wi-fi strange name
+  client:
+    register-with-eureka: false
+    fetch-registry: false
+  server:
+    response-cache-update-interval-ms: 5000
+
+#check localhost:8761 web page to see all services!
+
+
