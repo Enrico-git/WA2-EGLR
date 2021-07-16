@@ -1,0 +1,16 @@
+{
+  "name": "orders-connector", 
+  "config": {
+    "connector.class": "io.debezium.connector.mongodb.MongoDbConnector", 
+    "collection.include.list": "orderservice.orders", 
+    "mongodb.hosts": "rs0/mongo:27017",
+    "mongodb.name": "mongodb",
+    "mongodb.user": "debezium",
+    "mongodb.password": "debezium",
+    "mongodb.authsource": "admin",
+    "transforms": "route",
+    "transforms.route.type": "org.apache.kafka.connect.transforms.RegexRouter",
+    "transforms.route.regex": "(.*)orderservice(.*)",
+    "transforms.route.replacement": "orders_ok"    
+   }
+}
