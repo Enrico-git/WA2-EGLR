@@ -1,8 +1,0 @@
-1- GraphQL for catalog endpoints, REST for contacting microservices
-2- Mongo as DB
-3- Kafka as MQ
-4- Comment code so we know what every function does during presentation
-5- Use loggers
-6- Change debezium default messages: https://debezium.io/documentation/reference/configuration/filtering.html 
-   read the configuration boilerplate in docker folder to change the default topic
-7- Find a way to provide authentication in kafka messages. (at the moment we pass jwt in messages in clear. NO BUENO)
