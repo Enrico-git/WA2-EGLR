@@ -20,3 +20,44 @@ db.createUser({
     }
   ],
 });
+
+db.createUser({
+  user: 'orderservice',
+  pwd: 'orderservice',
+  roles: [
+    {
+      role: 'readWrite',
+      db: 'orderservice',
+    },
+    {
+      role: 'read',
+      db: 'users',
+    }  
+  ],
+});
+
+db.createUser({
+  user: 'catalogservice',
+  pwd: 'catalogservice',
+  roles: [
+    {
+      role: 'readWrite',
+      db: 'users',
+    }    
+  ], 
+});
+
+db.createUser({
+  user: 'walletservice',
+  pwd: 'walletservice',
+  roles: [
+    {
+      role: 'readWrite',
+      db: 'walletservice',
+    },
+    {
+      role: 'read',
+      db: 'users',
+    }    
+  ], 
+});

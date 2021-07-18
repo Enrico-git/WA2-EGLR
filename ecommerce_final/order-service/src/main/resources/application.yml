@@ -1,0 +1,11 @@
+spring:
+  data:
+    mongodb:
+  #      change to container name when you spawn the jar
+#        host: mongo
+      host: localhost
+      username: orderservice
+      password: orderservice
+      authentication-database: admin
+#      database: orderservice
+
