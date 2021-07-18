@@ -61,3 +61,14 @@ db.createUser({
     }    
   ], 
 });
+
+db.createUser({
+  user: 'warehouseservice',
+  pwd: 'warehouseservice',
+  roles: [
+    {
+      role: 'readWrite',
+      db: 'warehouseservice',
+    }  
+  ], 
+});
