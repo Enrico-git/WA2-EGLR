@@ -1,6 +1,6 @@
 // start all containers as written in the docker-compose.yml file
 // use -d to detach the process
-sudo docker-compose up 
+sudo docker-compose up
 
 // initialize mongo replicas, users and add debezium connector
 // run only when previous command is done
@@ -11,3 +11,6 @@ sudo docker-compose up
 ./docker.sh
 
 // rsconfig is the configuration for mongo replicas. do not touch it
+
+// check connector online
+curl -H "Accept:application/json" localhost:8083/connectors/

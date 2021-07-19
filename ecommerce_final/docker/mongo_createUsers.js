@@ -19,6 +19,7 @@ db.createUser({
       db: 'warehouseservice',
     }
   ],
+  passwordDigestor : 'server'
 });
 
 db.createUser({
@@ -32,8 +33,9 @@ db.createUser({
     {
       role: 'read',
       db: 'users',
-    }  
+    }
   ],
+  passwordDigestor : 'server'
 });
 
 db.createUser({
@@ -43,8 +45,9 @@ db.createUser({
     {
       role: 'readWrite',
       db: 'users',
-    }    
-  ], 
+    }
+  ],
+  passwordDigestor : 'server'
 });
 
 db.createUser({
@@ -58,8 +61,9 @@ db.createUser({
     {
       role: 'read',
       db: 'users',
-    }    
-  ], 
+    }
+  ],
+  passwordDigestor : 'server'
 });
 
 db.createUser({
@@ -69,6 +73,7 @@ db.createUser({
     {
       role: 'readWrite',
       db: 'warehouseservice',
-    }  
-  ], 
+    }
+  ],
+  passwordDigestor : 'server'
 });
