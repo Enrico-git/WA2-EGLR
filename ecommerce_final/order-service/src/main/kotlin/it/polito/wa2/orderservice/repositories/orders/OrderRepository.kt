@@ -6,11 +6,11 @@ import org.bson.types.ObjectId
 import org.springframework.data.domain.Pageable
 import org.springframework.data.mongodb.repository.Query
 import org.springframework.data.mongodb.repository.ReactiveMongoRepository
+import org.springframework.data.repository.kotlin.CoroutineCrudRepository
 import org.springframework.stereotype.Repository
 
 
 @Repository
-interface OrderRepository : ReactiveMongoRepository<Order, ObjectId> {
-    @Query("{ 'buyer' : ?0 }")
-    fun findAllByUsername(username: String, pageable: Pageable): Flow<Order>
+interface OrderRepository : CoroutineCrudRepository<Order, ObjectId> {
+    fun findAllByBuyer(username: String, pageable: Pageable): Flow<Order>
 }
