@@ -12,5 +12,5 @@ import org.springframework.stereotype.Repository
 @Repository
 interface OrderRepository : ReactiveMongoRepository<Order, ObjectId> {
     @Query("{ 'buyer' : ?0 }")
-    fun findAllByUserID(userID: Long, pageable: Pageable): Flow<Order>
+    fun findAllByUsername(username: String, pageable: Pageable): Flow<Order>
 }

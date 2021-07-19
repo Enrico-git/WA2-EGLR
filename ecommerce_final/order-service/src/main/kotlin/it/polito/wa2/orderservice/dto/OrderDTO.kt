@@ -5,7 +5,7 @@ import org.bson.types.ObjectId
 
 data class OrderDTO(
     val id: ObjectId,
-    val buyer: Long,
+    val buyer: String,
     val products: Set<ProductDTO>,
     val status: OrderStatus
 )

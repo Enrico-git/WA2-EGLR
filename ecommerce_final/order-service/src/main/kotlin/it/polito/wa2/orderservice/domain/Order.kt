@@ -11,7 +11,7 @@ import org.springframework.data.mongodb.core.mapping.Document
 data class Order (
     @Id
     val id: ObjectId?,
-    val buyer: Long,
+    val buyer: String,
     val products: Set<Product>,
     val status: OrderStatus,
     @Version

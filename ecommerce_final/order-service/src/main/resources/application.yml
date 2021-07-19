@@ -7,5 +7,19 @@ spring:
       username: orderservice
       password: orderservice
       authentication-database: admin
-#      database: orderservice
+      #      database: orderservice
 
+  security:
+    user:
+      name: order-service
+      password: order-service
+application:
+  jwt:
+    jwtSecret: that_depends_a_good_deal_on_where_you_want_to_get_to_then_it_doesnt_much_matter_which_way_you_go
+    jwtExpirationMs: 1800000
+
+#logging:
+#  file:
+#    name: ./ecommerce_final/order-service/logs/order-service.log
+#  level:
+#    root: DEBUG

@@ -7,3 +7,27 @@
    read the configuration boilerplate in docker folder to change the default topic
 7- Find a way to provide authentication in kafka messages. (at the moment we pass jwt in messages in clear. NO BUENO)
 8- Add all the HTTP requests you do to test the endpoints in a file
+
+
+JWT TOKEN FORMAT
+use this in https://jwt.io/ to make valid jwts 
+
+{
+  "alg": "HS512"
+}
+
+{
+  
+  "roles": "CUSTOMER",
+  "sub": "alice_in_wonderland",
+  "iat": 1016239022,
+  "exp": 6016239022
+}
+
+
+HMACSHA512(
+  base64UrlEncode(header) + "." +
+  base64UrlEncode(payload),
+  
+  [OUR KEY]
+)
