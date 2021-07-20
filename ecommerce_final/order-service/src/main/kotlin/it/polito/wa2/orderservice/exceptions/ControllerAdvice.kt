@@ -11,7 +11,13 @@ import javax.validation.ValidationException
 @ControllerAdvice
 class ControllerAdvice {
 
-    @ExceptionHandler(value = [ValidationException::class, NotFoundException::class, IllegalArgumentException::class, OptimisticLockingFailureException::class])
+    @ExceptionHandler(value = [ValidationException::class,
+        NotFoundException::class,
+        IllegalArgumentException::class,
+        OptimisticLockingFailureException::class,
+        UnauthorizedException::class,
+        InvalidOperationException::class
+    ])
     fun genericExceptionHandler(e: Exception): ResponseEntity<ErrorDTO> {
         val errorDTO = ErrorDTO(
             timestamp = Timestamp(System.currentTimeMillis()),
@@ -24,6 +30,14 @@ class ControllerAdvice {
             is ValidationException -> {
                 errorDTO.status = 422
                 status = HttpStatus.UNPROCESSABLE_ENTITY
+            }
+            is InvalidOperationException -> {
+                errorDTO.status = 409
+                status = HttpStatus.CONFLICT
+            }
+            is UnauthorizedException -> {
+                errorDTO.status = 403
+                status = HttpStatus.FORBIDDEN
             }
             is OptimisticLockingFailureException -> {
                 errorDTO.status = 500

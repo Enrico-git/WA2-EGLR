@@ -13,7 +13,7 @@ data class Order (
     val id: ObjectId?,
     val buyer: String,
     val products: Set<Product>,
-    val status: OrderStatus,
+    var status: OrderStatus,
     @Version
     val version: Long? = null
 )
