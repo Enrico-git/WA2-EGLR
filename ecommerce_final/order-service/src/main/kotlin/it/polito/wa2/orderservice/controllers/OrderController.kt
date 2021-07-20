@@ -72,4 +72,16 @@ class OrderController(
         }
         throw OptimisticLockingFailureException("Order")
     }
+
+    /**
+     * API endpoint to create a new order
+     * @param orderDTO the details of the order
+     * @return the created order details
+     */
+     @PostMapping("")
+     @ResponseStatus(HttpStatus.CREATED)
+     suspend fun createOrder(@RequestBody orderDTO: OrderDTO) {
+//        TODO implement this
+//        return orderService.createOrder(orderDTO)
+    }
 }

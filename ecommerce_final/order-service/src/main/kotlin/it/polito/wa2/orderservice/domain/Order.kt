@@ -11,9 +11,10 @@ import org.springframework.data.mongodb.core.mapping.Document
 data class Order (
     @Id
     val id: ObjectId?,
-    val buyer: String,
+    val buyer: ObjectId,
     val products: Set<Product>,
     var status: OrderStatus,
+    val delivery: Delivery?,
     @Version
     val version: Long? = null
 )
@@ -22,5 +23,6 @@ fun Order.toDTO() = OrderDTO(
     id = id!!,
     buyer = buyer,
     products = products.map { it.toDTO() }.toHashSet(),
-    status = status
+    status = status,
+    delivery = delivery
 )
