@@ -22,7 +22,7 @@ data class Order (
 fun Order.toDTO() = OrderDTO(
     id = id!!,
     buyer = buyer,
-    products = products.map { it.toDTO() }.toHashSet(),
+    products = products,
     status = status,
     delivery = delivery
 )

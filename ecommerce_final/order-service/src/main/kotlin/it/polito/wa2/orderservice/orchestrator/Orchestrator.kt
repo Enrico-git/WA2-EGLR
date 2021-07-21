@@ -1,34 +1,39 @@
 package it.polito.wa2.orderservice.orchestrator
 
-import com.netflix.discovery.EurekaClient
+import it.polito.wa2.orderservice.common.OrderStatus
+import it.polito.wa2.orderservice.domain.OrderJob
 import it.polito.wa2.orderservice.events.KafkaResponseReceivedEventInResponseTo
 import it.polito.wa2.orderservice.events.SagaFailureEvent
 import it.polito.wa2.orderservice.events.SagaFinishedEvent
 import it.polito.wa2.orderservice.events.StateMachineEvent
+import it.polito.wa2.orderservice.repositories.orders.OrderRepository
 import it.polito.wa2.orderservice.statemachine.StateMachine
 import it.polito.wa2.orderservice.statemachine.StateMachineBuilder
 import kotlinx.coroutines.*
-import org.apache.kafka.clients.consumer.Consumer
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerRecord
+import org.bson.types.ObjectId
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.context.ApplicationEventPublisher
+import org.springframework.context.annotation.Lazy
 import org.springframework.context.event.EventListener
 import org.springframework.kafka.annotation.KafkaListener
 import org.springframework.stereotype.Component
-import org.springframework.web.reactive.function.client.WebClient
-import org.springframework.web.reactive.function.client.bodyToMono
-import java.time.Duration
+import java.util.logging.Logger
 
 @Component
 class Orchestrator(
     @Qualifier("new_order_sm") private val stateMachineBuilder: StateMachineBuilder,
     private val kafkaProducer: KafkaProducer<String, String>,
-    private val applicationEventPublisher: ApplicationEventPublisher
+    private val applicationEventPublisher: ApplicationEventPublisher,
+    private val orderRepository: OrderRepository,
+    private val sagas: MutableList<StateMachine>,
+    private val jobs: MutableList<OrderJob>,
+    private val logger: Logger
 ) {
 
-    val sagas = mutableListOf<StateMachine>()
-    val jobs = mutableListOf<Pair<String, Job>>()
+//    val sagas = mutableListOf<StateMachine>()
+//    val jobs = mutableListOf<OrderJob>()
 
     //    TODO THIS IS FOR DEBEZIUM
     @KafkaListener(topics = ["orders_ok"])
@@ -37,35 +42,41 @@ class Orchestrator(
     }
 
 
-    @KafkaListener(topics = ["reserve_products_ok", "reserve_products_failed", "payment_request_failed", "abort_products_reservation_ok"])
+    @KafkaListener(topics = [
+        "reserve_products_ok",
+        "reserve_products_failed",
+        "payment_request_failed",
+        "payment_request_ok",
+        "abort_products_reservation_ok",
+        "abort_products_reservation_failed",
+        "abort_payment_request_ok",
+        "abort_payment_request_failed"
+    ])
     fun receivedEvent(event: String) = CoroutineScope(Dispatchers.IO).launch {
+
         val sagaEvent = event.substringAfter("-")
         val sagaID = event.substringBefore("-")
         val saga = sagas.find{it.id == sagaID}
         val transition = saga?.transitions?.find{it.source == saga.state && it.event == sagaEvent}
+        logger.info("BEFORE CRASH. transition $transition")
+        logger.info("saga state: ${saga?.state}, event: $sagaEvent")
         saga?.send(transition?.event!!)
     }
-
-    //        @EventListener(ApplicationReadyEvent::class)
-    //        fun spawnSagas()= CoroutineScope(Dispatchers.Default).launch {
-    //            for (i in 0..2)
-    //                createSaga()
-    //        }
-
 
     suspend fun createSaga(id: String) {
         val stateMachine = stateMachineBuilder.id(id).build()
         stateMachine.start()
         sagas.add(stateMachine)
-        //        println("aggiunto $stateMachine a sagas")
+        println(sagas)
         stateMachine.send("reserve_products")
+        logger.info("STATE MACHINE ${stateMachine.id} STARTED")
     }
 
     @EventListener
     fun onStateMachineEvent(event: StateMachineEvent) {
         val sm = event.source as StateMachine
         when (event.event.substringAfter("-")) {
-            "reserve_products" -> jobs.add(Pair("${sm.id}-reserve_products", CoroutineScope(Dispatchers.IO).launch {
+            "reserve_products" -> jobs.add(OrderJob("${sm.id}-reserve_products", CoroutineScope(Dispatchers.IO).launch {
                 repeat(5) {
                     if (isActive)
                         try {
@@ -83,9 +94,10 @@ class Orchestrator(
                 applicationEventPublisher.publishEvent(KafkaResponseReceivedEventInResponseTo(sm, "reserve_products"))
                 sm.send("payment_request")
             }
-            "reserve_products_failed" ->
+            "reserve_products_failed" ->{
                 applicationEventPublisher.publishEvent(KafkaResponseReceivedEventInResponseTo(sm, "reserve_products"))
-            "payment_request" -> jobs.add(Pair("${sm.id}-payment_request", CoroutineScope(Dispatchers.IO).launch {
+            }
+            "payment_request" -> jobs.add(OrderJob("${sm.id}-payment_request", CoroutineScope(Dispatchers.IO).launch {
                 repeat(5) {
                     if (isActive)
                         try {
@@ -97,18 +109,20 @@ class Orchestrator(
                 }
                 sm.send("payment_request_failed")
             }))
-            "payment_request_ok" -> applicationEventPublisher.publishEvent(
-                KafkaResponseReceivedEventInResponseTo(
-                    sm,
-                    "payment_request"
+            "payment_request_ok" -> {
+                applicationEventPublisher.publishEvent(
+                    KafkaResponseReceivedEventInResponseTo(
+                        sm,
+                        "payment_request"
+                    )
                 )
-            )
+            }
             "payment_request_failed" -> CoroutineScope(Dispatchers.Default).launch {
                 applicationEventPublisher.publishEvent(KafkaResponseReceivedEventInResponseTo(sm, "payment_request"))
                 sm.send("abort_products_reservation")
             }
             "abort_payment_request" -> jobs.add(
-                Pair(
+                OrderJob(
                     "${sm.id}-abort_payment_request",
                     CoroutineScope(Dispatchers.IO).launch {
                         repeat(5) {
@@ -121,22 +135,29 @@ class Orchestrator(
                                 }
                         }
                         sm.send("abort_payment_request_failed")
+                        logger.severe("ABORT PAYMENT FAILED FOR ORDER ${sm.id}")
                     })
             )
-            "abort_payment_request_ok" -> applicationEventPublisher.publishEvent(
-                KafkaResponseReceivedEventInResponseTo(
-                    sm,
-                    "abort_payment_request"
+            "abort_payment_request_ok" -> CoroutineScope(Dispatchers.Default).launch {
+                applicationEventPublisher.publishEvent(
+                    KafkaResponseReceivedEventInResponseTo(
+                        sm,
+                        "abort_payment_request"
+                    )
                 )
-            )
-            "abort_payment_request_failed" -> applicationEventPublisher.publishEvent(
-                KafkaResponseReceivedEventInResponseTo(
-                    sm,
-                    "abort_payment_request"
+                sm.send("abort_products_reservation")
+            }
+            "abort_payment_request_failed" -> {
+                applicationEventPublisher.publishEvent(
+                    KafkaResponseReceivedEventInResponseTo(
+                        sm,
+                        "abort_payment_request"
+                    )
                 )
-            )
+
+            }
             "abort_products_reservation" -> jobs.add(
-                Pair(
+                OrderJob(
                     "${sm.id}-abort_products_reservation",
                     CoroutineScope(Dispatchers.IO).launch {
                         repeat(5) {
@@ -151,9 +172,11 @@ class Orchestrator(
                         sm.send("abort_products_reservation_failed")
                     })
             )
-            "abort_products_reservation_ok" -> applicationEventPublisher.publishEvent(KafkaResponseReceivedEventInResponseTo(sm, "abort_products_reservation"))
+            "abort_products_reservation_ok" -> {
+                applicationEventPublisher.publishEvent(KafkaResponseReceivedEventInResponseTo(sm, "abort_products_reservation"))
+            }
             "abort_products_reservation_failed" -> {
-//                TODO LOG AND KILL SAGA
+                logger.severe("COULD NOT ABORT PRODUCTS RESERVATION FOR ORDER ${sm.id}")
                 applicationEventPublisher.publishEvent(KafkaResponseReceivedEventInResponseTo(sm, "abort_products_reservation"))
             }
         }
@@ -162,45 +185,50 @@ class Orchestrator(
     @EventListener
     fun onKafkaResponseReceivedEventInResponseTo(event: KafkaResponseReceivedEventInResponseTo) = CoroutineScope(
         Dispatchers.Default).launch {
-        println("onKafkaResponseReceivedEventInResponseTo LISTENER ${Thread.currentThread()}")
-        println("RECEIVED EVENT ${event.source}")
-        println("CURRENT JOBS LIST $jobs")
         val sm = event.source as StateMachine
         println("${sm.id}-${event.event}")
         val job = jobs.find { it.first == "${sm.id}-${event.event}"}?.second
         job?.cancel()
-//      TODO ADD LOCK
-        jobs.removeIf { it.second.key == job?.key }
-        println("jobs after removal $jobs")
+//        jobs.removeIf { it.second.key == job?.key }
     }
 
     @EventListener
     fun onSagaFinishedEvent(sagaFinishedEvent: SagaFinishedEvent){
-        println("onSagaFinishedEvent LISTENER ${Thread.currentThread()}")
         val sm = sagaFinishedEvent.source as StateMachine
-        sagas.removeIf { it.id == sm.id }
+        sm.completed = true
+//        sagas.removeIf { it.id == sm.id }
         //        TODO CHANGE ORDER STATUS FROM PENDING TO READY USING COROUTINE
         //        controller -> new order [pending]
         //        controller -> preso in carico con id 1
         //        controller -> parte la saga con id 1
         //        endsaga -> fine saga -> [verificato] -> invia la mail
-        println("SAGA OF ORDER ${sm.id} ENDED SUCCESSFULLY")
-        println("SAGAS LIST NOW IS: $sagas")
+        CoroutineScope(Dispatchers.IO).launch {
+            val order = orderRepository.findById(ObjectId(sm.id))
+            order!!.status = OrderStatus.ISSUED
+            orderRepository.save(order)
+//            TODO SEND MAIL
+        }
+        logger.info("SAGA OF ORDER ${sm.id} ENDED SUCCESSFULLY")
     }
 
     @EventListener
     fun onSagaFailureEvent(sagaFailureEvent: SagaFailureEvent){
-        println("onSagaFailureEvent LISTENER ${Thread.currentThread()}")
         val sm = sagaFailureEvent.source as StateMachine
+        sm.failed = true
 //            applicationEventPublisher.send(KafkaResponseReceivedEventInResponseTo(sm, "reserve_products_failed"))
-        sagas.removeIf { it.id == sm.id }
+//        sagas.removeIf { it.id == sm.id }
         //        TODO CHANGE ORDER STATUS FROM PENDING TO failure USING COROUTINE
         //        controller -> new order [pending]
         //        controller -> preso in carico con id 1
         //        controller -> parte la saga con id 1
         //        endsaga -> fine saga -> [verificato] -> invia la mail
-        println("SAGA OF ORDER ${sm.id} FAILED ")
-        println("SAGAS LIST NOW IS: $sagas")
+        CoroutineScope(Dispatchers.IO).launch {
+            val order = orderRepository.findById(ObjectId(sm.id))
+            order!!.status = OrderStatus.FAILED
+            orderRepository.save(order)
+//            TODO SEND MAIL
+        }
+        logger.info("SAGA OF ORDER ${sm.id} FAILED ")
     }
 
 }

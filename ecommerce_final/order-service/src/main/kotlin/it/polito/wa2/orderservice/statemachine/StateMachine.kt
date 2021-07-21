@@ -11,14 +11,18 @@ import org.springframework.stereotype.Component
 
 @Component
 @Scope("prototype")
-class StateMachine(val initialState: String,
-                   val finalState: String,
+class StateMachine(val initialState: String = "",
+                   val finalState: String = "",
                    val transitions: MutableList<Transition>,
-                   var state: String?,
-                   val id: String,
+                   var state: String? = null,
+                   val id: String = "",
+                   var failed: Boolean? = false,
+                   var completed: Boolean? = false,
                    private val applicationEventPublisher: ApplicationEventPublisher
 ) {
-
+    init {
+        println("SM INITIATED")
+    }
     fun start(): Boolean{
         state = initialState
         return true
@@ -30,17 +34,15 @@ class StateMachine(val initialState: String,
 
     suspend fun send(event: String): Boolean {
         val transition = transitions.find{it.source == state && it.event == event}
+        println(transition)
         state = transition!!.target
 
         when (state) {
             finalState -> {
-//                fireEvent(KafkaResponseReceivedEventInResponseTo(this, "reserve_products"))
-//                fireEvent(KafkaResponseReceivedEventInResponseTo(this, "payment_request"))
                 fireEvent(StateMachineEvent(this, "$id-$event" ))
                 fireEvent(SagaFinishedEvent(this))
             }
             initialState -> {
-//                fireEvent(KafkaResponseReceivedEventInResponseTo(this, "reserve_products"))
                 fireEvent(StateMachineEvent(this, "$id-$event" ))
                 fireEvent(SagaFailureEvent(this))
             }
@@ -52,4 +54,5 @@ class StateMachine(val initialState: String,
         transition.action?.invoke()
         return true
     }
+
 }

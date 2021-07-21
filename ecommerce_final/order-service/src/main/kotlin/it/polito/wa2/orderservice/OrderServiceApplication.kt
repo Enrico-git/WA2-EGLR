@@ -1,10 +1,15 @@
 package it.polito.wa2.orderservice
 
+import it.polito.wa2.orderservice.domain.OrderJob
+import it.polito.wa2.orderservice.statemachine.StateMachine
 import it.polito.wa2.orderservice.statemachine.StateMachineBuilder
+import kotlinx.coroutines.Job
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.context.annotation.Bean
+import org.springframework.context.annotation.DependsOn
+import org.springframework.context.annotation.Lazy
 import org.springframework.kafka.annotation.EnableKafka
 import java.util.logging.Logger
 
@@ -19,41 +24,40 @@ class OrderServiceApplication{
         val builder = StateMachineBuilder(applicationEventPublisher)
 
         return builder
-            .initialState("STATE1") // ordine ricevuto
-            .finalState("STATE5") //ordine pronto
-            .source("STATE1")
-            .target("STATE2")
+            .initialState("ORDER_REQ") // order creation request
+            .finalState("ORDER_CREATED") // order issued
+            .source("ORDER_REQ")
+            .target("PROD_AVAILABILITY_REQ")
             .event("reserve_products")
             .and()
-            .source("STATE2")
-            .target("STATE3")
+            .source("PROD_AVAILABILITY_REQ")
+            .target("PROD_AVAILABILITY_OK")
             .event("reserve_products_ok")
             .and()
-            .source("STATE3")
-            .target("STATE4")
+            .source("PROD_AVAILABILITY_OK")
+            .target("PAYMENT_REQ")
             .event("payment_request")
             .and()
-            .source("STATE4")
-            .target("STATE5")
+            .source("PAYMENT_REQ")
+            .target("ORDER_CREATED")
             .event("payment_request_ok")
             .and()
 //        rollback
-            .source("STATE4")
-            .target("STATE3")
+            .source("PAYMENT_REQ")
+            .target("PROD_AVAILABILITY_OK")
             .event("payment_request_failed")
             .and()
-            .source("STATE3")
-            .target("STATE2")
+            .source("PROD_AVAILABILITY_OK")
+            .target("PROD_AVAILABILITY_REQ")
             .event("abort_products_reservation")
             .and()
-            .source("STATE2")
-            .target("STATE1")
+            .source("PROD_AVAILABILITY_REQ")
+            .target("ORDER_REQ")
             .event("abort_products_reservation_ok")
             .and()
-            .source("STATE2")
-            .target("STATE1")
+            .source("PROD_AVAILABILITY_REQ")
+            .target("ORDER_REQ")
             .event("reserve_products_failed")
-//        si uccide la macchina
     }
 
     @Bean(name=["delete_order_sm"])
@@ -61,30 +65,35 @@ class OrderServiceApplication{
         val builder = StateMachineBuilder(applicationEventPublisher)
 
         return builder
-            .initialState("STATE1") // ordine ricevuto
-            .finalState("STATE5") //ordine pronto
-            .source("STATE1")
-            .target("STATE2")
+            .initialState("CANCEL_ORDER_REQ") // abort order req
+            .finalState("ORDER_CANCELED") // order aborted successfully
+            .source("CANCEL_ORDER_REQ")
+            .target("ABORT_PAYMENT_REQ")
             .event("abort_payment_request")
             .and()
-            .source("STATE2")
-            .target("STATE3")
+            .source("ABORT_PAYMENT_REQ")
+            .target("ABORT_PAYMENT_REQ_OK")
             .event("abort_payment_request_ok")
             .and()
-            .source("STATE3")
-            .target("STATE4")
+            .source("ABORT_PAYMENT_REQ_OK")
+            .target("ABORT_PROD_RESERVATION_REQ")
             .event("abort_products_reservation")
             .and()
-            .source("STATE4")
-            .target("STATE5")
+            .source("ABORT_PROD_RESERVATION_REQ")
+            .target("ORDER_CANCELED")
             .event("abort_products_reservation_ok")
 //        rollback
             .and()
-            .source("STATE2")
-            .target("STATE1")
+            .source("ABORT_PAYMENT_REQ")
+            .target("CANCEL_ORDER_REQ")
             .event("abort_payment_request_failed")
-//        si uccide la macchina
     }
+
+    @Bean
+    fun getJobsList(): MutableList<OrderJob> = mutableListOf()
+
+    @Bean
+    fun getSagasList(): MutableList<StateMachine> = mutableListOf()
 
 }
 

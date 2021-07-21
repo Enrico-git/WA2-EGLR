@@ -80,8 +80,7 @@ class OrderController(
      */
      @PostMapping("")
      @ResponseStatus(HttpStatus.CREATED)
-     suspend fun createOrder(@RequestBody orderDTO: OrderDTO) {
-//        TODO implement this
-//        return orderService.createOrder(orderDTO)
+     suspend fun createOrder(@RequestBody orderDTO: OrderDTO): OrderDTO {
+        return orderService.createOrder(orderDTO)
     }
 }

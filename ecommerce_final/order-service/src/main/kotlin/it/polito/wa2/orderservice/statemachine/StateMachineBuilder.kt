@@ -1,6 +1,7 @@
 package it.polito.wa2.orderservice.statemachine
 
 import it.polito.wa2.orderservice.domain.Transition
+import org.bson.types.ObjectId
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Component
 
@@ -50,6 +51,6 @@ class StateMachineBuilder(private val applicationEventPublisher: ApplicationEven
         return this
     }
 
-    fun build() = StateMachine(initialState, finalState, transitions, null, id, applicationEventPublisher)
+    fun build() = StateMachine(initialState, finalState, transitions, null, id, applicationEventPublisher = applicationEventPublisher)
 
 }

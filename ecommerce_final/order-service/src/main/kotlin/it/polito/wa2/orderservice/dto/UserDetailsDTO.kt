@@ -9,7 +9,7 @@ import org.springframework.security.core.userdetails.UserDetails
 
 data class UserDetailsDTO(
     val id: ObjectId?,
-    private val username: String,
+    private val username: String?,
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private var password: String?,
     private val isEnabled: Boolean?,
@@ -30,7 +30,7 @@ data class UserDetailsDTO(
     }
 
     override fun getUsername(): String {
-        return username
+        return username!!
     }
 
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
