@@ -2,6 +2,14 @@
 // use -d to detach the process
 sudo docker-compose up
 
+// start mongo container only
+sudo docker start mongo
+
+// access into mongo with wallet user
+mongo -u walletservice -p walletservice --authenticationDatabase admin
+
+// remember to **use** the right database (e.g: use walletservice)
+
 // initialize mongo replicas, users and add debezium connector
 // run only when previous command is done
 ./script.sh
