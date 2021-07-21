@@ -61,7 +61,7 @@ class WalletApplication{
             accept(MediaType.APPLICATION_NDJSON).nest {
                 GET("/{walletID}", walletHandler::getWallet)
                 POST("/", walletHandler::createWallet)
-                POST("/{walletID}/transactions", walletHandler::createTransaction)
+                //POST("/{walletID}/transactions", walletHandler::createTransaction) //TODO with kafka
                 GET("/{walletID}/transactions", walletHandler::getWalletTransactions)
                 GET("/{walletID}/transactions/{transactionID}", walletHandler::getWalletTransaction)
             }
