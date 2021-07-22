@@ -13,33 +13,39 @@ import kotlinx.coroutines.*
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.bson.types.ObjectId
+import org.springframework.beans.factory.annotation.Lookup
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.context.annotation.Lazy
 import org.springframework.context.event.EventListener
 import org.springframework.kafka.annotation.KafkaListener
 import org.springframework.stereotype.Component
+import java.util.concurrent.CopyOnWriteArrayList
 import java.util.logging.Logger
 
 @Component
 class Orchestrator(
     @Qualifier("new_order_sm") private val stateMachineBuilder: StateMachineBuilder,
+    @Qualifier("delete_order_sm") private val deleteOrderstateMachineBuilder: StateMachineBuilder,
     private val kafkaProducer: KafkaProducer<String, String>,
     private val applicationEventPublisher: ApplicationEventPublisher,
     private val orderRepository: OrderRepository,
-    private val sagas: MutableList<StateMachine>,
-    private val jobs: MutableList<OrderJob>,
+    private val jobs: CopyOnWriteArrayList<OrderJob>,
     private val logger: Logger
 ) {
 
-//    val sagas = mutableListOf<StateMachine>()
-//    val jobs = mutableListOf<OrderJob>()
+
+    @Lookup
+    @Lazy
+    fun getListOfStateMachine(): CopyOnWriteArrayList<StateMachine> {
+        return null!!
+    }
 
     //    TODO THIS IS FOR DEBEZIUM
-    @KafkaListener(topics = ["orders_ok"])
-    fun debezium_test(msg: String){
-        println("New Message: $msg")
-    }
+//    @KafkaListener(topics = ["orders_ok"])
+//    fun debezium_test(msg: String){
+//        println("New Message: $msg")
+//    }
 
 
     @KafkaListener(topics = [
@@ -53,22 +59,27 @@ class Orchestrator(
         "abort_payment_request_failed"
     ])
     fun receivedEvent(event: String) = CoroutineScope(Dispatchers.IO).launch {
-
+        val sagas = getListOfStateMachine()
         val sagaEvent = event.substringAfter("-")
         val sagaID = event.substringBefore("-")
         val saga = sagas.find{it.id == sagaID}
         val transition = saga?.transitions?.find{it.source == saga.state && it.event == sagaEvent}
-        logger.info("BEFORE CRASH. transition $transition")
-        logger.info("saga state: ${saga?.state}, event: $sagaEvent")
+        println("${saga?.id} --- ${saga?.state} --- $sagaEvent ---- trans: $transition")
         saga?.send(transition?.event!!)
     }
 
-    suspend fun createSaga(id: String) {
-        val stateMachine = stateMachineBuilder.id(id).build()
+    suspend fun createSaga(id: String, type: String) {
+        val sagas = getListOfStateMachine()
+        val stateMachine = if (type == "new_order")
+            stateMachineBuilder.id(id).build()
+        else
+            deleteOrderstateMachineBuilder.id(id).build()
         stateMachine.start()
         sagas.add(stateMachine)
-        println(sagas)
-        stateMachine.send("reserve_products")
+        if (type == "new_order")
+            stateMachine.send("reserve_products")
+        else
+            stateMachine.send("abort_payment_request")
         logger.info("STATE MACHINE ${stateMachine.id} STARTED")
     }
 
@@ -80,7 +91,6 @@ class Orchestrator(
                 repeat(5) {
                     if (isActive)
                         try {
-                            println("sending kafka msg")
                             kafkaProducer.send(ProducerRecord("reserve_products", event.event))
                             delay(5000)
 
@@ -186,11 +196,23 @@ class Orchestrator(
     fun onKafkaResponseReceivedEventInResponseTo(event: KafkaResponseReceivedEventInResponseTo) = CoroutineScope(
         Dispatchers.Default).launch {
         val sm = event.source as StateMachine
-        println("${sm.id}-${event.event}")
-        val job = jobs.find { it.first == "${sm.id}-${event.event}"}?.second
-        job?.cancel()
+//        println("${sm.id}-${event.event}")
+//        var job: Job? = null
+//        lock.withLock {
+//            val it = jobs.iterator()
+//            while (it.hasNext()){
+//                val orderJob = it.next()
+//                if (orderJob.first == "${sm.id}-${event.event}") {
+//                    job = orderJob.second
+
+                    val job = jobs.find { it.first == "${sm.id}-${event.event}" }?.second
+                    job?.cancel()
+//                    break
+//                }
+            }
+//        }
 //        jobs.removeIf { it.second.key == job?.key }
-    }
+//    }
 
     @EventListener
     fun onSagaFinishedEvent(sagaFinishedEvent: SagaFinishedEvent){

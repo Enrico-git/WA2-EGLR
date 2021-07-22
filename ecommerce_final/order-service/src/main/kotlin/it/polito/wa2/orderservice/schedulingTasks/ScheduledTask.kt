@@ -2,29 +2,46 @@ package it.polito.wa2.orderservice.schedulingTasks
 
 import it.polito.wa2.orderservice.domain.OrderJob
 import it.polito.wa2.orderservice.statemachine.StateMachine
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
+import org.springframework.beans.factory.annotation.Lookup
+import org.springframework.context.annotation.DependsOn
 import org.springframework.context.annotation.Lazy
 import org.springframework.scheduling.annotation.EnableScheduling
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
+import java.util.concurrent.CopyOnWriteArrayList
 import java.util.logging.Logger
 
 @Component
 @EnableScheduling
 class ScheduledTask(
-    private val sagas: MutableList<StateMachine>,
-    private val jobs: MutableList<OrderJob>,
+    private val jobs: CopyOnWriteArrayList<OrderJob>,
     private val logger: Logger
 ) {
+    /**
+     * Method to get a list of Prototype Beans without dependency injection
+     * You need to use the lookup annotation otherwise it will initialize a new list for every injection
+     */
+    @Lookup
+    @Lazy
+    fun getListOfStateMachine(): CopyOnWriteArrayList<StateMachine> {
+        return null!!
+    }
 
-    @Scheduled(fixedRate = 1000)
-    fun removeCompletedSagasAndJobs() {
-//        TODO FIX STATEMACHINE LIST
+    /**
+     * Scheduler to remove the finished sagas and order job from the list and free memory
+     */
+    @Scheduled(fixedRate = 1000*10)
+    fun removeCompletedSagasAndJobs() = CoroutineScope(Dispatchers.Default).launch{
+        val sagas = getListOfStateMachine()
         logger.info("BEFORE REMOVED SAGAS: $sagas --- REMOVED JOBS: $jobs")
-        val removedSagas = sagas.removeIf { it.completed == true || it.failed == true }
-        val removedJobs = jobs.removeIf { it.second.isCancelled || it.second.isCompleted}
+        sagas.removeIf { it.completed == true || it.failed == true }
+        jobs.removeIf { it.second.isCancelled || it.second.isCompleted}
         logger.info("AFTER REMOVED SAGAS: $sagas --- REMOVED JOBS: $jobs")
         logger.info("SAGAS: $sagas --- JOBS: $jobs")
-        logger.info("SAGAS: ${sagas.get(0).completed}")
+//        logger.info("SAGAS: ${sagas.get(0).completed}")
     }
 }

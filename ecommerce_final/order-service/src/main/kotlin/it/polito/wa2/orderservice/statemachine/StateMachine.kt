@@ -34,7 +34,7 @@ class StateMachine(val initialState: String = "",
 
     suspend fun send(event: String): Boolean {
         val transition = transitions.find{it.source == state && it.event == event}
-        println(transition)
+        println("ID: $id, state $state, event $event")
         state = transition!!.target
 
         when (state) {

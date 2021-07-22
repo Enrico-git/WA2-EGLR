@@ -63,6 +63,9 @@ class OrderServiceImpl(
             throw InvalidOperationException("You cannot cancel the order anymore")
         order.status = OrderStatus.CANCELED
         orderRepository.save(order)
+        CoroutineScope(Dispatchers.Default).launch {
+            orchestrator.createSaga(order.id.toString(), "delete_order")
+        }
     }
 
     override suspend fun createOrder(orderDTO: OrderDTO): OrderDTO {
@@ -77,7 +80,7 @@ class OrderServiceImpl(
 
         val storedOrder = orderRepository.save(order)
         CoroutineScope(Dispatchers.Default).launch {
-            orchestrator.createSaga(storedOrder.id.toString())
+            orchestrator.createSaga(storedOrder.id.toString(), "new_order")
         }
         return storedOrder.toDTO()
     }
