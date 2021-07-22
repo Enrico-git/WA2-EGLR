@@ -12,7 +12,7 @@ data class Wallet (
     val id: ObjectId?,
     var balance: BigDecimal = BigDecimal(0.0),
     val userID: ObjectId, //TODO JWT uses User not Customer. Avoiding the use of Customer we loose name, surname, address
-    val transactions: Set<ObjectId>,
+    var transactions: Set<ObjectId> = setOf(),
     //@Version
     //val version: Long = 0 //TODO Where do i need lock? performTransaction?
 )

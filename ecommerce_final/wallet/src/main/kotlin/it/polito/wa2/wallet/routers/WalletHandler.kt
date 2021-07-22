@@ -1,17 +1,10 @@
 package it.polito.wa2.wallet.routers
 
+import it.polito.wa2.wallet.entities.Wallet
 import it.polito.wa2.wallet.services.WalletService
-import kotlinx.coroutines.*
-import kotlinx.coroutines.reactor.awaitSingle
-import kotlinx.coroutines.reactor.awaitSingleOrNull
-import org.bson.types.ObjectId
-import org.springframework.http.HttpStatus
-import org.springframework.http.server.reactive.ServerHttpRequest
-import org.springframework.http.server.reactive.ServerHttpResponse
-import org.springframework.http.server.reactive.ServerHttpResponseDecorator
 import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.server.*
-import java.util.logging.Logger
+
 
 @Component
 class WalletHandler(
@@ -33,18 +26,19 @@ class WalletHandler(
         //TODO understand Why ObjectID is mapped as {timestamp, date}
     }
 
-    suspend fun createWallet(request: ServerRequest): ServerResponse{
-        return ServerResponse
+    suspend fun createWallet(request: ServerRequest): ServerResponse {
+        val wallet = request.awaitBody(Wallet::class)
+            return ServerResponse
             .ok()
             .json()
-            .bodyValueAndAwait("walletService.getWallet(walletID)")
+            .bodyValueAndAwait(walletService.createWallet(wallet))
     }
 
     suspend fun createTransaction(request: ServerRequest): ServerResponse{
         return ServerResponse
             .ok()
             .json()
-            .bodyValueAndAwait("walletService.getWallet(walletID)")
+            .bodyValueAndAwait("walletService.createTransaction(walletID)")
     }
 
     suspend fun getWalletTransactions(request: ServerRequest): ServerResponse{
@@ -59,13 +53,13 @@ class WalletHandler(
         return ServerResponse
             .ok()
             .json()
-            .bodyValueAndAwait("walletService.getWallet(walletID)")
+            .bodyValueAndAwait("walletService.getWalletTransactions(walletID)")
     }
 
     suspend fun getWalletTransaction(request: ServerRequest): ServerResponse{
         return ServerResponse
             .ok()
             .json()
-            .bodyValueAndAwait("walletService.getWallet(walletID)")
+            .bodyValueAndAwait("walletService.getWalletTransaction(walletID)")
     }
 }

@@ -43,56 +43,6 @@ class WalletApplication{
     fun getLogger(): Logger = Logger.getLogger("it.polito.wa2.walletServiceLogger")
 
     /**
-     * router is similar to a controller but it reduces bootstrap time since less annotation are needed.
-     * coRouter ('co' since we are in reactive kotlin)
-     * Here more on RouterFunctionDsl:
-     * https://docs.spring.io/spring-framework/docs/current/kdoc-api/spring-framework/org.springframework.web.reactive.function.server/-router-function-dsl/index.html
-     * see Functional endpoints (1.5 paragraph) from here:
-     * https://docs.spring.io/spring-framework/docs/current/reference/html/web-reactive.html
-     */
-
-    @Bean
-    fun walletRoutes(walletHandler: WalletHandler) = coRouter {
-        /**
-         * 'nest' is used to group all API with the same prefix (/wallets):
-         * walletHandler contains the handler functions needed for solving requests.
-         */
-        "/wallets".nest {
-            accept(MediaType.APPLICATION_NDJSON).nest {
-                GET("/{walletID}", walletHandler::getWallet)
-                POST("/", walletHandler::createWallet)
-                //POST("/{walletID}/transactions", walletHandler::createTransaction) //TODO with kafka
-                GET("/{walletID}/transactions", walletHandler::getWalletTransactions)
-                GET("/{walletID}/transactions/{transactionID}", walletHandler::getWalletTransaction)
-            }
-        }
-        /**
-         * 	Declaring the 'before' and 'after' filters at the bottom,
-         * 	the logs of request/response are applied to all routes.
-         */
-        before {
-            getLogger().info("Doing : $it")
-            ServerRequest.from(it).build()
-        }
-        after { serverRequest, serverResponse ->
-            getLogger().info("Ended: $serverRequest with ${serverResponse.statusCode()}")
-            serverResponse
-        }
-
-        /**
-         * The onError is applied to all previous route also.
-         * It's similar to @ExceptionHandler and @ControllerAdvice
-         */
-        onError<NotFoundException> {e, _ ->  status(HttpStatus.NOT_FOUND).bodyValueAndAwait(e.localizedMessage)}
-        onError<ValidationException> {e, _ ->  status(HttpStatus.UNPROCESSABLE_ENTITY).bodyValueAndAwait(e.localizedMessage)}
-        onError<IllegalArgumentException> {e, _ ->  status(HttpStatus.BAD_REQUEST).bodyValueAndAwait(e.localizedMessage)}
-        onError<OptimisticLockingFailureException> {e, _ ->  status(HttpStatus.INTERNAL_SERVER_ERROR).bodyValueAndAwait(e.localizedMessage)}
-        onError<InvalidOperationException> {e, _ ->  status(HttpStatus.CONFLICT).bodyValueAndAwait(e.localizedMessage)}
-        onError<UnauthorizedException> { e, _ ->  status(HttpStatus.UNAUTHORIZED).bodyValueAndAwait(e.localizedMessage)}
-        onError<Exception> {e, _ ->  status(HttpStatus.BAD_REQUEST).bodyValueAndAwait(e.localizedMessage)}
-    }
-
-    /**
      * MongoDB reactive configuration
      */
     @EnableReactiveMongoRepositories
