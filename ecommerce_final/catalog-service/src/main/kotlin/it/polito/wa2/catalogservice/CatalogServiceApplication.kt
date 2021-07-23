@@ -3,6 +3,7 @@ package it.polito.wa2.catalogservice
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
+import org.springframework.cloud.netflix.eureka.EnableEurekaClient
 import org.springframework.context.annotation.Bean
 import org.springframework.mail.javamail.JavaMailSender
 import org.springframework.mail.javamail.JavaMailSenderImpl
@@ -11,6 +12,7 @@ import org.springframework.security.crypto.password.PasswordEncoder
 import java.util.*
 
 @SpringBootApplication
+@EnableEurekaClient
 class CatalogServiceApplication {
     @Value("\${spring.mail.host}")
     val host: String = ""
