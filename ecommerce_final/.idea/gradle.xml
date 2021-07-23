@@ -14,6 +14,15 @@
       </GradleProjectSettings>
       <GradleProjectSettings>
         <option name="distributionType" value="DEFAULT_WRAPPED" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$/catalog-service" />
+        <option name="modules">
+          <set>
+            <option value="$PROJECT_DIR$/catalog-service" />
+          </set>
+        </option>
+      </GradleProjectSettings>
+      <GradleProjectSettings>
+        <option name="distributionType" value="DEFAULT_WRAPPED" />
         <option name="externalProjectPath" value="$PROJECT_DIR$/eureka" />
         <option name="modules">
           <set>
@@ -36,6 +45,15 @@
         <option name="modules">
           <set>
             <option value="$PROJECT_DIR$/wallet" />
+          </set>
+        </option>
+      </GradleProjectSettings>
+      <GradleProjectSettings>
+        <option name="distributionType" value="DEFAULT_WRAPPED" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$/warehouse" />
+        <option name="modules">
+          <set>
+            <option value="$PROJECT_DIR$/warehouse" />
           </set>
         </option>
       </GradleProjectSettings>
