@@ -3,14 +3,13 @@ package it.polito.wa2.orderservice
 import it.polito.wa2.orderservice.domain.OrderJob
 import it.polito.wa2.orderservice.statemachine.StateMachine
 import it.polito.wa2.orderservice.statemachine.StateMachineBuilder
-import kotlinx.coroutines.Job
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.context.annotation.Bean
-import org.springframework.context.annotation.DependsOn
-import org.springframework.context.annotation.Lazy
-import org.springframework.kafka.annotation.EnableKafka
+import java.util.concurrent.CopyOnWriteArrayList
+import java.util.concurrent.locks.Lock
+import java.util.concurrent.locks.ReentrantLock
 import java.util.logging.Logger
 
 
@@ -90,10 +89,10 @@ class OrderServiceApplication{
     }
 
     @Bean
-    fun getJobsList(): MutableList<OrderJob> = mutableListOf()
+    fun getJobsList(): CopyOnWriteArrayList<OrderJob> = CopyOnWriteArrayList()
 
     @Bean
-    fun getSagasList(): MutableList<StateMachine> = mutableListOf()
+    fun getSagasList(): CopyOnWriteArrayList<StateMachine> = CopyOnWriteArrayList()
 
 }
 
