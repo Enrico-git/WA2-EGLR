@@ -1,7 +1,10 @@
 package it.polito.wa2.wallet.routers
 
+import it.polito.wa2.wallet.dto.TransactionDTO
 import it.polito.wa2.wallet.entities.Wallet
 import it.polito.wa2.wallet.services.WalletService
+import org.springframework.data.domain.PageRequest
+import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.server.*
 
@@ -35,25 +38,30 @@ class WalletHandler(
     }
 
     suspend fun createTransaction(request: ServerRequest): ServerResponse{
+        val walletID = request.pathVariable("walletID")
+        val transactionDTO = request.awaitBody(TransactionDTO::class)
+
         return ServerResponse
             .ok()
             .json()
-            .bodyValueAndAwait("walletService.createTransaction(walletID)")
+            .bodyValueAndAwait(walletService.createTransaction(walletID, transactionDTO))
     }
 
-    suspend fun getWalletTransactions(request: ServerRequest): ServerResponse{
-        println("GET WALLET TRANSACITONS")
-        // http://localhost:8100/wallets/60f53679ff7b674f90c399a9/transactions?from=123123&to=456456
+    suspend fun getAllTransactions(request: ServerRequest): ServerResponse{
         val walletID = request.pathVariable("walletID")
+        val from = request.queryParamOrNull("from")?.toLong()
+        val to = request.queryParamOrNull("to")?.toLong()
 
-        println("walletID: ${walletID}")
-        println("from: ${request.queryParam("from")}")
-        println("to: ${request.queryParam("to")}")
+        val page = request.queryParamOrNull("page")?.toInt()
+        val size = request.queryParamOrNull("size")?.toInt()
+        var pageable: Pageable = Pageable.unpaged()
+        if(page != null && size != null)
+            pageable = PageRequest.of(page, size)
 
         return ServerResponse
             .ok()
             .json()
-            .bodyValueAndAwait("walletService.getWalletTransactions(walletID)")
+            .bodyAndAwait(walletService.getAllTransactions(walletID, from, to, pageable))
     }
 
     suspend fun getWalletTransaction(request: ServerRequest): ServerResponse{

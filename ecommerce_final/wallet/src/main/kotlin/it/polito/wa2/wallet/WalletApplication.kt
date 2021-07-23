@@ -1,25 +1,10 @@
 package it.polito.wa2.wallet
 
-import com.mongodb.reactivestreams.client.MongoClient
-import com.mongodb.reactivestreams.client.MongoClients
-import it.polito.wa2.wallet.exceptions.InvalidOperationException
-import it.polito.wa2.wallet.exceptions.NotFoundException
-import it.polito.wa2.wallet.exceptions.UnauthorizedException
-import it.polito.wa2.wallet.routers.WalletHandler
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
 import org.springframework.cloud.netflix.eureka.EnableEurekaClient
 import org.springframework.context.annotation.Bean
-import org.springframework.dao.OptimisticLockingFailureException
-import org.springframework.data.mongodb.config.AbstractReactiveMongoConfiguration
-import org.springframework.data.mongodb.repository.config.EnableReactiveMongoRepositories
-import org.springframework.http.HttpStatus
-import org.springframework.http.MediaType
-import org.springframework.web.reactive.function.server.ServerRequest
-import org.springframework.web.reactive.function.server.bodyValueAndAwait
-import org.springframework.web.reactive.function.server.coRouter
 import java.util.logging.Logger
-import javax.validation.ValidationException
 
 
 /**
@@ -41,25 +26,6 @@ class WalletApplication{
 
     @Bean
     fun getLogger(): Logger = Logger.getLogger("it.polito.wa2.walletServiceLogger")
-
-    /**
-     * MongoDB reactive configuration
-     */
-    @EnableReactiveMongoRepositories
-    class MongoReactiveConfig : AbstractReactiveMongoConfiguration() {
-        @Bean
-        fun mongoClient(): MongoClient {
-            return MongoClients.create()
-        }
-
-        override fun getDatabaseName() = "walletservice"
-
-//        @Bean
-//        override fun reactiveMongoTemplate()
-//                = ReactiveMongoTemplate(mongoClient(), 'walletservice')
-    }
-
-
 }
 
 fun main(args: Array<String>) {
