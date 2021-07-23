@@ -3,13 +3,11 @@ package it.polito.wa2.wallet.services
 import it.polito.wa2.wallet.dto.TransactionDTO
 import it.polito.wa2.wallet.dto.WalletDTO
 import it.polito.wa2.wallet.dto.toEntity
-import it.polito.wa2.wallet.entities.Wallet
 import it.polito.wa2.wallet.entities.toDTO
 import it.polito.wa2.wallet.exceptions.NotFoundException
 import it.polito.wa2.wallet.repositories.TransactionRepository
 import it.polito.wa2.wallet.repositories.WalletRepository
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import org.bson.types.ObjectId
 import org.springframework.data.domain.Pageable
@@ -28,12 +26,13 @@ class WalletServiceImpl(
         return wallet.toDTO()
     }
 
-    override suspend fun createWallet(wallet: Wallet): WalletDTO {
+    override suspend fun createWallet(walletDTO: WalletDTO): WalletDTO {
         //TODO Catalog (the only one who can access usersDB) has to check that user exists!
-        return walletRepository.save(wallet).toDTO()
+        return walletRepository.save(walletDTO.toEntity()).toDTO()
     }
 
     override suspend fun createTransaction(walletID: String, transactionDTO: TransactionDTO): TransactionDTO {
+        //TODO Catalog has to check user existence (I suppose admin create wallet)
         //TODO check wallet
         //TODO check balance
         //TODO only admin can do refund
@@ -42,6 +41,7 @@ class WalletServiceImpl(
         transactionDTO.timestamp = Timestamp(System.currentTimeMillis()) //TODO Why faking two hours ago?
 
         return transactionRepository.save(transactionDTO.toEntity()).toDTO()
+        //TODO insert the new transaction in wallet.
     }
 
     override suspend fun getAllTransactions(walletID: String, from: Long?,

@@ -1,7 +1,7 @@
 package it.polito.wa2.wallet.routers
 
 import it.polito.wa2.wallet.dto.TransactionDTO
-import it.polito.wa2.wallet.entities.Wallet
+import it.polito.wa2.wallet.dto.WalletDTO
 import it.polito.wa2.wallet.services.WalletService
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
@@ -24,17 +24,14 @@ class WalletHandler(
             .ok()
             .json()
             .bodyValueAndAwait(walletService.getWallet(walletID))
-
-        //{"id":{"timestamp":1626763353,"date":"2021-07-20T06:42:33.000+00:00"},"balance":32.13,"userID":{"timestamp":1626763221,"date":"2021-07-20T06:40:21.000+00:00"}}
-        //TODO understand Why ObjectID is mapped as {timestamp, date}
     }
 
     suspend fun createWallet(request: ServerRequest): ServerResponse {
-        val wallet = request.awaitBody(Wallet::class)
+        val walletDTO = request.awaitBody(WalletDTO::class)
             return ServerResponse
             .ok()
             .json()
-            .bodyValueAndAwait(walletService.createWallet(wallet))
+            .bodyValueAndAwait(walletService.createWallet(walletDTO))
     }
 
     suspend fun createTransaction(request: ServerRequest): ServerResponse{
