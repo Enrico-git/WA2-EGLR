@@ -41,10 +41,10 @@
       </GradleProjectSettings>
       <GradleProjectSettings>
         <option name="distributionType" value="DEFAULT_WRAPPED" />
-        <option name="externalProjectPath" value="$PROJECT_DIR$/wallet" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$/wallet-service" />
         <option name="modules">
           <set>
-            <option value="$PROJECT_DIR$/wallet" />
+            <option value="$PROJECT_DIR$/wallet-service" />
           </set>
         </option>
       </GradleProjectSettings>

@@ -19,7 +19,7 @@ curl -i -v -H "Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJyb2xlcyI6IkNVU1RPTU
 
 
 #######################################################
-## POST / -> create wallet [ADMIN ONLY]
+## POST /wallets/ -> create wallet [ADMIN ONLY]
 #######################################################
 
  #200 OK - ADMIN
@@ -68,4 +68,22 @@ curl -i -v -H "Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJyb2xlcyI6IkNVU1RPTU
 
 
 
+################################################################################
+## GET /wallets/{walletID}/transactions/{transactionID} -> getTransactionDetails
+################################################################################
 
+#200 OK [CUSTOMER] - get information
+curl -i -v -H "Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJyb2xlcyI6IkNVU1RPTUVSIiwic3ViIjoiYWxpY2VfaW5fd29uZGVybGFuZCIsImlhdCI6MTUxNjIzOTAyMiwiZXhwIjoxODE2MjM5MDIyfQ.V_ePfXDIFymWiXDs_-599XvNYYwYFMZvsAbAT77UoAIfs9uczLMJLKBXZ-7zVuK0MCJfF8aS7hawYG3vao3yqx" \
+ "172.28.240.1:8100/wallets/60faeed2c3e740711b059afa/transactions/60fa74dbc00ce9721dde8cec"
+
+#200 OK [ADMIN] - get information
+curl -i -v -H "Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJyb2xlcyI6IkFETUlOIiwic3ViIjoiYWxpY2VfaW5fd29uZGVybGFuZCIsImlhdCI6MTAxNjIzOTAyMiwiZXhwIjo2MDE2MjM5MDIyfQ.UgdtjYTDBh7jt5z-lA3pyVLwdS1fzFwJQqRnaHw8q6yctUkgLzHHfIDRMJYoO5qHq3DISeClH09oRKM92RLVpw" \
+ "172.28.240.1:8100/wallets/60faeed2c3e740711b059afa/transactions/60fa74dbc00ce9721dde8cec"
+
+#404 Not found - Wallet was not found
+curl -i -v -H "Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJyb2xlcyI6IkNVU1RPTUVSIiwic3ViIjoiYWxpY2VfaW5fd29uZGVybGFuZCIsImlhdCI6MTUxNjIzOTAyMiwiZXhwIjoxODE2MjM5MDIyfQ.V_ePfXDIFymWiXDs_-599XvNYYwYFMZvsAbAT77UoAIfs9uczLMJLKBXZ-7zVuK0MCJfF8aS7hawYG3vao3yqx" \
+ "172.28.240.1:8100/wallets/60faeed2c3e740711b059afb/transactions/60fa74dbc00ce9721dde8cec"
+
+#404 Not found - Transaction was not found
+curl -i -v -H "Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJyb2xlcyI6IkNVU1RPTUVSIiwic3ViIjoiYWxpY2VfaW5fd29uZGVybGFuZCIsImlhdCI6MTUxNjIzOTAyMiwiZXhwIjoxODE2MjM5MDIyfQ.V_ePfXDIFymWiXDs_-599XvNYYwYFMZvsAbAT77UoAIfs9uczLMJLKBXZ-7zVuK0MCJfF8aS7hawYG3vao3yqx" \
+ "172.28.240.1:8100/wallets/60faeed2c3e740711b059afa/transactions/60fa74dbc00ce9721dde8ced"
