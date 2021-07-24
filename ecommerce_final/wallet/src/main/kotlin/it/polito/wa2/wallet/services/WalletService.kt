@@ -19,4 +19,7 @@ interface WalletService {
 
     @PreAuthorizeCustomerOrAdmin
     suspend fun getAllTransactions(walletID: String, from: Long?, to: Long?, pageable: Pageable): Flow<TransactionDTO>
+
+    @PreAuthorizeCustomerOrAdmin
+    suspend fun getTransaction(walletID: String, transactionID: String): TransactionDTO
 }

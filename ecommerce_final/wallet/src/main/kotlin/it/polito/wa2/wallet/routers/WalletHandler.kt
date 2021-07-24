@@ -37,7 +37,6 @@ class WalletHandler(
     suspend fun createTransaction(request: ServerRequest): ServerResponse{
         val walletID = request.pathVariable("walletID")
         val transactionDTO = request.awaitBody(TransactionDTO::class)
-
         return ServerResponse
             .ok()
             .json()
@@ -61,10 +60,12 @@ class WalletHandler(
             .bodyAndAwait(walletService.getAllTransactions(walletID, from, to, pageable))
     }
 
-    suspend fun getWalletTransaction(request: ServerRequest): ServerResponse{
+    suspend fun getTransaction(request: ServerRequest): ServerResponse{
+        val walletID = request.pathVariable("walletID")
+        val transactionID = request.pathVariable("transactionID")
         return ServerResponse
             .ok()
             .json()
-            .bodyValueAndAwait("walletService.getWalletTransaction(walletID)")
+            .bodyValueAndAwait(walletService.getTransaction(walletID, transactionID))
     }
 }

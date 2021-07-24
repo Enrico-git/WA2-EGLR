@@ -41,7 +41,7 @@ class WalletServiceImpl(
         transactionDTO.timestamp = Timestamp(System.currentTimeMillis()) //TODO Why faking two hours ago?
 
         return transactionRepository.save(transactionDTO.toEntity()).toDTO()
-        //TODO insert the new transaction in wallet.
+        // insert the new transaction in the wallet -> NO. use specific endpoint
     }
 
     override suspend fun getAllTransactions(walletID: String, from: Long?,
@@ -62,5 +62,12 @@ class WalletServiceImpl(
         // both 'from' and 'to' not present. (no window)
         return transactionRepository.findAllByWalletID(walletIdObjectId, pageable).map{it.toDTO()}
         // TODO in my pc timestamp printed here and in WSL2 are different of 2h. In mongodb are also 2h ago.
+    }
+
+    override suspend fun getTransaction(walletID: String, transactionID: String): TransactionDTO {
+        walletRepository.findById(ObjectId(walletID)) ?: throw NotFoundException("Wallet was not found")
+
+        val transaction = transactionRepository.findById(ObjectId(transactionID)) ?: throw NotFoundException("Transaction was not found")
+        return transaction.toDTO()
     }
 }
