@@ -22,19 +22,22 @@ import org.springframework.data.domain.Pageable
 import org.springframework.security.core.context.ReactiveSecurityContextHolder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.io.BufferedWriter
+import java.io.FileWriter
+import java.math.BigDecimal
 import java.util.logging.Logger
 
 @Service
 @Transactional
 class OrderServiceImpl(
     private val orderRepository: OrderRepository,
-    private val userRepository: UserRepository,
     private val logger: Logger,
-    private val orchestrator: Orchestrator
+    private val orchestrator: Orchestrator,
+    private val mailService: MailService
 ): OrderService {
     override suspend fun getOrders(pageable: Pageable): Flow<OrderDTO> {
         val user = ReactiveSecurityContextHolder.getContext().awaitFirst().authentication.principal as UserDetailsDTO
-        return orderRepository.findAllByBuyer(user.username, pageable).map { it.toDTO() }
+        return orderRepository.findAllByBuyer(user.id!!, pageable).map { it.toDTO() }
     }
 
     override suspend fun getOrderByID(orderID: ObjectId): OrderDTO {
@@ -47,29 +50,32 @@ class OrderServiceImpl(
 
     override suspend fun updateOrder(orderID: ObjectId, orderDTO: OrderDTO): OrderDTO {
         val order = orderRepository.findById(orderID) ?: throw IllegalArgumentException("Order not found")
-        val user = ReactiveSecurityContextHolder.getContext().awaitFirst().authentication.principal as UserDetailsDTO
-        if ( ! user.roles!!.contains("ADMIN") && user.id != order.buyer )
-            throw UnauthorizedException("Forbidden")
         order.status = orderDTO.status!!
+        mailService.notifyCustomer(orderDTO.email!!, "Order ${order.id} Notification", order.id.toString(), "UPDATE", order.status )
+        mailService.notifyAdmin("Order ${order.id} Notification", order.id.toString(), "UPDATE", order.status )
         return orderRepository.save(order).toDTO()
     }
 
-    override suspend fun deleteOrder(orderID: ObjectId) {
+    override suspend fun deleteOrder(orderID: ObjectId, orderDTO: OrderDTO) {
         val order = orderRepository.findById(orderID) ?: throw IllegalArgumentException("Order not found")
-        val user = ReactiveSecurityContextHolder.getContext().awaitFirst().authentication.principal as UserDetailsDTO
+        val auth = ReactiveSecurityContextHolder.getContext().awaitFirst().authentication
+        val user = auth.principal as UserDetailsDTO
+        val token = auth.credentials as String
         if ( ! user.roles!!.contains("ADMIN") && user.id != order.buyer )
             throw UnauthorizedException("Forbidden")
         if (order.status != OrderStatus.ISSUED)
             throw InvalidOperationException("You cannot cancel the order anymore")
-        order.status = OrderStatus.CANCELED
-        orderRepository.save(order)
+//        order.status = OrderStatus.CANCELED
+//        orderRepository.save(order)
         CoroutineScope(Dispatchers.Default).launch {
-            orchestrator.createSaga(order.id.toString(), "delete_order")
+            orchestrator.createSaga(order.id.toString(), "delete_order", orderDTO.email!!, auth = token)
         }
     }
 
     override suspend fun createOrder(orderDTO: OrderDTO): OrderDTO {
-        val user = ReactiveSecurityContextHolder.getContext().awaitFirst().authentication.principal as UserDetailsDTO
+        val auth = ReactiveSecurityContextHolder.getContext().awaitFirst().authentication
+        val user = auth.principal as UserDetailsDTO
+        val token = auth.credentials as String
         val order = Order(
             id = null,
             buyer = user.id!!,
@@ -80,8 +86,23 @@ class OrderServiceImpl(
 
         val storedOrder = orderRepository.save(order)
         CoroutineScope(Dispatchers.Default).launch {
-            orchestrator.createSaga(storedOrder.id.toString(), "new_order")
+            orchestrator.createSaga(
+                storedOrder.id.toString(),
+                "new_order",
+                orderDTO.email!!,
+                order.products.map{ BigDecimal(it.amount)
+                    .multiply(it.price)}
+                    .reduce{acc, elem -> acc+elem },
+                token
+            )
         }
+
+//        val fw = FileWriter("boh", true);
+//        val bw = BufferedWriter(fw);
+//        bw.write(storedOrder.id.toString());
+//        bw.newLine();
+//        bw.close()
+
         return storedOrder.toDTO()
     }
 }

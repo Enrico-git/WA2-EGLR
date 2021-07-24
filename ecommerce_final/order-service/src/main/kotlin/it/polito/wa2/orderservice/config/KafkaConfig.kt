@@ -1,5 +1,6 @@
 package it.polito.wa2.orderservice.config
 
+import it.polito.wa2.orderservice.domain.PaymentRequest
 import org.apache.kafka.clients.consumer.Consumer
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.clients.consumer.KafkaConsumer
@@ -14,6 +15,7 @@ import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory
 import org.springframework.kafka.core.ConsumerFactory
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory
 import org.springframework.kafka.support.serializer.JsonDeserializer
+import org.springframework.kafka.support.serializer.JsonSerializer
 import org.springframework.stereotype.Component
 import java.util.*
 
@@ -39,6 +41,25 @@ class KafkaConfig {
 //        props[ProducerConfig.ISOLATION_LEVEL_CONFIG] = "read_committed"
 //        props[ProducerConfig.ENABLE_AUTO_COMMIT_CONFIG] = false
         return KafkaProducer<String, String>(props)
+    }
+
+    @Bean
+    fun getPaymentRequestProducer(): KafkaProducer<String, PaymentRequest> {
+        val props = Properties()
+        props[ProducerConfig.BOOTSTRAP_SERVERS_CONFIG] = bootstrapAddress!!
+        props[ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG] =
+            StringSerializer::class.java
+        props[ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG] =
+            JsonSerializer::class.java
+        props[ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG] = true
+        props[ProducerConfig.MAX_IN_FLIGHT_REQUESTS_PER_CONNECTION] = "5"
+        props[ProducerConfig.RETRIES_CONFIG] = "2"
+        props[ProducerConfig.ACKS_CONFIG] = "all"
+        props[ProducerConfig.CLIENT_ID_CONFIG] = "order_service_payment_req_producer"
+//        props[JsonSerializer.TYPE_MAPPINGS] = "payment_done:it.polito.wa2.orderservice.domain.PaymentRequest"
+//        props[ProducerConfig.ISOLATION_LEVEL_CONFIG] = "read_committed"
+//        props[ProducerConfig.ENABLE_AUTO_COMMIT_CONFIG] = false
+        return KafkaProducer<String, PaymentRequest>(props)
     }
 
 //    @Bean

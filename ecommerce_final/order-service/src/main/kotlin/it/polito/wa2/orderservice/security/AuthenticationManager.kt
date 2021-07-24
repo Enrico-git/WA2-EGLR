@@ -33,7 +33,7 @@ class AuthenticationManager(
                 val userDetailsDTO = jwtUtils.getDetailsFromJwtToken(jwtToken)
                 UsernamePasswordAuthenticationToken(
                     userDetailsDTO,
-                    null,
+                    jwtToken,
                     userDetailsDTO.authorities
                 )
             }

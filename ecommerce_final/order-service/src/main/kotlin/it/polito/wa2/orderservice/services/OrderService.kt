@@ -18,7 +18,7 @@ interface OrderService {
     suspend fun updateOrder(orderID: ObjectId, orderDTO: OrderDTO): OrderDTO
 
     @PreAuthorize("hasAuthority(\"ADMIN\") or hasAuthority(\"CUSTOMER\")")
-    suspend fun deleteOrder(orderID: ObjectId)
+    suspend fun deleteOrder(orderID: ObjectId, orderDTO: OrderDTO)
 
     @PreAuthorize("hasAuthority(\"ADMIN\") or hasAuthority(\"CUSTOMER\")")
     suspend fun createOrder(orderDTO: OrderDTO): OrderDTO

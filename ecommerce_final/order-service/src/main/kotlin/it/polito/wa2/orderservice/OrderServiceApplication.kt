@@ -1,15 +1,13 @@
 package it.polito.wa2.orderservice
 
-import it.polito.wa2.orderservice.domain.OrderJob
 import it.polito.wa2.orderservice.statemachine.StateMachine
 import it.polito.wa2.orderservice.statemachine.StateMachineBuilder
+import kotlinx.coroutines.Job
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.context.annotation.Bean
-import java.util.concurrent.CopyOnWriteArrayList
-import java.util.concurrent.locks.Lock
-import java.util.concurrent.locks.ReentrantLock
+import java.util.concurrent.ConcurrentHashMap
 import java.util.logging.Logger
 
 
@@ -24,7 +22,7 @@ class OrderServiceApplication{
 
         return builder
             .initialState("ORDER_REQ") // order creation request
-            .finalState("ORDER_CREATED") // order issued
+            .finalState("ORDER_ISSUED") // order issued
             .source("ORDER_REQ")
             .target("PROD_AVAILABILITY_REQ")
             .event("reserve_products")
@@ -38,7 +36,7 @@ class OrderServiceApplication{
             .event("payment_request")
             .and()
             .source("PAYMENT_REQ")
-            .target("ORDER_CREATED")
+            .target("ORDER_ISSUED")
             .event("payment_request_ok")
             .and()
 //        rollback
@@ -53,6 +51,10 @@ class OrderServiceApplication{
             .source("PROD_AVAILABILITY_REQ")
             .target("ORDER_REQ")
             .event("abort_products_reservation_ok")
+            .and()
+            .source("PROD_AVAILABILITY_REQ")
+            .target("ORDER_REQ")
+            .event("abort_products_reservation_failed")
             .and()
             .source("PROD_AVAILABILITY_REQ")
             .target("ORDER_REQ")
@@ -86,13 +88,17 @@ class OrderServiceApplication{
             .source("ABORT_PAYMENT_REQ")
             .target("CANCEL_ORDER_REQ")
             .event("abort_payment_request_failed")
+            .and()
+            .source("ABORT_PROD_RESERVATION_REQ")
+            .target("ORDER_CANCELED")
+            .event("abort_products_reservation_failed")
     }
 
     @Bean
-    fun getJobsList(): CopyOnWriteArrayList<OrderJob> = CopyOnWriteArrayList()
+    fun getJobsList(): ConcurrentHashMap<String, Job> = ConcurrentHashMap()
 
     @Bean
-    fun getSagasList(): CopyOnWriteArrayList<StateMachine> = CopyOnWriteArrayList()
+    fun getSagasList(): ConcurrentHashMap<String, StateMachine> = ConcurrentHashMap()
 
 }
 

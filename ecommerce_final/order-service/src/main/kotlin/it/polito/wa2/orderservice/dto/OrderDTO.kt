@@ -10,6 +10,7 @@ data class OrderDTO(
     val buyer: ObjectId?,
     val products: Set<Product>?,
     val delivery: Delivery?,
-    val status: OrderStatus?
+    val status: OrderStatus?,
+    val email: String? = null
 )
 

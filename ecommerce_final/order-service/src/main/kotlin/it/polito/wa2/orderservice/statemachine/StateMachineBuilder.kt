@@ -4,12 +4,16 @@ import it.polito.wa2.orderservice.domain.Transition
 import org.bson.types.ObjectId
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Component
+import java.math.BigDecimal
 
 @Component
 class StateMachineBuilder(private val applicationEventPublisher: ApplicationEventPublisher){
     lateinit var initialState: String
     lateinit var finalState: String
     lateinit var id: String
+    lateinit var customerEmail: String
+    lateinit var auth: String
+    var amount: BigDecimal? = null
     var transitions: MutableList<Transition> = mutableListOf(Transition(null, null, null, null))
 
     fun initialState(source: String): StateMachineBuilder{
@@ -23,6 +27,21 @@ class StateMachineBuilder(private val applicationEventPublisher: ApplicationEven
 
     fun id(newId: String): StateMachineBuilder{
         id = newId
+        return this
+    }
+
+    fun customerEmail(email: String): StateMachineBuilder{
+        customerEmail = email
+        return this
+    }
+
+    fun amount(newAmount: BigDecimal): StateMachineBuilder{
+        amount = newAmount
+        return this
+    }
+
+    fun auth(token: String): StateMachineBuilder{
+        auth = token
         return this
     }
 
@@ -51,6 +70,17 @@ class StateMachineBuilder(private val applicationEventPublisher: ApplicationEven
         return this
     }
 
-    fun build() = StateMachine(initialState, finalState, transitions, null, id, applicationEventPublisher = applicationEventPublisher)
+    fun build() = StateMachine(initialState,
+        finalState,
+        transitions,
+        null,
+        id,
+        false,
+    false,
+        customerEmail,
+        amount,
+        auth,
+        applicationEventPublisher
+    )
 
 }

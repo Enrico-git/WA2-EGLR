@@ -8,6 +8,7 @@ import org.springframework.context.ApplicationEvent
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.context.annotation.Scope
 import org.springframework.stereotype.Component
+import java.math.BigDecimal
 
 @Component
 @Scope("prototype")
@@ -18,6 +19,9 @@ class StateMachine(val initialState: String = "",
                    val id: String = "",
                    var failed: Boolean? = false,
                    var completed: Boolean? = false,
+                   val customerEmail: String,
+                   val amount: BigDecimal? = null,
+                   val auth: String,
                    private val applicationEventPublisher: ApplicationEventPublisher
 ) {
     init {

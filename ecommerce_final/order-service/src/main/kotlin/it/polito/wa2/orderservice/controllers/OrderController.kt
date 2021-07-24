@@ -60,11 +60,11 @@ class OrderController(
      */
      @DeleteMapping("/{orderID}")
      @ResponseStatus(HttpStatus.NO_CONTENT)
-     suspend fun deleteOrderByID(@PathVariable orderID: ObjectId) {
+     suspend fun deleteOrderByID(@PathVariable orderID: ObjectId, @RequestBody orderDTO: OrderDTO) {
         var counter = 5
         while (counter-- > 0){
             try {
-                return orderService.deleteOrder(orderID)
+                return orderService.deleteOrder(orderID, orderDTO)
             }
             catch(e: OptimisticLockingFailureException){
                 delay(1000)

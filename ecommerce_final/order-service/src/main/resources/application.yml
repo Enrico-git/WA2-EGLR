@@ -1,4 +1,16 @@
 spring:
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: eglrgroup9@gmail.com
+    password: z5i59QRJLwpAyxT
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+        debug: true
   data:
     mongodb:
   #      change to container name when you spawn the jar
@@ -14,6 +26,8 @@ spring:
       name: order-service
       password: order-service
 application:
+  admin:
+    email: eglrgroup9@gmail.com
   jwt:
     jwtSecret: that_depends_a_good_deal_on_where_you_want_to_get_to_then_it_doesnt_much_matter_which_way_you_go
     jwtExpirationMs: 1800000
