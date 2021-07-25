@@ -1,6 +1,7 @@
 package it.polito.wa2.walletservice.dto
 
 import it.polito.wa2.walletservice.entities.Transaction
+import it.polito.wa2.walletservice.entities.TransactionDescription
 import org.bson.types.ObjectId
 import java.math.BigDecimal
 import java.sql.Timestamp
@@ -10,12 +11,9 @@ class TransactionDTO(
     var timestamp: Timestamp?,
     var walletID: String?,
     val amount: BigDecimal,
+    val description: String,
     val orderID: String,
-){
-    override fun toString(): String {
-        return "{id: $id, timestamp: $timestamp, walletID: $walletID, amount: $amount, orderID: $orderID}"
-    }
-}
+)
 
 //createTransaction receive DTO and to perform 'save' need an entity
 fun TransactionDTO.toEntity() = Transaction(
@@ -23,5 +21,6 @@ fun TransactionDTO.toEntity() = Transaction(
     timestamp = timestamp!!,
     walletID = ObjectId(walletID),
     amount = amount,
+    description = TransactionDescription.valueOf(description),
     orderID = ObjectId(orderID)
 )

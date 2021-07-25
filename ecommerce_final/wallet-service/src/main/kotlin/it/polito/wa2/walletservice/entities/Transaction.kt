@@ -7,6 +7,11 @@ import org.springframework.data.mongodb.core.mapping.Document
 import java.math.BigDecimal
 import java.sql.Timestamp
 
+
+enum class TransactionDescription {
+    REFUND, RECHARGE, PAYMENT
+}
+
 @Document(collection = "transactions")
 data class Transaction (
     @Id
@@ -14,7 +19,8 @@ data class Transaction (
     val timestamp: Timestamp,
     val walletID: ObjectId,
     var amount: BigDecimal = BigDecimal(0.0),
-    val orderID: ObjectId, //also recharge reference in case of refund //TODO ObjectId or Order (aggregation)
+    val description: TransactionDescription,
+    val orderID: ObjectId, //also recharge reference //TODO ObjectId or Order ? (aggregation)
 )
 
 fun Transaction.toDTO() = TransactionDTO(
@@ -22,6 +28,7 @@ fun Transaction.toDTO() = TransactionDTO(
     timestamp = timestamp,
     walletID = walletID.toString(),
     amount = amount,
+    description = description.name,
     orderID = orderID.toString()
 )
 

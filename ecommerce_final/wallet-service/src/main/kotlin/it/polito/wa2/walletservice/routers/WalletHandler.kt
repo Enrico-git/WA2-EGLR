@@ -34,6 +34,12 @@ class WalletHandler(
             .bodyValueAndAwait(walletService.createWallet(walletDTO))
     }
 
+    /**
+     * Please notice that the wallet must have some money (balance)
+     * So the customer has to **recharge** the wallet.
+     * For doing so, the admin calls this end-point.
+     * For *Payment* or *Refund* (compensative transaction) it will be used Kafka instead.
+     */
     suspend fun createTransaction(request: ServerRequest): ServerResponse{
         val walletID = request.pathVariable("walletID")
         val transactionDTO = request.awaitBody(TransactionDTO::class)

@@ -7,7 +7,7 @@ import java.math.BigDecimal
 data class WalletDTO(
     var id: String?,
     val balance: BigDecimal,
-    val userID: String, //TODO how to map nested object ? ObjectId or User?
+    val userID: String,
     //val transactions: Set<String> // use specific end-point for retrieve walletTransactions!!!
 )
 

@@ -14,7 +14,7 @@ interface WalletService {
     @PreAuthorize("hasAuthority(\"ADMIN\")")
     suspend fun createWallet(walletDTO: WalletDTO): WalletDTO
 
-    @PreAuthorizeCustomerOrAdmin
+    @PreAuthorize("hasAuthority(\"ADMIN\")") // recharge wallet
     suspend fun createTransaction(walletID: String, transactionDTO: TransactionDTO): TransactionDTO
 
     @PreAuthorizeCustomerOrAdmin
