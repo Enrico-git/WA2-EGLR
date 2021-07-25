@@ -19,13 +19,16 @@ spring:
       username: orderservice
       password: orderservice
       authentication-database: admin
-      #      database: orderservice
+      database: orderservice
 
   security:
     user:
       name: order-service
       password: order-service
 application:
+  kafka:
+#    in ms
+    retryDelay: 5000
   admin:
     email: eglrgroup9@gmail.com
   jwt:

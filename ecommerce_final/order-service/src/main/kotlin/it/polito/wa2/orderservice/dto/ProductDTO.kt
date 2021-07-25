@@ -1,10 +1,9 @@
 package it.polito.wa2.orderservice.dto
 
-import org.bson.types.ObjectId
 import java.math.BigDecimal
 
 data class ProductDTO (
-    val id: ObjectId,
+    val id: String,
     val amount: Int,
-    val price: BigDecimal
+    val price: BigDecimal? = null
 )

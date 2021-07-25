@@ -1,12 +1,16 @@
 package it.polito.wa2.orderservice
 
+import it.polito.wa2.orderservice.common.StateMachineEvents
+import it.polito.wa2.orderservice.common.StateMachineStates
 import it.polito.wa2.orderservice.statemachine.StateMachine
 import it.polito.wa2.orderservice.statemachine.StateMachineBuilder
 import kotlinx.coroutines.Job
+import org.bson.types.ObjectId
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.context.annotation.Bean
+import org.springframework.context.annotation.Configuration
 import java.util.concurrent.ConcurrentHashMap
 import java.util.logging.Logger
 
@@ -21,44 +25,44 @@ class OrderServiceApplication{
         val builder = StateMachineBuilder(applicationEventPublisher)
 
         return builder
-            .initialState("ORDER_REQ") // order creation request
-            .finalState("ORDER_ISSUED") // order issued
-            .source("ORDER_REQ")
-            .target("PROD_AVAILABILITY_REQ")
-            .event("reserve_products")
+            .initialState(StateMachineStates.ORDER_REQ) // order creation request
+            .finalState(StateMachineStates.ORDER_ISSUED) // order issued
+            .source(StateMachineStates.ORDER_REQ)
+            .target(StateMachineStates.PROD_AVAILABILITY_REQ)
+            .event(StateMachineEvents.RESERVE_PRODUCTS)
             .and()
-            .source("PROD_AVAILABILITY_REQ")
-            .target("PROD_AVAILABILITY_OK")
-            .event("reserve_products_ok")
+            .source(StateMachineStates.PROD_AVAILABILITY_REQ)
+            .target(StateMachineStates.PROD_AVAILABILITY_OK)
+            .event(StateMachineEvents.RESERVE_PRODUCTS_OK)
             .and()
-            .source("PROD_AVAILABILITY_OK")
-            .target("PAYMENT_REQ")
-            .event("payment_request")
+            .source(StateMachineStates.PROD_AVAILABILITY_OK)
+            .target(StateMachineStates.PAYMENT_REQ)
+            .event(StateMachineEvents.PAYMENT_REQUEST)
             .and()
-            .source("PAYMENT_REQ")
-            .target("ORDER_ISSUED")
-            .event("payment_request_ok")
+            .source(StateMachineStates.PAYMENT_REQ)
+            .target(StateMachineStates.ORDER_ISSUED)
+            .event(StateMachineEvents.PAYMENT_REQUEST_OK)
             .and()
 //        rollback
-            .source("PAYMENT_REQ")
-            .target("PROD_AVAILABILITY_OK")
-            .event("payment_request_failed")
+            .source(StateMachineStates.PAYMENT_REQ)
+            .target(StateMachineStates.PROD_AVAILABILITY_OK)
+            .event(StateMachineEvents.PAYMENT_REQUEST_FAILED)
             .and()
-            .source("PROD_AVAILABILITY_OK")
-            .target("PROD_AVAILABILITY_REQ")
-            .event("abort_products_reservation")
+            .source(StateMachineStates.PROD_AVAILABILITY_OK)
+            .target(StateMachineStates.PROD_AVAILABILITY_REQ)
+            .event(StateMachineEvents.ABORT_PRODUCTS_RESERVATION)
             .and()
-            .source("PROD_AVAILABILITY_REQ")
-            .target("ORDER_REQ")
-            .event("abort_products_reservation_ok")
+            .source(StateMachineStates.PROD_AVAILABILITY_REQ)
+            .target(StateMachineStates.ORDER_REQ)
+            .event(StateMachineEvents.ABORT_PRODUCTS_RESERVATION_OK)
             .and()
-            .source("PROD_AVAILABILITY_REQ")
-            .target("ORDER_REQ")
-            .event("abort_products_reservation_failed")
+            .source(StateMachineStates.PROD_AVAILABILITY_REQ)
+            .target(StateMachineStates.ORDER_REQ)
+            .event(StateMachineEvents.ABORT_PRODUCTS_RESERVATION_FAILED)
             .and()
-            .source("PROD_AVAILABILITY_REQ")
-            .target("ORDER_REQ")
-            .event("reserve_products_failed")
+            .source(StateMachineStates.PROD_AVAILABILITY_REQ)
+            .target(StateMachineStates.ORDER_REQ)
+            .event(StateMachineEvents.RESERVE_PRODUCTS_FAILED)
     }
 
     @Bean(name=["delete_order_sm"])
@@ -66,32 +70,32 @@ class OrderServiceApplication{
         val builder = StateMachineBuilder(applicationEventPublisher)
 
         return builder
-            .initialState("CANCEL_ORDER_REQ") // abort order req
-            .finalState("ORDER_CANCELED") // order aborted successfully
-            .source("CANCEL_ORDER_REQ")
-            .target("ABORT_PAYMENT_REQ")
-            .event("abort_payment_request")
+            .initialState(StateMachineStates.CANCEL_ORDER_REQ) // abort order req
+            .finalState(StateMachineStates.ORDER_CANCELED) // order aborted successfully
+            .source(StateMachineStates.CANCEL_ORDER_REQ)
+            .target(StateMachineStates.ABORT_PAYMENT_REQ)
+            .event(StateMachineEvents.ABORT_PAYMENT_REQUEST)
             .and()
-            .source("ABORT_PAYMENT_REQ")
-            .target("ABORT_PAYMENT_REQ_OK")
-            .event("abort_payment_request_ok")
+            .source(StateMachineStates.ABORT_PAYMENT_REQ)
+            .target(StateMachineStates.ABORT_PAYMENT_REQ_OK)
+            .event(StateMachineEvents.ABORT_PAYMENT_REQUEST_OK)
             .and()
-            .source("ABORT_PAYMENT_REQ_OK")
-            .target("ABORT_PROD_RESERVATION_REQ")
-            .event("abort_products_reservation")
+            .source(StateMachineStates.ABORT_PAYMENT_REQ_OK)
+            .target(StateMachineStates.ABORT_PROD_RESERVATION_REQ)
+            .event(StateMachineEvents.ABORT_PRODUCTS_RESERVATION)
             .and()
-            .source("ABORT_PROD_RESERVATION_REQ")
-            .target("ORDER_CANCELED")
-            .event("abort_products_reservation_ok")
+            .source(StateMachineStates.ABORT_PROD_RESERVATION_REQ)
+            .target(StateMachineStates.ORDER_CANCELED)
+            .event(StateMachineEvents.ABORT_PRODUCTS_RESERVATION_OK)
 //        rollback
             .and()
-            .source("ABORT_PAYMENT_REQ")
-            .target("CANCEL_ORDER_REQ")
-            .event("abort_payment_request_failed")
+            .source(StateMachineStates.ABORT_PAYMENT_REQ)
+            .target(StateMachineStates.CANCEL_ORDER_REQ)
+            .event(StateMachineEvents.ABORT_PAYMENT_REQUEST_FAILED)
             .and()
-            .source("ABORT_PROD_RESERVATION_REQ")
-            .target("ORDER_CANCELED")
-            .event("abort_products_reservation_failed")
+            .source(StateMachineStates.ABORT_PROD_RESERVATION_REQ)
+            .target(StateMachineStates.ORDER_CANCELED)
+            .event(StateMachineEvents.ABORT_PRODUCTS_RESERVATION_FAILED)
     }
 
     @Bean

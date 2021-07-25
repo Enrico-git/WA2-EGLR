@@ -8,6 +8,11 @@ import org.springframework.core.task.SimpleAsyncTaskExecutor
 
 @Configuration
 class EventListenerConfig {
+
+    /**
+     * Make the event listeners async
+     * @return the application event multicaster
+     */
     @Bean(name = ["applicationEventMulticaster"])
     fun simpleApplicationEventMulticaster(): ApplicationEventMulticaster {
         val eventMulticaster = SimpleApplicationEventMulticaster()

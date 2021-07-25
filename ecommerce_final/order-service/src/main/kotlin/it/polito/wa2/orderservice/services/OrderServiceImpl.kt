@@ -5,6 +5,7 @@ import it.polito.wa2.orderservice.domain.Order
 import it.polito.wa2.orderservice.domain.Product
 import it.polito.wa2.orderservice.domain.toDTO
 import it.polito.wa2.orderservice.dto.OrderDTO
+import it.polito.wa2.orderservice.dto.SagaDTO
 import it.polito.wa2.orderservice.dto.UserDetailsDTO
 import it.polito.wa2.orderservice.exceptions.InvalidOperationException
 import it.polito.wa2.orderservice.exceptions.NotFoundException
@@ -65,10 +66,16 @@ class OrderServiceImpl(
             throw UnauthorizedException("Forbidden")
         if (order.status != OrderStatus.ISSUED)
             throw InvalidOperationException("You cannot cancel the order anymore")
-//        order.status = OrderStatus.CANCELED
-//        orderRepository.save(order)
         CoroutineScope(Dispatchers.Default).launch {
-            orchestrator.createSaga(order.id.toString(), "delete_order", orderDTO.email!!, auth = token)
+            orchestrator.createSaga(SagaDTO(
+                id = order.id.toString(),
+                type = "delete_order",
+                customerEmail = orderDTO.email!!,
+                amount = order.products.map{ BigDecimal(it.amount).multiply(it.price) }
+                    .reduce{acc, elem -> acc+elem },
+                productsWarehouseLocation = order.delivery!!.productsWarehouseLocation,
+                auth = token
+            ))
         }
     }
 
@@ -86,15 +93,16 @@ class OrderServiceImpl(
 
         val storedOrder = orderRepository.save(order)
         CoroutineScope(Dispatchers.Default).launch {
-            orchestrator.createSaga(
-                storedOrder.id.toString(),
-                "new_order",
-                orderDTO.email!!,
-                order.products.map{ BigDecimal(it.amount)
+            orchestrator.createSaga(SagaDTO(
+                id = storedOrder.id.toString(),
+                type = "new_order",
+                customerEmail = orderDTO.email!!,
+                amount = order.products.map{ BigDecimal(it.amount)
                     .multiply(it.price)}
                     .reduce{acc, elem -> acc+elem },
-                token
-            )
+                products = order.products.map { it.toDTO() }.toHashSet(),
+                auth = token
+            ))
         }
 
 //        val fw = FileWriter("boh", true);

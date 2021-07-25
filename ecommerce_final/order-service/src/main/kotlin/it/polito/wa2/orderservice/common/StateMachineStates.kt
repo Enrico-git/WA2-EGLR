@@ -1,0 +1,15 @@
+package it.polito.wa2.orderservice.common
+
+enum class StateMachineStates {
+    ORDER_REQ,
+    ORDER_ISSUED,
+    PROD_AVAILABILITY_REQ,
+    PROD_AVAILABILITY_OK,
+    PAYMENT_REQ,
+    CANCEL_ORDER_REQ,
+    ORDER_CANCELED,
+    ABORT_PAYMENT_REQ,
+    ABORT_PAYMENT_REQ_OK,
+    ABORT_PROD_RESERVATION_REQ,
+
+}
