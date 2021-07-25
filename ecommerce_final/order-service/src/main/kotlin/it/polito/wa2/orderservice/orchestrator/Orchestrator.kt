@@ -1,7 +1,11 @@
 package it.polito.wa2.orderservice.orchestrator
 
 import it.polito.wa2.orderservice.common.OrderStatus
-import it.polito.wa2.orderservice.domain.PaymentRequest
+import it.polito.wa2.orderservice.common.StateMachineEvents
+import it.polito.wa2.orderservice.common.StateMachineStates
+import it.polito.wa2.orderservice.domain.Product
+import it.polito.wa2.orderservice.domain.ProductLocation
+import it.polito.wa2.orderservice.dto.*
 import it.polito.wa2.orderservice.events.KafkaResponseReceivedEventInResponseTo
 import it.polito.wa2.orderservice.events.SagaFailureEvent
 import it.polito.wa2.orderservice.events.SagaFinishedEvent
@@ -22,37 +26,30 @@ import org.springframework.context.annotation.Lazy
 import org.springframework.context.event.EventListener
 import org.springframework.kafka.annotation.KafkaListener
 import org.springframework.stereotype.Component
-import java.math.BigDecimal
 import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.CopyOnWriteArrayList
 import java.util.logging.Logger
 
 @Component
 class Orchestrator(
     @Qualifier("new_order_sm") private val stateMachineBuilder: StateMachineBuilder,
     @Qualifier("delete_order_sm") private val deleteOrderstateMachineBuilder: StateMachineBuilder,
-    private val kafkaProducer: KafkaProducer<String, String>,
-    private val kafkaPaymentReqProducer: KafkaProducer<String, PaymentRequest>,
+    private val kafkaPaymentReqProducer: KafkaProducer<String, PaymentRequestDTO>,
+    private val kafkaProdResReqProducer: KafkaProducer<String, ProductsReservationRequestDTO>,
+    private val kafkaAbortProdResReqProducer: KafkaProducer<String, AbortProductReservationRequestDTO>,
     private val applicationEventPublisher: ApplicationEventPublisher,
     private val orderRepository: OrderRepository,
     private val jobs: ConcurrentHashMap<String, Job>,
     private val logger: Logger,
     private val mailService: MailServiceImpl
 ) {
-
+    @Value("\${application.kafka.retryDelay}")
+    val delay: Long = 0
 
     @Lookup
     @Lazy
     fun getListOfStateMachine(): ConcurrentHashMap<String, StateMachine> {
         return null!!
     }
-
-    //    TODO THIS IS FOR DEBEZIUM
-//    @KafkaListener(topics = ["orders_ok"])
-//    fun debezium_test(msg: String){
-//        println("New Message: $msg")
-//    }
-
 
     @KafkaListener(topics = [
         "reserve_products_ok",
@@ -66,7 +63,7 @@ class Orchestrator(
     ])
     fun receivedEvent(event: String) = CoroutineScope(Dispatchers.IO).launch {
         val sagas = getListOfStateMachine()
-        val sagaEvent = event.substringAfter("-")
+        val sagaEvent = StateMachineEvents.valueOf(event.substringAfter("-").uppercase())
         val sagaID = event.substringBefore("-")
         val saga = sagas[sagaID]
         val transition = saga?.transitions?.find{it.source == saga.state && it.event == sagaEvent}
@@ -74,124 +71,159 @@ class Orchestrator(
         saga?.send(transition?.event!!)
     }
 
-    suspend fun createSaga(id: String, type: String, customerEmail: String, amount: BigDecimal? = null, auth: String) {
+    suspend fun createSaga(sagaDTO: SagaDTO) {
         val sagas = getListOfStateMachine()
-        val stateMachine = if (type == "new_order")
-            stateMachineBuilder.id(id).amount(amount!!).auth(auth).customerEmail(customerEmail).build()
+        val stateMachine = if (sagaDTO.type == "new_order")
+            stateMachineBuilder
+                .id(sagaDTO.id)
+                .amount(sagaDTO.amount)
+                .products(sagaDTO.products!!)
+                .auth(sagaDTO.auth)
+                .customerEmail(sagaDTO.customerEmail)
+                .build()
         else
-            deleteOrderstateMachineBuilder.id(id).auth(auth).customerEmail(customerEmail).build()
+            deleteOrderstateMachineBuilder
+                .id(sagaDTO.id)
+                .amount(sagaDTO.amount)
+                .productsWarehouseLocation(sagaDTO.productsWarehouseLocation!!)
+                .auth(sagaDTO.auth)
+                .customerEmail(sagaDTO.customerEmail)
+                .build()
         stateMachine.start()
-        sagas[id] = stateMachine
-        if (type == "new_order")
-            stateMachine.send("reserve_products")
+        sagas[sagaDTO.id] = stateMachine
+        if (sagaDTO.type == "new_order")
+            stateMachine.send(StateMachineEvents.RESERVE_PRODUCTS)
         else
-            stateMachine.send("abort_payment_request")
+            stateMachine.send(StateMachineEvents.ABORT_PAYMENT_REQUEST)
         logger.info("STATE MACHINE ${stateMachine.id} STARTED")
     }
 
     @EventListener
     fun onStateMachineEvent(event: StateMachineEvent) {
         val sm = event.source as StateMachine
-        when (event.event.substringAfter("-")) {
-            "reserve_products" -> jobs["${sm.id}-reserve_products"] = CoroutineScope(Dispatchers.IO).launch {
+        when (StateMachineEvents.valueOf(event.event.substringAfter("-"))) {
+            StateMachineEvents.RESERVE_PRODUCTS -> jobs["${sm.id}-${StateMachineEvents.RESERVE_PRODUCTS}"] = CoroutineScope(Dispatchers.IO).launch {
                 repeat(5) {
                     if (isActive)
                         try {
-                            kafkaProducer.send(ProducerRecord("reserve_products", event.event))
-                            delay(5000)
-
+                            kafkaProdResReqProducer.send(ProducerRecord("reserve_products", ProductsReservationRequestDTO(
+                                orderID = sm.id,
+                                products = sm.products!!
+                            )))
+                            delay(delay)
                         } catch (e: CancellationException) {
                             return@launch
                         }
                 }
-                sm.send("reserve_products_failed")
+                sm.send(StateMachineEvents.RESERVE_PRODUCTS_FAILED)
             }
-            "reserve_products_ok" -> CoroutineScope(Dispatchers.Default).launch {
-                applicationEventPublisher.publishEvent(KafkaResponseReceivedEventInResponseTo(sm, "reserve_products"))
-                sm.send("payment_request")
+            StateMachineEvents.RESERVE_PRODUCTS_OK -> CoroutineScope(Dispatchers.IO).launch {
+                applicationEventPublisher.publishEvent(KafkaResponseReceivedEventInResponseTo(sm, StateMachineEvents.RESERVE_PRODUCTS))
+                CoroutineScope(Dispatchers.IO).launch {
+                    val order = orderRepository.findById(ObjectId(sm.id))!!
+//                    TODO hardcoded warehouse response NEED FIX
+                    order.delivery!!.productsWarehouseLocation = setOf(ProductLocation("boh", "wh1", 2))
+                    try{
+                        orderRepository.save(order)
+                    } catch (e: Exception){
+                        logger.severe("Could not add products location of order ${sm.id}")
+                    }
+                }
+                sm.send(StateMachineEvents.PAYMENT_REQUEST)
             }
-            "reserve_products_failed" ->{
-                applicationEventPublisher.publishEvent(KafkaResponseReceivedEventInResponseTo(sm, "reserve_products"))
+            StateMachineEvents.RESERVE_PRODUCTS_FAILED ->{
+                applicationEventPublisher.publishEvent(KafkaResponseReceivedEventInResponseTo(sm, StateMachineEvents.RESERVE_PRODUCTS))
             }
-            "payment_request" -> jobs["${sm.id}-payment_request"] = CoroutineScope(Dispatchers.IO).launch {
+            StateMachineEvents.PAYMENT_REQUEST -> jobs["${sm.id}-${StateMachineEvents.PAYMENT_REQUEST}"] = CoroutineScope(Dispatchers.IO).launch {
                 repeat(5) {
                     if (isActive)
                         try {
-//                            kafkaProducer.send(ProducerRecord("payment_request", event.event))
-                            kafkaPaymentReqProducer.send(ProducerRecord("payment_request", PaymentRequest(sm.id, sm.amount!!, sm.auth  )))
-                            delay(5000)
+                            kafkaPaymentReqProducer.send(ProducerRecord("payment_request", PaymentRequestDTO(sm.id, sm.amount, sm.auth  )))
+                            delay(delay)
                         } catch (e: CancellationException) {
                             return@launch
                         }
                 }
-                sm.send("payment_request_failed")
+                sm.send(StateMachineEvents.PAYMENT_REQUEST_FAILED)
             }
-            "payment_request_ok" -> {
+            StateMachineEvents.PAYMENT_REQUEST_OK -> {
                 applicationEventPublisher.publishEvent(
                     KafkaResponseReceivedEventInResponseTo(
                         sm,
-                        "payment_request"
+                        StateMachineEvents.PAYMENT_REQUEST
                     )
                 )
             }
-            "payment_request_failed" -> CoroutineScope(Dispatchers.Default).launch {
-                applicationEventPublisher.publishEvent(KafkaResponseReceivedEventInResponseTo(sm, "payment_request"))
-                sm.send("abort_products_reservation")
+            StateMachineEvents.PAYMENT_REQUEST_FAILED -> CoroutineScope(Dispatchers.Default).launch {
+                applicationEventPublisher.publishEvent(KafkaResponseReceivedEventInResponseTo(sm, StateMachineEvents.PAYMENT_REQUEST))
+                sm.send(StateMachineEvents.ABORT_PRODUCTS_RESERVATION)
             }
-            "abort_payment_request" -> jobs["${sm.id}-abort_payment_request"] =
+            StateMachineEvents.ABORT_PAYMENT_REQUEST -> jobs["${sm.id}-${StateMachineEvents.ABORT_PAYMENT_REQUEST}"] =
                     CoroutineScope(Dispatchers.IO).launch {
                         repeat(5) {
                             if (isActive)
                                 try {
-                                    kafkaProducer.send(ProducerRecord("abort_payment_request", event.event))
-                                    delay(5000)
+                                    kafkaPaymentReqProducer.send(ProducerRecord("abort_payment_request", PaymentRequestDTO(
+                                        sm.id,
+                                        sm.amount,
+                                        sm.auth
+                                    )
+                                    ))
+                                    delay(delay)
                                 } catch (e: CancellationException) {
                                     return@launch
                                 }
                         }
-                        sm.send("abort_payment_request_failed")
+                        sm.send(StateMachineEvents.ABORT_PAYMENT_REQUEST_FAILED)
                         logger.severe("ABORT PAYMENT FAILED FOR ORDER ${sm.id}")
                     }
-            "abort_payment_request_ok" -> CoroutineScope(Dispatchers.Default).launch {
+            StateMachineEvents.ABORT_PAYMENT_REQUEST_OK -> CoroutineScope(Dispatchers.Default).launch {
                 applicationEventPublisher.publishEvent(
                     KafkaResponseReceivedEventInResponseTo(
                         sm,
-                        "abort_payment_request"
+                        StateMachineEvents.ABORT_PAYMENT_REQUEST
                     )
                 )
-                sm.send("abort_products_reservation")
+                sm.send(StateMachineEvents.ABORT_PRODUCTS_RESERVATION)
             }
-            "abort_payment_request_failed" -> {
+            StateMachineEvents.ABORT_PAYMENT_REQUEST_FAILED -> {
                 applicationEventPublisher.publishEvent(
                     KafkaResponseReceivedEventInResponseTo(
                         sm,
-                        "abort_payment_request"
+                        StateMachineEvents.ABORT_PAYMENT_REQUEST
                     )
                 )
 
             }
-            "abort_products_reservation" -> jobs["${sm.id}-abort_products_reservation"] =
+            StateMachineEvents.ABORT_PRODUCTS_RESERVATION -> jobs["${sm.id}-${StateMachineEvents.ABORT_PRODUCTS_RESERVATION}"] =
                     CoroutineScope(Dispatchers.IO).launch {
                         repeat(5) {
                             if (isActive)
                                 try {
-                                    kafkaProducer.send(ProducerRecord("abort_products_reservation", event.event))
-                                    delay(5000)
+                                    kafkaAbortProdResReqProducer.send(
+                                        ProducerRecord(
+                                            "abort_products_reservation",
+                                            AbortProductReservationRequestDTO(
+                                                sm.id,
+                                                sm.productsWarehouseLocation!!
+                                        )
+                                        ))
+                                    delay(delay)
                                 } catch (e: CancellationException) {
                                     return@launch
                                 }
                         }
-                        sm.send("abort_products_reservation_failed")
+                        sm.send(StateMachineEvents.ABORT_PRODUCTS_RESERVATION_FAILED)
                     }
-            "abort_products_reservation_ok" -> {
-                applicationEventPublisher.publishEvent(KafkaResponseReceivedEventInResponseTo(sm, "abort_products_reservation"))
+            StateMachineEvents.ABORT_PRODUCTS_RESERVATION_OK -> {
+                applicationEventPublisher.publishEvent(KafkaResponseReceivedEventInResponseTo(sm, StateMachineEvents.ABORT_PRODUCTS_RESERVATION))
             }
-            "abort_products_reservation_failed" -> {
+            StateMachineEvents.ABORT_PRODUCTS_RESERVATION_FAILED -> {
                 logger.severe("COULD NOT ABORT PRODUCTS RESERVATION FOR ORDER ${sm.id}")
                 CoroutineScope(Dispatchers.IO).launch {
                     mailService.notifyAdmin("ORDER ${sm.id} NOTIFICATION", sm.id, "ERROR")
                 }
-                applicationEventPublisher.publishEvent(KafkaResponseReceivedEventInResponseTo(sm, "abort_products_reservation"))
+                applicationEventPublisher.publishEvent(KafkaResponseReceivedEventInResponseTo(sm, StateMachineEvents.ABORT_PRODUCTS_RESERVATION))
             }
         }
     }
@@ -209,13 +241,13 @@ class Orchestrator(
         sm.completed = true
         CoroutineScope(Dispatchers.IO).launch {
             val order = orderRepository.findById(ObjectId(sm.id))
-            if (sm.state!! == "ORDER_ISSUED")
+            if (sm.state!! == StateMachineStates.ORDER_ISSUED)
                 order!!.status = OrderStatus.ISSUED
-            else if (sm.state!! == "ORDER_CANCELED")
+            else if (sm.state!! == StateMachineStates.ORDER_CANCELED)
                 order!!.status = OrderStatus.CANCELED
             orderRepository.save(order!!)
-            mailService.notifyCustomer(sm.customerEmail, "ORDER ${sm.id} NOTIFICATION", sm.id,  sm.finalState.substringAfter("_"))
-            mailService.notifyAdmin("ORDER ${sm.id} NOTIFICATION", sm.id,  sm.finalState.substringAfter("_"))
+            mailService.notifyCustomer(sm.customerEmail, "ORDER ${sm.id} NOTIFICATION", sm.id,  sm.finalState.toString().substringAfter("_"))
+            mailService.notifyAdmin("ORDER ${sm.id} NOTIFICATION", sm.id,  sm.finalState.toString().substringAfter("_"))
         }
         logger.info("SAGA OF ORDER ${sm.id} ENDED SUCCESSFULLY")
     }
@@ -226,13 +258,13 @@ class Orchestrator(
         sm.failed = true
         CoroutineScope(Dispatchers.IO).launch {
             val order = orderRepository.findById(ObjectId(sm.id))
-            if (sm.finalState == "ORDER_ISSUED"){
+            if (sm.finalState == StateMachineStates.ORDER_ISSUED){
                 order!!.status = OrderStatus.FAILED
                 orderRepository.save(order)
                 mailService.notifyCustomer(sm.customerEmail, "ORDER ${sm.id} NOTIFICATION", sm.id,  "ISSUE_FAILED")
                 mailService.notifyAdmin("ORDER ${sm.id} NOTIFICATION", sm.id,  "ISSUE_FAILED")
             }
-            else if (sm.finalState == "ORDER_CANCELED"){
+            else if (sm.finalState == StateMachineStates.ORDER_CANCELED){
                 mailService.notifyCustomer(sm.customerEmail, "ORDER ${sm.id} NOTIFICATION", sm.id,  "CANCELLATION_FAILED")
                 mailService.notifyAdmin("ORDER ${sm.id} NOTIFICATION", sm.id,  "CANCELLATION_FAILED")
             }

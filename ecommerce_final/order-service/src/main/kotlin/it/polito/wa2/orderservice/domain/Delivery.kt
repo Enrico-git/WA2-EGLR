@@ -1,5 +1,7 @@
 package it.polito.wa2.orderservice.domain
 
+import it.polito.wa2.orderservice.domain.ProductLocation
+
 /**
  * Order
  *       id
@@ -10,5 +12,5 @@ package it.polito.wa2.orderservice.domain
  */
 data class Delivery(
         val shippingAddress: String,
-        val productWarehouseLocation: Set<ProductLocation>?
+        var productsWarehouseLocation: Set<ProductLocation>?
 )

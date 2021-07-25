@@ -1,6 +1,10 @@
 package it.polito.wa2.orderservice.statemachine
 
+import it.polito.wa2.orderservice.common.StateMachineEvents
+import it.polito.wa2.orderservice.common.StateMachineStates
+import it.polito.wa2.orderservice.domain.ProductLocation
 import it.polito.wa2.orderservice.domain.Transition
+import it.polito.wa2.orderservice.dto.ProductDTO
 import it.polito.wa2.orderservice.events.SagaFailureEvent
 import it.polito.wa2.orderservice.events.SagaFinishedEvent
 import it.polito.wa2.orderservice.events.StateMachineEvent
@@ -12,21 +16,20 @@ import java.math.BigDecimal
 
 @Component
 @Scope("prototype")
-class StateMachine(val initialState: String = "",
-                   val finalState: String = "",
+class StateMachine(val initialState: StateMachineStates,
+                   val finalState: StateMachineStates,
                    val transitions: MutableList<Transition>,
-                   var state: String? = null,
+                   var state: StateMachineStates? = null,
                    val id: String = "",
                    var failed: Boolean? = false,
                    var completed: Boolean? = false,
                    val customerEmail: String,
-                   val amount: BigDecimal? = null,
+                   val amount: BigDecimal,
+                   val products: Set<ProductDTO>? = null,
+                   val productsWarehouseLocation: Set<ProductLocation>? = null,
                    val auth: String,
                    private val applicationEventPublisher: ApplicationEventPublisher
 ) {
-    init {
-        println("SM INITIATED")
-    }
     fun start(): Boolean{
         state = initialState
         return true
@@ -36,10 +39,14 @@ class StateMachine(val initialState: String = "",
         applicationEventPublisher.publishEvent(event)
     }
 
-    suspend fun send(event: String): Boolean {
+    suspend fun send(event: StateMachineEvents): Boolean {
         val transition = transitions.find{it.source == state && it.event == event}
         println("ID: $id, state $state, event $event")
-        state = transition!!.target
+
+        if (transition == null)
+            return false
+
+        state = transition.target
 
         when (state) {
             finalState -> {

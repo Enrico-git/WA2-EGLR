@@ -1,17 +1,15 @@
 package it.polito.wa2.orderservice.domain
 
 import it.polito.wa2.orderservice.dto.ProductDTO
-import org.bson.types.ObjectId
 import java.math.BigDecimal
 
-class Product(
-    val id: ObjectId?,
+data class Product(
+    val id: String?,
     val amount: Int,
     val price: BigDecimal
 )
 
 fun Product.toDTO() = ProductDTO(
     id = id!!,
-    amount = amount,
-    price = price
+    amount = amount
 )
