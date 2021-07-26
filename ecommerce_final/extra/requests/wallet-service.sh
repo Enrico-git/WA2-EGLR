@@ -26,14 +26,14 @@ curl -i -v -H "Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJyb2xlcyI6IkNVU1RPTU
  curl -i -v -X POST  \
   -H "Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJyb2xlcyI6IkFETUlOIiwic3ViIjoiYWxpY2VfaW5fd29uZGVybGFuZCIsImlhdCI6MTAxNjIzOTAyMiwiZXhwIjo2MDE2MjM5MDIyfQ.UgdtjYTDBh7jt5z-lA3pyVLwdS1fzFwJQqRnaHw8q6yctUkgLzHHfIDRMJYoO5qHq3DISeClH09oRKM92RLVpw" \
   -H "Content-Type: application/json" \
-  -d '{"userID": "60f66fd598f6d22dc03092d4", "balance": 30.33}' \
+  -d '{"userID": "60f66fd598f6d22dc03092d4"}' \
  172.28.240.1:8100/wallets/
 
 #400 Bad request: Denied - CUSTOMER
  curl -i -v -X POST  \
   -H "Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJyb2xlcyI6IkNVU1RPTUVSIiwic3ViIjoiYWxpY2VfaW5fd29uZGVybGFuZCIsImlhdCI6MTUxNjIzOTAyMiwiZXhwIjoxODE2MjM5MDIyfQ.V_ePfXDIFymWiXDs_-599XvNYYwYFMZvsAbAT77UoAIfs9uczLMJLKBXZ-7zVuK0MCJfF8aS7hawYG3vao3yqx" \
   -H "Content-Type: application/json" \
-  -d '{"userID": "60f66fd598f6d22dc03092d4", "balance": 30.33}' \
+  -d '{"userID": "60f66fd598f6d22dc03092d4"}' \
  172.28.240.1:8100/wallets/
 
 ########################################################################
@@ -87,3 +87,10 @@ curl -i -v -H "Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJyb2xlcyI6IkNVU1RPTU
 #404 Not found - Transaction was not found
 curl -i -v -H "Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJyb2xlcyI6IkNVU1RPTUVSIiwic3ViIjoiYWxpY2VfaW5fd29uZGVybGFuZCIsImlhdCI6MTUxNjIzOTAyMiwiZXhwIjoxODE2MjM5MDIyfQ.V_ePfXDIFymWiXDs_-599XvNYYwYFMZvsAbAT77UoAIfs9uczLMJLKBXZ-7zVuK0MCJfF8aS7hawYG3vao3yqx" \
  "172.28.240.1:8100/wallets/60fd6fc3ccf1245470cf12fe/transactions/60fa74dbc00ce9721dde8ced"
+
+################################################################################
+## GET /wallets/ -> MOCK for KAFKA "payment_request" or "abort_payment_request
+################################################################################
+
+curl -i -v -H "Authorization: Bearer eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJyb2xlcyI6IkNVU1RPTUVSIiwic3ViIjoiYWxpY2VfaW5fd29uZGVybGFuZCIsImlhdCI6MTUxNjIzOTAyMiwiZXhwIjoxODE2MjM5MDIyfQ.VOu9FelxRLawUkJIkpJQAH2ESbAacWVQo1JYjyCYoqZPuYEuWhXzLA_g_qxrUeq-e9MIsvVyc6nBeXDXHqS4uw" \
+ "172.28.240.1:8100/wallets/"

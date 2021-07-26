@@ -40,9 +40,14 @@ class RouterConfiguration(
             accept(MediaType.APPLICATION_JSON).nest {
                 GET("/{walletID}", walletHandler::getWallet)
                 POST("/", contentType(MediaType.APPLICATION_JSON), walletHandler::createWallet)
-                POST("/{walletID}/transactions", walletHandler::createTransaction) //TODO with kafka
+                POST("/{walletID}/transactions", walletHandler::createTransaction)
                 GET("/{walletID}/transactions", walletHandler::getAllTransactions)
                 GET("/{walletID}/transactions/{transactionID}", walletHandler::getTransaction)
+
+                //These mocks simulate 'creteTransaction' in kafka done by order-service.
+                //use them in mutual exclusion or provide different path
+                GET("/", walletHandler::mockPaymentRequest)
+                //GET("/", walletHandler::mockAbortPaymentRequest)
             }
         }
         /**

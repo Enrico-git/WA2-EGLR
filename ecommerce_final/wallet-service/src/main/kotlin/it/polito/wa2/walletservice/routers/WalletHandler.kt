@@ -74,4 +74,18 @@ class WalletHandler(
             .json()
             .bodyValueAndAwait(walletService.getTransaction(walletID, transactionID))
     }
+
+    suspend fun mockPaymentRequest(request: ServerRequest): ServerResponse{
+        return ServerResponse
+            .ok()
+            .json()
+            .bodyValueAndAwait(walletService.mockPaymentRequest())
+    }
+
+    suspend fun mockAbortPaymentRequest(request: ServerRequest): ServerResponse{
+        return ServerResponse
+            .ok()
+            .json()
+            .bodyValueAndAwait(walletService.mockAbortPaymentRequest())
+    }
 }

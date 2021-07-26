@@ -22,4 +22,9 @@ interface WalletService {
 
     @PreAuthorizeCustomerOrAdmin
     suspend fun getTransaction(walletID: String, transactionID: String): TransactionDTO
+
+    suspend fun mockPaymentRequest(): String
+
+    suspend fun mockAbortPaymentRequest(): String
+
 }

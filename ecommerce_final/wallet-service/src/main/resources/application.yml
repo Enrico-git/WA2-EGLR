@@ -11,7 +11,12 @@ spring:
 #    mongodb:
 #      host: localhost
 #      port: 27017
+#      username: walletservice
+#      password: walletservice
+#      authentication-database: admin
 #      database: walletservice
+  kafka:
+    bootstrap-servers: "localhost:29092"
 eureka:
   instance:
     hostname: localhost

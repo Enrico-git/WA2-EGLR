@@ -14,6 +14,11 @@ mongo -u walletservice -p walletservice --authenticationDatabase admin
 // run only when previous command is done
 ./script.sh
 
+// list all topics in kafka
+WSL2:$ docker exec kafka kafka-topics --list --zookeeper zookeeper:2181
+
+// delete topics in kafka
+WSL2:$ docker exec kafka kafka-topics --delete --zookeeper zookeeper:2181 --topic <topic_name>
 
 // docker.sh is a script to use docker shortcuts (i.e. stop all containers etc)
 ./docker.sh
