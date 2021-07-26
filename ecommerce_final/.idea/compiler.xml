@@ -3,8 +3,6 @@
   <component name="CompilerConfiguration">
     <bytecodeTargetLevel target="1.6">
       <module name="wallet" target="11" />
-      <module name="wallet.main" target="11" />
-      <module name="wallet.test" target="11" />
     </bytecodeTargetLevel>
   </component>
 </project>
