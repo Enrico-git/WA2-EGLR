@@ -2,6 +2,7 @@ package it.polito.wa2.orderservice
 
 import it.polito.wa2.orderservice.common.StateMachineEvents
 import it.polito.wa2.orderservice.common.StateMachineStates
+import it.polito.wa2.orderservice.repositories.RedisStateMachineRepository
 import it.polito.wa2.orderservice.statemachine.StateMachine
 import it.polito.wa2.orderservice.statemachine.StateMachineBuilder
 import kotlinx.coroutines.Job
@@ -21,8 +22,8 @@ class OrderServiceApplication{
     fun getLogger(): Logger = Logger.getLogger("OrderServiceLogger")
 
     @Bean(name=["new_order_sm"])
-    fun getNewOrderStateMachine(applicationEventPublisher: ApplicationEventPublisher): StateMachineBuilder{
-        val builder = StateMachineBuilder(applicationEventPublisher)
+    fun getNewOrderStateMachine(applicationEventPublisher: ApplicationEventPublisher, redisStateMachineRepository: RedisStateMachineRepository): StateMachineBuilder{
+        val builder = StateMachineBuilder(applicationEventPublisher, redisStateMachineRepository)
 
         return builder
             .initialState(StateMachineStates.ORDER_REQ) // order creation request
@@ -66,8 +67,8 @@ class OrderServiceApplication{
     }
 
     @Bean(name=["delete_order_sm"])
-    fun getDeleteOrderStateMachine(applicationEventPublisher: ApplicationEventPublisher): StateMachineBuilder{
-        val builder = StateMachineBuilder(applicationEventPublisher)
+    fun getDeleteOrderStateMachine(applicationEventPublisher: ApplicationEventPublisher, redisStateMachineRepository: RedisStateMachineRepository): StateMachineBuilder{
+        val builder = StateMachineBuilder(applicationEventPublisher, redisStateMachineRepository)
 
         return builder
             .initialState(StateMachineStates.CANCEL_ORDER_REQ) // abort order req

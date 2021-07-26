@@ -10,7 +10,7 @@ import it.polito.wa2.orderservice.events.KafkaResponseReceivedEventInResponseTo
 import it.polito.wa2.orderservice.events.SagaFailureEvent
 import it.polito.wa2.orderservice.events.SagaFinishedEvent
 import it.polito.wa2.orderservice.events.StateMachineEvent
-import it.polito.wa2.orderservice.repositories.orders.OrderRepository
+import it.polito.wa2.orderservice.repositories.OrderRepository
 import it.polito.wa2.orderservice.services.MailServiceImpl
 import it.polito.wa2.orderservice.statemachine.StateMachine
 import it.polito.wa2.orderservice.statemachine.StateMachineBuilder
@@ -23,6 +23,7 @@ import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.context.annotation.Lazy
+import org.springframework.context.event.ContextRefreshedEvent
 import org.springframework.context.event.EventListener
 import org.springframework.kafka.annotation.KafkaListener
 import org.springframework.stereotype.Component
@@ -51,26 +52,6 @@ class Orchestrator(
         return null!!
     }
 
-    @KafkaListener(topics = [
-        "reserve_products_ok",
-        "reserve_products_failed",
-        "payment_request_failed",
-        "payment_request_ok",
-        "abort_products_reservation_ok",
-        "abort_products_reservation_failed",
-        "abort_payment_request_ok",
-        "abort_payment_request_failed"
-    ])
-    fun receivedEvent(event: String) = CoroutineScope(Dispatchers.IO).launch {
-        val sagas = getListOfStateMachine()
-        val sagaEvent = StateMachineEvents.valueOf(event.substringAfter("-").uppercase())
-        val sagaID = event.substringBefore("-")
-        val saga = sagas[sagaID]
-        val transition = saga?.transitions?.find{it.source == saga.state && it.event == sagaEvent}
-        println("${saga?.id} --- ${saga?.state} --- $sagaEvent ---- trans: $transition")
-        saga?.send(transition?.event!!)
-    }
-
     suspend fun createSaga(sagaDTO: SagaDTO) {
         val sagas = getListOfStateMachine()
         val stateMachine = if (sagaDTO.type == "new_order")
@@ -96,6 +77,26 @@ class Orchestrator(
         else
             stateMachine.send(StateMachineEvents.ABORT_PAYMENT_REQUEST)
         logger.info("STATE MACHINE ${stateMachine.id} STARTED")
+    }
+
+    @KafkaListener(topics = [
+        "reserve_products_ok",
+        "reserve_products_failed",
+        "payment_request_failed",
+        "payment_request_ok",
+        "abort_products_reservation_ok",
+        "abort_products_reservation_failed",
+        "abort_payment_request_ok",
+        "abort_payment_request_failed"
+    ])
+    fun receivedEvent(event: String) = CoroutineScope(Dispatchers.IO).launch {
+        val sagas = getListOfStateMachine()
+        val sagaEvent = StateMachineEvents.valueOf(event.substringAfter("-").uppercase())
+        val sagaID = event.substringBefore("-")
+        val saga = sagas[sagaID]
+        val transition = saga?.transitions?.find{it.source == saga.state && it.event == sagaEvent}
+        println("${saga?.id} --- ${saga?.state} --- $sagaEvent ---- trans: $transition")
+        saga?.send(transition?.event!!)
     }
 
     @EventListener
@@ -238,7 +239,6 @@ class Orchestrator(
     @EventListener
     fun onSagaFinishedEvent(sagaFinishedEvent: SagaFinishedEvent){
         val sm = sagaFinishedEvent.source as StateMachine
-        sm.completed = true
         CoroutineScope(Dispatchers.IO).launch {
             val order = orderRepository.findById(ObjectId(sm.id))
             if (sm.state!! == StateMachineStates.ORDER_ISSUED)
@@ -255,7 +255,6 @@ class Orchestrator(
     @EventListener
     fun onSagaFailureEvent(sagaFailureEvent: SagaFailureEvent){
         val sm = sagaFailureEvent.source as StateMachine
-        sm.failed = true
         CoroutineScope(Dispatchers.IO).launch {
             val order = orderRepository.findById(ObjectId(sm.id))
             if (sm.finalState == StateMachineStates.ORDER_ISSUED){
@@ -272,4 +271,13 @@ class Orchestrator(
         logger.info("SAGA OF ORDER ${sm.id} FAILED ")
     }
 
+    /**
+     * On startup check if there are pending sagas by querying redis
+     * if there are, this service crashed before completing them
+     * @param event the event emitted when all beans are loaded
+     */
+    @EventListener
+    fun onStartUp(event: ContextRefreshedEvent){
+// TODO RESUME STATE MACHINES
+    }
 }

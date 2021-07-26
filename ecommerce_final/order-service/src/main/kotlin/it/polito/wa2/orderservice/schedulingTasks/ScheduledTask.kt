@@ -1,5 +1,7 @@
 package it.polito.wa2.orderservice.schedulingTasks
 
+import it.polito.wa2.orderservice.domain.toRedisStateMachine
+import it.polito.wa2.orderservice.repositories.RedisStateMachineRepository
 import it.polito.wa2.orderservice.statemachine.StateMachine
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -17,7 +19,8 @@ import java.util.logging.Logger
 @EnableScheduling
 class ScheduledTask(
     private val jobs: ConcurrentHashMap<String, Job>,
-    private val logger: Logger
+    private val logger: Logger,
+    private val redisStateMachineRepository: RedisStateMachineRepository
 ) {
     /**
      * Method to get a list of Prototype Beans without dependency injection
@@ -36,7 +39,16 @@ class ScheduledTask(
     fun removeCompletedSagasAndJobs() = CoroutineScope(Dispatchers.Default).launch{
         val sagas = getListOfStateMachine()
         logger.info("BEFORE REMOVED SAGAS: $sagas --- REMOVED JOBS: $jobs")
-        sagas.values.removeIf { it.completed == true || it.failed == true }
+        sagas.values.removeIf {
+            if(it.completed == true || it.failed == true) {
+                CoroutineScope(Dispatchers.IO).launch {
+                    redisStateMachineRepository.remove(it.toRedisStateMachine())
+                }
+                return@removeIf true
+            }
+            return@removeIf false
+        }
+
         jobs.values.removeIf{ it.isCancelled || it.isCompleted}
         logger.info("AFTER REMOVED SAGAS: $sagas --- REMOVED JOBS: $jobs")
         logger.info("SAGAS: $sagas --- JOBS: $jobs")

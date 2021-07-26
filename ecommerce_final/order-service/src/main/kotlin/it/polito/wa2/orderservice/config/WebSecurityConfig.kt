@@ -1,7 +1,7 @@
 package it.polito.wa2.orderservice.config
 
 import it.polito.wa2.orderservice.dto.UserDetailsDTO
-import it.polito.wa2.orderservice.repositories.orders.OrderRepository
+import it.polito.wa2.orderservice.repositories.OrderRepository
 import it.polito.wa2.orderservice.security.AuthenticationManager
 import it.polito.wa2.orderservice.security.SecurityContextRepository
 import org.bson.types.ObjectId

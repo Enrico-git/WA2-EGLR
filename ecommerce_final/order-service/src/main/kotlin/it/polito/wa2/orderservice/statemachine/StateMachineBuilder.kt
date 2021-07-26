@@ -5,19 +5,23 @@ import it.polito.wa2.orderservice.common.StateMachineStates
 import it.polito.wa2.orderservice.domain.ProductLocation
 import it.polito.wa2.orderservice.domain.Transition
 import it.polito.wa2.orderservice.dto.ProductDTO
+import it.polito.wa2.orderservice.repositories.RedisStateMachineRepository
 import org.bson.types.ObjectId
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Component
 import java.math.BigDecimal
 
 @Component
-class StateMachineBuilder(private val applicationEventPublisher: ApplicationEventPublisher){
+class StateMachineBuilder(private val applicationEventPublisher: ApplicationEventPublisher, private val redisStateMachineRepository: RedisStateMachineRepository){
     lateinit var initialState: StateMachineStates
     lateinit var finalState: StateMachineStates
     lateinit var id: String
     lateinit var customerEmail: String
     lateinit var auth: String
     lateinit var amount: BigDecimal
+    var failed: Boolean? = false
+    var completed: Boolean? = false
+    var state: StateMachineStates? = null
     var products: Set<ProductDTO>? = null
     var productsWarehouseLocation: Set<ProductLocation>? = null
     var transitions: MutableList<Transition> = mutableListOf(Transition(null, null, null, null))
@@ -31,6 +35,11 @@ class StateMachineBuilder(private val applicationEventPublisher: ApplicationEven
         return this
     }
 
+    fun state(newState: StateMachineStates?): StateMachineBuilder{
+        state = newState
+        return this
+    }
+
     fun id(newId: String): StateMachineBuilder{
         id = newId
         return this
@@ -41,12 +50,12 @@ class StateMachineBuilder(private val applicationEventPublisher: ApplicationEven
         return this
     }
 
-    fun products(newProducts: Set<ProductDTO>): StateMachineBuilder{
+    fun products(newProducts: Set<ProductDTO>?): StateMachineBuilder{
         products = newProducts
         return this
     }
 
-    fun productsWarehouseLocation(newProductsWarehouseLocation: Set<ProductLocation>): StateMachineBuilder{
+    fun productsWarehouseLocation(newProductsWarehouseLocation: Set<ProductLocation>?): StateMachineBuilder{
         productsWarehouseLocation = newProductsWarehouseLocation
         return this
     }
@@ -76,6 +85,15 @@ class StateMachineBuilder(private val applicationEventPublisher: ApplicationEven
         return this
     }
 
+    fun failed(newFailed: Boolean?): StateMachineBuilder{
+        failed = newFailed
+        return this
+    }
+    fun completed(newCompleted: Boolean?): StateMachineBuilder{
+        completed = newCompleted
+        return this
+    }
+
     fun action(action: (() -> Any?)?): StateMachineBuilder{
         transitions.last().action = action
         return this
@@ -98,7 +116,8 @@ class StateMachineBuilder(private val applicationEventPublisher: ApplicationEven
         products,
         productsWarehouseLocation,
         auth,
-        applicationEventPublisher
+        applicationEventPublisher,
+        redisStateMachineRepository
     )
 
 }

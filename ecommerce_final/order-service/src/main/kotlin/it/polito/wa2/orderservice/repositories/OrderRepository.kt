@@ -1,4 +1,4 @@
-package it.polito.wa2.orderservice.repositories.orders
+package it.polito.wa2.orderservice.repositories
 
 import it.polito.wa2.orderservice.domain.Order
 import kotlinx.coroutines.flow.Flow
