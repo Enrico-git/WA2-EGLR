@@ -6,7 +6,7 @@ import java.math.BigDecimal
 
 data class WalletDTO(
     var id: String?,
-    val balance: BigDecimal,
+    val balance: BigDecimal = BigDecimal(0),
     val userID: String,
     //val transactions: Set<String> // use specific end-point for retrieve walletTransactions!!!
 )
