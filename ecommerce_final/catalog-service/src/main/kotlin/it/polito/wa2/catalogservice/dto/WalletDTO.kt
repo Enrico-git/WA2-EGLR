@@ -1,11 +1,10 @@
 package it.polito.wa2.catalogservice.dto
 
-import org.bson.types.ObjectId
 import java.math.BigDecimal
 
 data class WalletDTO(
-    val id: ObjectId,
+    val id: String?,
     val balance: BigDecimal,
-    val userID: ObjectId, //TODO how to map nested object ? ObjectId or User
-    val transactions: Set<ObjectId> // ObjectId or Set<Transaction> ?
+    val userID: String, //TODO how to map nested object ? ObjectId or User
+    //val transactions: Set<ObjectId> // ObjectId or Set<Transaction> ?
 )
