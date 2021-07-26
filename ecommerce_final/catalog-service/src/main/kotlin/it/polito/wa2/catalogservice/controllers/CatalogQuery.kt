@@ -81,7 +81,7 @@ class CatalogQuery(private val userService: UserDetailsService): Query {
         }
     }
 
-    //RETRIEVE INFO ABOUT A WALLET GIVEN HIS WALLETID
+    //RETRIEVE INFO ABOUT A WALLET GIVEN ITS ID
     @ResponseStatus(HttpStatus.OK)
     suspend fun wallet(walletID: String, token: String): Mono<WalletDTO>? {
         //Create a WebClient instance
@@ -188,13 +188,123 @@ class CatalogQuery(private val userService: UserDetailsService): Query {
         val uriSpec: WebClient.UriSpec<WebClient.RequestBodySpec> = client.method(HttpMethod.POST)
 
         //Preparing the request: define the URL
-        var bodySpec: WebClient.RequestBodySpec = uriSpec.uri("/wallets/$walletID/transaction")
+        var bodySpec: WebClient.RequestBodySpec = uriSpec.uri("/wallets/$walletID/transactions")
 
         //Preparing a Request: define the Body
         //in this case there is no body in the Request
         val transaction = TransactionDTO(amount = amount, orderID = orderID, description = description,
             id = null, timestamp = null, walletID = null)
         var headersSpec: WebClient.RequestHeadersSpec<*> = bodySpec.bodyValue(transaction)
+
+        //Preparing a Request: define the Headers
+        val responseSpec: WebClient.ResponseSpec = headersSpec.header(
+            HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_NDJSON_VALUE
+        )
+            .accept(MediaType.APPLICATION_NDJSON)
+            .acceptCharset(StandardCharsets.UTF_8)
+            .ifNoneMatch("*")
+            .ifModifiedSince(ZonedDateTime.now())
+            .header(HttpHeaders.AUTHORIZATION, "Bearer $token")
+            .retrieve()
+
+        //Get a response
+        return headersSpec.exchangeToMono { response: ClientResponse ->
+            if (response.statusCode() == HttpStatus.OK) {
+                return@exchangeToMono response.bodyToMono(TransactionDTO::class.java)
+                //TODO fix error cases
+            } else if (response.statusCode().is4xxClientError) {
+                return@exchangeToMono response.bodyToMono(TransactionDTO::class.java)
+            } else {
+                return@exchangeToMono response.bodyToMono(TransactionDTO::class.java)
+            }
+        }
+    }
+
+    //GET LIST OF TRANSACTION OF A GIVEN WALLET, OPTIONALLY IN A RANGE OF TIME
+    @ResponseStatus(HttpStatus.OK)
+    suspend fun transactions(walletID: String, from: Long?, to: Long?, page: Int?, size: Int?,
+                             token: String): Flow<TransactionDTO> {
+        //Create a WebClient instance
+        //building a client by using the DefaultWebClientBuilder class, which allows full customization
+        val client: WebClient = WebClient.builder()
+            .baseUrl("http://localhost:8100")
+            .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_NDJSON_VALUE)
+            .defaultUriVariables(Collections.singletonMap("url", "http://localhost:8100"))
+            .build()
+
+        //specify an HTTP method of a request by invoking method(HttpMethod method)
+        val uriSpec: WebClient.UriSpec<WebClient.RequestBodySpec> = client.method(HttpMethod.GET)
+
+        //Preparing the request: define the URL
+        var query: String = ""
+        if(from!=null)
+            query = "?from=$from"
+        if(to!=null && query!="") {
+            query += "&to=$to"
+        } else if(to!=null && query=="") {
+            query += "?to=$to"
+        }
+        if(page!=null && query!="") {
+            query += "&page=$page"
+        } else if(page!=null && query=="") {
+            query += "?page=$page"
+        }
+        if(size!=null && query!="") {
+            query += "&size=$size"
+        } else if(size!=null && query=="") {
+            query += "?size=$size"
+        }
+        var bodySpec: WebClient.RequestBodySpec = uriSpec.uri("/wallets/$walletID/transactions$query")
+
+
+        //Preparing a Request: define the Body
+        //in this case there is no body in the Request
+        var headersSpec: WebClient.RequestHeadersSpec<*> = bodySpec.bodyValue("")
+
+        //Preparing a Request: define the Headers
+        val responseSpec: WebClient.ResponseSpec = headersSpec.header(
+            HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_NDJSON_VALUE
+        )
+            .accept(MediaType.APPLICATION_NDJSON)
+            .acceptCharset(StandardCharsets.UTF_8)
+            .ifNoneMatch("*")
+            .ifModifiedSince(ZonedDateTime.now())
+            .header(HttpHeaders.AUTHORIZATION, "Bearer $token")
+            .retrieve()
+
+        //Get a response
+        return headersSpec.exchangeToFlow { response: ClientResponse ->
+            if (response.statusCode() == HttpStatus.OK) {
+                return@exchangeToFlow response.bodyToFlow<TransactionDTO>()
+                //TODO fix error cases
+            } else if (response.statusCode().is4xxClientError) {
+                return@exchangeToFlow response.bodyToFlow()
+            } else {
+                return@exchangeToFlow response.bodyToFlow()
+            }
+        }
+    }
+
+    //RETTRIEVE THE INFO OF A TRANSACTION GIVEN ITS ID
+    @ResponseStatus(HttpStatus.OK)
+    suspend fun transaction(walletID: String, transactionID: String, token: String): Mono<TransactionDTO>? {
+        //Create a WebClient instance
+        //building a client by using the DefaultWebClientBuilder class, which allows full customization
+        val client: WebClient = WebClient.builder()
+            .baseUrl("http://localhost:8100")
+            .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_NDJSON_VALUE)
+            .defaultUriVariables(Collections.singletonMap("url", "http://localhost:8100"))
+            .build()
+
+        //specify an HTTP method of a request by invoking method(HttpMethod method)
+        val uriSpec: WebClient.UriSpec<WebClient.RequestBodySpec> = client.method(HttpMethod.POST)
+
+        //Preparing the request: define the URL
+        var bodySpec: WebClient.RequestBodySpec = uriSpec.uri("/wallets/$walletID/transactions/$transactionID")
+
+        //Preparing a Request: define the Body
+        //in this case there is no body in the Request
+        var headersSpec: WebClient.RequestHeadersSpec<*> = bodySpec.bodyValue("")
 
         //Preparing a Request: define the Headers
         val responseSpec: WebClient.ResponseSpec = headersSpec.header(
