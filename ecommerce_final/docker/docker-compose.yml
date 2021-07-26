@@ -45,19 +45,24 @@ services:
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       #KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
       #KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
-  
+
   connect:
     image: debezium/connect:1.6
     container_name: kafka_connect
     ports:
-     - 8083:8083
+      - 8083:8083
     links:
-     - kafka
-     - zookeeper
-     - mongo
+      - kafka
+      - zookeeper
+      - mongo
     environment:
-     - BOOTSTRAP_SERVERS=kafka:9092
-     - GROUP_ID=1
-     - CONFIG_STORAGE_TOPIC=my_connect_configs
-     - OFFSET_STORAGE_TOPIC=my_connect_offsets
-     - STATUS_STORAGE_TOPIC=my_connect_statuses
+      - BOOTSTRAP_SERVERS=kafka:9092
+      - GROUP_ID=1
+      - CONFIG_STORAGE_TOPIC=my_connect_configs
+      - OFFSET_STORAGE_TOPIC=my_connect_offsets
+      - STATUS_STORAGE_TOPIC=my_connect_statuses
+  redis:
+    image: redis
+    container_name: redis
+    ports:
+      - 6379:6379
