@@ -1,4 +1,4 @@
-package it.polito.wa2.warehouse
+package it.polito.wa2.warehouseservice
 
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
@@ -10,5 +10,4 @@ class WarehouseServiceApplication
 
 fun main(args: Array<String>) {
     runApplication<WarehouseServiceApplication>(*args)
-    println("Warehouse service started")
 }

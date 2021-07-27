@@ -14,15 +14,15 @@ class AuthenticationManager (
     override fun authenticate(authentication: Authentication?): Mono<Authentication> {
         val jwtToken = authentication?.credentials.toString()
         return Mono.just(jwtUtils.validateJwtToken(jwtToken))
-            .filter{ it }
-            .switchIfEmpty(Mono.empty())
-            .map{
-                val userDetailsDTO = jwtUtils.getDetailsFromJwtToken(jwtToken)
-                UsernamePasswordAuthenticationToken(
-                        userDetailsDTO,
-                        jwtToken,
-                        userDetailsDTO.authorities
-                )
-            }
+                .filter{ it }
+                .switchIfEmpty(Mono.empty())
+                .map{
+                    val userDetailsDTO = jwtUtils.getDetailsFromJwtToken(jwtToken)
+                    UsernamePasswordAuthenticationToken(
+                            userDetailsDTO,
+                            jwtToken,
+                            userDetailsDTO.authorities
+                    )
+                }
     }
 }

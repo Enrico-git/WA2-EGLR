@@ -13,4 +13,4 @@ data class ProductDTO (
         val avgRating: Double,
         val creationDate: Timestamp,
         val comments: List<String>?
-        )
+)

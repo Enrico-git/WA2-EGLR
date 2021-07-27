@@ -1,6 +1,6 @@
 package it.polito.wa2.warehouseservice.services
 
-import it.polito.wa2.warehouseservice.domain.toDTO
+import it.polito.wa2.warehouseservice.domains.toDTO
 import it.polito.wa2.warehouseservice.dto.ProductDTO
 import it.polito.wa2.warehouseservice.dto.WarehouseDTO
 import it.polito.wa2.warehouseservice.exceptions.NotFoundException
@@ -14,7 +14,7 @@ import org.springframework.transaction.annotation.Transactional
 @Transactional
 class ProductServiceImpl(
         private val productRepository: ProductRepository
-        ): ProductService {
+): ProductService {
     override suspend fun getProductsByCategory(category: String): Flow<ProductDTO> {
         TODO("Not yet implemented")
     }

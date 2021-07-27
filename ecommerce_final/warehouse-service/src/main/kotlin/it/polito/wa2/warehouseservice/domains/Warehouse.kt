@@ -1,4 +1,4 @@
-package it.polito.wa2.warehouseservice.entities
+package it.polito.wa2.warehouseservice.domains
 
 import it.polito.wa2.warehouseservice.dto.ProductInfoDTO
 import it.polito.wa2.warehouseservice.dto.WarehouseDTO

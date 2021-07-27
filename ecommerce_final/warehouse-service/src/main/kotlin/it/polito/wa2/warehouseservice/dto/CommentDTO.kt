@@ -8,4 +8,4 @@ data class CommentDTO (
         val body: String,
         val stars: Float,
         val creationDate: Timestamp
-        )
+)

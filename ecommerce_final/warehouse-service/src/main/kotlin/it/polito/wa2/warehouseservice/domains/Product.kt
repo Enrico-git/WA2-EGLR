@@ -1,4 +1,4 @@
-package it.polito.wa2.warehouseservice.entities
+package it.polito.wa2.warehouseservice.domains
 
 import it.polito.wa2.warehouseservice.dto.ProductDTO
 import org.bson.types.ObjectId
@@ -11,7 +11,7 @@ import java.sql.Timestamp
 @Document(collection = "products")
 class Product (
         @Id
-    val id: ObjectId?,
+        val id: ObjectId?,
         val name: String,
         val description: String,
         val pictureUrl: String,
