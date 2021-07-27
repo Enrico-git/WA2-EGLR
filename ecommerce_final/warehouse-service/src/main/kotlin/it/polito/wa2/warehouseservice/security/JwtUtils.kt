@@ -53,8 +53,6 @@ class JwtUtils {
                 .build()
                 .parseClaimsJws(authToken)
                 .body
-        println("parsed token")
-        println(parsedToken)
         val user = UserDetailsDTO(
                 id = null,
                 username = parsedToken["sub"].toString(),
@@ -63,8 +61,6 @@ class JwtUtils {
                 password = null,
                 email = null
         )
-        println("JwtUtils")
-        println(user)
         return user
     }
 
