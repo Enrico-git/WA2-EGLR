@@ -13,7 +13,7 @@ class NotificationServiceImpl(
     private val notificationRepository: EmailVerificationTokenRepository,
     private val userRepository: UserRepository
 ) : NotificationService {
-    override fun createEmailVerificationToken(user: User): String {
+    override suspend fun createEmailVerificationToken(user: User): String {
         val notification = EmailVerificationToken(
             expiryDate = Timestamp(System.currentTimeMillis() + 1000 * 60 * 60), //one hour
             token = UUID.randomUUID().toString(),
