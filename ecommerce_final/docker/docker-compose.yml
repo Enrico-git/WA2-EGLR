@@ -2,6 +2,11 @@ version: '2'
 volumes:
   mongodb_server_data:
 services:
+  eureka:
+    image: thepassengerhub/eureka:0.1
+    container_name: eureka
+    ports:
+      - 8761:8761
   mongo:
     image: mongo
     #restart: always
