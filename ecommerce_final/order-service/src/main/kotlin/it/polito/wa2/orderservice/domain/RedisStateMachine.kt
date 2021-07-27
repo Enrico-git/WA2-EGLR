@@ -13,7 +13,8 @@ import java.math.BigDecimal
 
 @RedisHash
 data class RedisStateMachine(
-    var state: StateMachineStates? = null,
+    val initialState: StateMachineStates,
+    var state: StateMachineStates?,
     val id: String = "",
     var failed: Boolean? = false,
     var completed: Boolean? = false,
@@ -38,6 +39,7 @@ fun RedisStateMachine.toStateMachine(stateMachineBuilder: StateMachineBuilder) =
 
 
 fun StateMachine.toRedisStateMachine() = RedisStateMachine(
+    initialState,
     state,
     id,
     failed,

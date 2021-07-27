@@ -7,5 +7,7 @@ data class Transition(
     var source: StateMachineStates?,
     var target: StateMachineStates?,
     var event: StateMachineEvents?,
+    var isRollingBack: Boolean = false,
+    var isPassive: Boolean = false,
     var action: (() -> Any?)?
 )

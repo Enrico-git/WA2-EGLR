@@ -21,13 +21,14 @@ import org.springframework.context.annotation.Scope
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
 import java.math.BigDecimal
+import kotlin.system.exitProcess
 
 @Component
 @Scope("prototype")
 class StateMachine(val initialState: StateMachineStates,
                    val finalState: StateMachineStates,
                    val transitions: MutableList<Transition>,
-                   var state: StateMachineStates? = null,
+                   var state: StateMachineStates?,
                    val id: String = "",
                    var failed: Boolean? = false,
                    var completed: Boolean? = false,
@@ -60,6 +61,10 @@ class StateMachine(val initialState: StateMachineStates,
         val oldSM = this.toRedisStateMachine()
 
         state = transition.target
+        if ( failed == false && transition.isRollingBack)
+            failed = true
+
+
 
         when (state) {
             finalState -> {
@@ -70,7 +75,7 @@ class StateMachine(val initialState: StateMachineStates,
             initialState -> {
                 fireEvent(StateMachineEvent(this, "$id-$event" ))
                 fireEvent(SagaFailureEvent(this))
-                failed = true
+                completed = true
             }
             else -> {
                 fireEvent(StateMachineEvent(this, "$id-$event" ))
@@ -83,10 +88,24 @@ class StateMachine(val initialState: StateMachineStates,
         return true
     }
 
+    suspend fun resume(){
+        if (this.failed == true)
+            return
+        else {
+            val transition = transitions.find { it.source == state && !it.isRollingBack } ?: return
+            if (transition.isPassive)
+                return
+            else
+                this.send(transition.event!!)
+        }
+    }
     @Transactional
     suspend fun backup(old: RedisStateMachine, new :RedisStateMachine = this.toRedisStateMachine()) = CoroutineScope(Dispatchers.IO).launch{
         redisStateMachineRepository.remove(old)
         redisStateMachineRepository.add(new)
     }
 
+    override fun toString(): String {
+        return "[ID: $id, STATE: $state, INITIAL_STATE: $initialState, FINAL_STATE: $finalState, FAILED: $failed, COMPLETED: $completed"
+    }
 }

@@ -24,7 +24,7 @@ class StateMachineBuilder(private val applicationEventPublisher: ApplicationEven
     var state: StateMachineStates? = null
     var products: Set<ProductDTO>? = null
     var productsWarehouseLocation: Set<ProductLocation>? = null
-    var transitions: MutableList<Transition> = mutableListOf(Transition(null, null, null, null))
+    var transitions: MutableList<Transition> = mutableListOf(Transition(null, null, null, false, false, null))
 
     fun initialState(source: StateMachineStates): StateMachineBuilder{
         initialState = source
@@ -37,6 +37,7 @@ class StateMachineBuilder(private val applicationEventPublisher: ApplicationEven
 
     fun state(newState: StateMachineStates?): StateMachineBuilder{
         state = newState
+        println("CHANGED STATE to $newState")
         return this
     }
 
@@ -85,6 +86,16 @@ class StateMachineBuilder(private val applicationEventPublisher: ApplicationEven
         return this
     }
 
+    fun isRollingBack(value: Boolean): StateMachineBuilder {
+        transitions.last().isRollingBack = value
+        return this
+    }
+
+    fun isPassive(value: Boolean): StateMachineBuilder {
+        transitions.last().isPassive = value
+        return this
+    }
+
     fun failed(newFailed: Boolean?): StateMachineBuilder{
         failed = newFailed
         return this
@@ -100,14 +111,14 @@ class StateMachineBuilder(private val applicationEventPublisher: ApplicationEven
     }
 
     fun and(): StateMachineBuilder {
-        transitions.add(Transition(null, null, null, null))
+        transitions.add(Transition(null, null, null, false, false, null))
         return this
     }
 
     fun build() = StateMachine(initialState,
         finalState,
         transitions,
-        null,
+        state,
         id,
         false,
     false,

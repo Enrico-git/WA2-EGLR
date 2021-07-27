@@ -40,7 +40,7 @@ class ScheduledTask(
         val sagas = getListOfStateMachine()
         logger.info("BEFORE REMOVED SAGAS: $sagas --- REMOVED JOBS: $jobs")
         sagas.values.removeIf {
-            if(it.completed == true || it.failed == true) {
+            if(it.completed == true) {
                 CoroutineScope(Dispatchers.IO).launch {
                     redisStateMachineRepository.remove(it.toRedisStateMachine())
                 }
