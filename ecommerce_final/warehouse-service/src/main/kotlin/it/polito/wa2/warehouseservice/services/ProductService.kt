@@ -3,6 +3,7 @@ package it.polito.wa2.warehouseservice.services
 import it.polito.wa2.warehouseservice.dto.ProductDTO
 import it.polito.wa2.warehouseservice.dto.WarehouseDTO
 import kotlinx.coroutines.flow.Flow
+import org.bson.types.ObjectId
 import org.springframework.security.access.prepost.PreAuthorize
 
 interface ProductService {
@@ -10,7 +11,7 @@ interface ProductService {
     suspend fun getProductsByCategory(category: String): Flow<ProductDTO>
 
     @PreAuthorize("hasAuthority(\"ADMIN\") or hasAuthority(\"CUSTOMER\")")
-    suspend fun getProductById(productID: String): ProductDTO
+    suspend fun getProductById(productID: ObjectId): ProductDTO
 
     @PreAuthorize("hasAuthority(\"ADMIN\")")
     suspend fun addProduct(productDTO: ProductDTO): ProductDTO

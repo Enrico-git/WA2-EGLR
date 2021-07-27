@@ -18,6 +18,8 @@ class AuthenticationManager (
                 .switchIfEmpty(Mono.empty())
                 .map{
                     val userDetailsDTO = jwtUtils.getDetailsFromJwtToken(jwtToken)
+                    println("Authentication Manager")
+                    println(userDetailsDTO)
                     UsernamePasswordAuthenticationToken(
                             userDetailsDTO,
                             jwtToken,

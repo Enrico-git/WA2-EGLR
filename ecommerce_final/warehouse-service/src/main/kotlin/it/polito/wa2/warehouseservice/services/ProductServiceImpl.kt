@@ -2,11 +2,15 @@ package it.polito.wa2.warehouseservice.services
 
 import it.polito.wa2.warehouseservice.domains.toDTO
 import it.polito.wa2.warehouseservice.dto.ProductDTO
+import it.polito.wa2.warehouseservice.dto.UserDetailsDTO
 import it.polito.wa2.warehouseservice.dto.WarehouseDTO
 import it.polito.wa2.warehouseservice.exceptions.NotFoundException
+import it.polito.wa2.warehouseservice.exceptions.UnauthorizedException
 import it.polito.wa2.warehouseservice.repositories.ProductRepository
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.reactive.awaitFirst
 import org.bson.types.ObjectId
+import org.springframework.security.core.context.ReactiveSecurityContextHolder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -19,8 +23,13 @@ class ProductServiceImpl(
         TODO("Not yet implemented")
     }
 
-    override suspend fun getProductById(productID: String): ProductDTO {
-        val product = productRepository.findById(ObjectId(productID)) ?: throw NotFoundException("Product not found")
+    override suspend fun getProductById(productID: ObjectId): ProductDTO {
+        println(productID)
+        val product = productRepository.findById(productID) ?: throw NotFoundException("Product not found")
+        val user = ReactiveSecurityContextHolder.getContext().awaitFirst().authentication.principal as UserDetailsDTO
+        println(user)
+        if (! user.roles!!.contains("ADMIN"))
+            throw UnauthorizedException("Forbidden")
         return product!!.toDTO()
     }
 
