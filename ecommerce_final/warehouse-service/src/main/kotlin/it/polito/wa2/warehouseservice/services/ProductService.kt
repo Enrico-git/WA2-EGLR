@@ -15,20 +15,26 @@ interface ProductService {
     suspend fun getProductById(productID: ObjectId): ProductDTO
 
     @PreAuthorize("hasAuthority(\"ADMIN\")")
+    suspend fun modifyOrInsertProduct(productDTO: ProductDTO, productID: ObjectId): ProductDTO
+
+    @PreAuthorize("hasAuthority(\"ADMIN\")")
+    suspend fun partialUpdateProduct(productDTO: ProductDTO, productID: ObjectId): ProductDTO
+
+    @PreAuthorize("hasAuthority(\"ADMIN\")")
     suspend fun addProduct(productDTO: ProductDTO): ProductDTO
 
     @PreAuthorize("hasAuthority(\"ADMIN\")")
-    suspend fun modifyProduct(productDTO: ProductDTO, productID: String): ProductDTO
+    suspend fun modifyProduct(productDTO: ProductDTO, productID: ObjectId): ProductDTO
 
     @PreAuthorize("hasAuthority(\"ADMIN\")")
-    suspend fun removeProduct(productID: String): Boolean
+    suspend fun deleteProduct(productID: ObjectId)
 
     @PreAuthorize("hasAuthority(\"ADMIN\") or hasAuthority(\"CUSTOMER\")")
-    suspend fun getProductPicture(productID: String): String
+    suspend fun getProductPicture(productID: ObjectId): String
 
     @PreAuthorize("hasAuthority(\"ADMIN\")")
-    suspend fun modifyProductPicture(newPicture: String, productID: String): ProductDTO
+    suspend fun modifyProductPicture(newPicture: String, productID: ObjectId): ProductDTO
 
     @PreAuthorize("hasAuthority(\"ADMIN\") or hasAuthority(\"CUSTOMER\")")
-    suspend fun getProductWarehouse(productID: String): Flow<WarehouseDTO>
+    suspend fun getProductWarehouse(productID: ObjectId): Flow<WarehouseDTO>
 }

@@ -8,7 +8,7 @@ import java.sql.Timestamp
 
 @ControllerAdvice
 class ControllerAdvice {
-    @ExceptionHandler(value = [NotFoundException::class, UnauthorizedException::class])
+    @ExceptionHandler(value = [NotFoundException::class, UnauthorizedException::class, IllegalArgumentException::class])
     fun genericExceptionHandler(e: Exception): ResponseEntity<ErrorDTO>{
         val errorDTO = ErrorDTO(
                 timestamp = Timestamp(System.currentTimeMillis()),
@@ -24,6 +24,10 @@ class ControllerAdvice {
             is UnauthorizedException -> {
                 errorDTO.status = 403
                 status = HttpStatus.FORBIDDEN
+            }
+            is IllegalArgumentException -> {
+                errorDTO.status = 422
+                status = HttpStatus.UNPROCESSABLE_ENTITY
             }
         }
 

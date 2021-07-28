@@ -11,9 +11,9 @@ import org.springframework.data.mongodb.core.mapping.Document
 class Warehouse (
         @Id
         val id: ObjectId?,
-        val products: List<ProductInfo>?,
+        var products: Set<ProductInfo>?,
         @Version
-        val version: Long = Long.MIN_VALUE
+        val version: Long? = null
 )
 
 data class ProductInfo(

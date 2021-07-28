@@ -12,16 +12,16 @@ import java.sql.Timestamp
 class Product (
         @Id
         val id: ObjectId?,
-        val name: String,
-        val description: String,
-        val pictureUrl: String,
-        val category: String,
-        val price: BigDecimal,
-        val avgRating: Double = 0.0,
+        var name: String,
+        var description: String,
+        var pictureUrl: String,
+        var category: String,
+        var price: BigDecimal,
+        var avgRating: Double = 0.0,
         val creationDate: Timestamp,
-        val comments: List<ObjectId>?,
+        var comments: Set<ObjectId>?,
         @Version
-        val version: Long = Long.MIN_VALUE
+        val version: Long? = null
 )
 
 fun Product.toDTO() = ProductDTO(
@@ -33,5 +33,5 @@ fun Product.toDTO() = ProductDTO(
         price = price,
         avgRating = avgRating,
         creationDate = creationDate,
-        comments = comments?.map{ it.toString() }
+        comments = comments?.map{ it.toString() }!!.toSet()
 )
