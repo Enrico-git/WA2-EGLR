@@ -1,11 +1,11 @@
 package it.polito.wa2.catalogservice.controllers
 
 import com.expediagroup.graphql.spring.operations.Query
-import it.polito.wa2.catalogservice.domain.Delivery
-import it.polito.wa2.catalogservice.domain.Product
 import it.polito.wa2.catalogservice.dto.OrderDTO
+import it.polito.wa2.catalogservice.dto.ProductDTO
+import it.polito.wa2.catalogservice.dto.WalletDTO
+import it.polito.wa2.catalogservice.dto.WarehouseDTO
 import kotlinx.coroutines.flow.Flow
-import org.bson.types.ObjectId
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
@@ -23,24 +23,28 @@ import java.util.*
 
 @Component
 //@Controller TODO try if graphql needs the Annotation @Controller
-class OrderQuery(): Query {
-
+class ProductQuery(): Query {
     //Create a WebClient instance
     //building a client by using the DefaultWebClientBuilder class, which allows full customization
+    //TODO fix number of port of warehouse service
     val client: WebClient = WebClient.builder()
-        .baseUrl("http://localhost:6379")
+        .baseUrl("http://localhost:8200")
         .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_NDJSON_VALUE)
-        .defaultUriVariables(Collections.singletonMap("url", "http://localhost:6379"))
+        .defaultUriVariables(Collections.singletonMap("url", "http://localhost:8200"))
         .build()
 
-    //RETRIEVE ALL ORDERS OF A CUSTOMER
+    //RETRIEVE ALL THE PRODUCTS, OR ALL THE PRODUCTS OF A GIVEN CATEGORY
+    //NO NEED OF AUTHENTICATION -> NO TOKEN
     @ResponseStatus(HttpStatus.OK)
-    suspend fun orders(token: String): Flow<OrderDTO> {
+    suspend fun products(category: String?): Flow<ProductDTO> {
         //specify an HTTP method of a request by invoking method(HttpMethod method)
         val uriSpec: WebClient.UriSpec<WebClient.RequestBodySpec> = client.method(HttpMethod.GET)
 
         //Preparing the request: define the URL
-        var bodySpec: WebClient.RequestBodySpec = uriSpec.uri("/orders")
+        var url: String = ""
+        if(category!=null)
+            url += "?category=$category"
+        var bodySpec: WebClient.RequestBodySpec = uriSpec.uri("/products$url")
 
         //Preparing a Request: define the Body
         //in this case there is no body in the Request
@@ -54,13 +58,13 @@ class OrderQuery(): Query {
             .acceptCharset(StandardCharsets.UTF_8)
             .ifNoneMatch("*")
             .ifModifiedSince(ZonedDateTime.now())
-            .header(HttpHeaders.AUTHORIZATION, "Bearer $token")
+            //.header(HttpHeaders.AUTHORIZATION, "Bearer $token")
             .retrieve()
 
         //Get a response
         return headersSpec.exchangeToFlow { response: ClientResponse ->
             if (response.statusCode() == HttpStatus.OK) {
-                return@exchangeToFlow response.bodyToFlow<OrderDTO>()
+                return@exchangeToFlow response.bodyToFlow<ProductDTO>()
                 //TODO fix error cases
             } else if (response.statusCode().is4xxClientError) {
                 return@exchangeToFlow response.bodyToFlow()
@@ -70,14 +74,15 @@ class OrderQuery(): Query {
         }
     }
 
-    //RETRIEVE AN ORDER GIVEN ITS ID
+    //RETRIEVE INFO ABOUT A PRODUCT GIVEN ITS ID
+    //NO NEED OF AUTHENTICATION -> NO TOKEN
     @ResponseStatus(HttpStatus.OK)
-    suspend fun order(orderID: String, token: String): Mono<OrderDTO> {
+    suspend fun product(productID: String): Mono<ProductDTO> {
         //specify an HTTP method of a request by invoking method(HttpMethod method)
         val uriSpec: WebClient.UriSpec<WebClient.RequestBodySpec> = client.method(HttpMethod.GET)
 
         //Preparing the request: define the URL
-        var bodySpec: WebClient.RequestBodySpec = uriSpec.uri("/orders/$orderID")
+        var bodySpec: WebClient.RequestBodySpec = uriSpec.uri("/products/$productID")
 
         //Preparing a Request: define the Body
         //in this case there is no body in the Request
@@ -91,70 +96,29 @@ class OrderQuery(): Query {
             .acceptCharset(StandardCharsets.UTF_8)
             .ifNoneMatch("*")
             .ifModifiedSince(ZonedDateTime.now())
-            .header(HttpHeaders.AUTHORIZATION, "Bearer $token")
             .retrieve()
 
         //Get a response
         return headersSpec.exchangeToMono { response: ClientResponse ->
             if (response.statusCode() == HttpStatus.OK) {
-                return@exchangeToMono response.bodyToMono(OrderDTO::class.java)
+                return@exchangeToMono response.bodyToMono(ProductDTO::class.java)
                 //TODO fix error cases
             } else if (response.statusCode().is4xxClientError) {
-                return@exchangeToMono response.bodyToMono(OrderDTO::class.java)
+                return@exchangeToMono response.bodyToMono(ProductDTO::class.java)
             } else {
-                return@exchangeToMono response.bodyToMono(OrderDTO::class.java)
+                return@exchangeToMono response.bodyToMono(ProductDTO::class.java)
             }
         }
     }
 
-    //CREATE A NEW ORDER
-    @ResponseStatus(HttpStatus.CREATED)
-    suspend fun newOrder(buyerID: ObjectId, products: Set<Product>, delivery: String,
-                         email: String, token: String): Mono<OrderDTO> {
-        //specify an HTTP method of a request by invoking method(HttpMethod method)
-        val uriSpec: WebClient.UriSpec<WebClient.RequestBodySpec> = client.method(HttpMethod.POST)
-
-        //Preparing the request: define the URL
-        var bodySpec: WebClient.RequestBodySpec = uriSpec.uri("/orders")
-
-        //Preparing a Request: define the Body
-        //in this case there is no body in the Request
-        var orderDTO = OrderDTO(buyer=buyerID,products=products,delivery=Delivery(delivery,null),
-            email=email,id=null,status=null)
-        var headersSpec: WebClient.RequestHeadersSpec<*> = bodySpec.bodyValue(orderDTO)
-
-        //Preparing a Request: define the Headers
-        val responseSpec: WebClient.ResponseSpec = headersSpec.header(
-            HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_NDJSON_VALUE
-        )
-            .accept(MediaType.APPLICATION_NDJSON)
-            .acceptCharset(StandardCharsets.UTF_8)
-            .ifNoneMatch("*")
-            .ifModifiedSince(ZonedDateTime.now())
-            .header(HttpHeaders.AUTHORIZATION, "Bearer $token")
-            .retrieve()
-
-        //Get a response
-        return headersSpec.exchangeToMono { response: ClientResponse ->
-            if (response.statusCode() == HttpStatus.CREATED) {
-                return@exchangeToMono response.bodyToMono(OrderDTO::class.java)
-                //TODO fix error cases
-            } else if (response.statusCode().is4xxClientError) {
-                return@exchangeToMono response.bodyToMono(OrderDTO::class.java)
-            } else {
-                return@exchangeToMono response.bodyToMono(OrderDTO::class.java)
-            }
-        }
-    }
-
-    //DELETE AN ORDER GIVEN ITS ID (IF POSSIBLE)
+    //DELETE A PRODUCT GIVEN ITS ID
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    suspend fun deleteOrder(orderID: String, token: String): Unit {
+    suspend fun deleteProduct(productID: String, token: String): Unit {
         //specify an HTTP method of a request by invoking method(HttpMethod method)
         val uriSpec: WebClient.UriSpec<WebClient.RequestBodySpec> = client.method(HttpMethod.DELETE)
 
         //Preparing the request: define the URL
-        var bodySpec: WebClient.RequestBodySpec = uriSpec.uri("/orders/$orderID")
+        var bodySpec: WebClient.RequestBodySpec = uriSpec.uri("/products/$productID")
 
         //Preparing a Request: define the Body
         //in this case there is no body in the Request
@@ -175,24 +139,19 @@ class OrderQuery(): Query {
         val response = headersSpec.retrieve()
     }
 
-    //UPDATE AN ORDER GIVEN ITS ID
-    @ResponseStatus(HttpStatus.CREATED)
-    suspend fun updateOrder(orderID: String, products: Set<Product>, delivery: String?, email: String?,
-                            buyerID: ObjectId?, token: String): Mono<OrderDTO> {
+    //RETRIEVE THE PICTURE URL OF A PRODUCT GIVEN ITS ID
+    //NO NEED OF AUTHENTICATION -> NO TOKEN
+    @ResponseStatus(HttpStatus.OK)
+    suspend fun picture(productID: String): Mono<String> {
         //specify an HTTP method of a request by invoking method(HttpMethod method)
-        val uriSpec: WebClient.UriSpec<WebClient.RequestBodySpec> = client.method(HttpMethod.PATCH)
+        val uriSpec: WebClient.UriSpec<WebClient.RequestBodySpec> = client.method(HttpMethod.GET)
 
         //Preparing the request: define the URL
-        var bodySpec: WebClient.RequestBodySpec = uriSpec.uri("/orders/$orderID")
+        var bodySpec: WebClient.RequestBodySpec = uriSpec.uri("/wallets/$productID/picture")
 
         //Preparing a Request: define the Body
         //in this case there is no body in the Request
-        var deliveryObj: Delivery? = null
-        if(delivery!=null)
-            deliveryObj = Delivery(delivery,null)
-        var orderDTO = OrderDTO(buyer=buyerID,products=products,delivery=deliveryObj,email=email,
-                id=null,status=null)
-        var headersSpec: WebClient.RequestHeadersSpec<*> = bodySpec.bodyValue(orderDTO)
+        var headersSpec: WebClient.RequestHeadersSpec<*> = bodySpec.bodyValue("")
 
         //Preparing a Request: define the Headers
         val responseSpec: WebClient.ResponseSpec = headersSpec.header(
@@ -202,18 +161,93 @@ class OrderQuery(): Query {
             .acceptCharset(StandardCharsets.UTF_8)
             .ifNoneMatch("*")
             .ifModifiedSince(ZonedDateTime.now())
-            .header(HttpHeaders.AUTHORIZATION, "Bearer $token")
+            //.header(HttpHeaders.AUTHORIZATION, "Bearer $token")
+            .retrieve()
+
+        //Get a response
+        return headersSpec.exchangeToMono { response: ClientResponse ->
+            if (response.statusCode() == HttpStatus.OK) {
+                return@exchangeToMono response.bodyToMono(String::class.java)
+                //TODO fix error cases
+            } else if (response.statusCode().is4xxClientError) {
+                return@exchangeToMono response.bodyToMono(String::class.java)
+            } else {
+                return@exchangeToMono response.bodyToMono(String::class.java)
+            }
+        }
+    }
+
+    //UPDATE THE PICTURE OF A PRODUCT GIVEN ITS ID AND THE NEW PICTURE
+    //TODO fix how to pass the new pictureURL
+    @ResponseStatus(HttpStatus.CREATED)
+    suspend fun updatePicture(productID: String, picture: String, token: String): Mono<ProductDTO> {
+        //specify an HTTP method of a request by invoking method(HttpMethod method)
+        val uriSpec: WebClient.UriSpec<WebClient.RequestBodySpec> = client.method(HttpMethod.POST)
+
+        //Preparing the request: define the URL
+        var bodySpec: WebClient.RequestBodySpec = uriSpec.uri("/wallets/$productID/picture")
+
+        //Preparing a Request: define the Body
+        //in this case there is no body in the Request
+        var headersSpec: WebClient.RequestHeadersSpec<*> = bodySpec.bodyValue(picture)
+
+        //Preparing a Request: define the Headers
+        val responseSpec: WebClient.ResponseSpec = headersSpec.header(
+            HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_NDJSON_VALUE
+        )
+            .accept(MediaType.APPLICATION_NDJSON)
+            .acceptCharset(StandardCharsets.UTF_8)
+            .ifNoneMatch("*")
+            .ifModifiedSince(ZonedDateTime.now())
+            //.header(HttpHeaders.AUTHORIZATION, "Bearer $token")
             .retrieve()
 
         //Get a response
         return headersSpec.exchangeToMono { response: ClientResponse ->
             if (response.statusCode() == HttpStatus.CREATED) {
-                return@exchangeToMono response.bodyToMono(OrderDTO::class.java)
+                return@exchangeToMono response.bodyToMono(ProductDTO::class.java)
                 //TODO fix error cases
             } else if (response.statusCode().is4xxClientError) {
-                return@exchangeToMono response.bodyToMono(OrderDTO::class.java)
+                return@exchangeToMono response.bodyToMono(ProductDTO::class.java)
             } else {
-                return@exchangeToMono response.bodyToMono(OrderDTO::class.java)
+                return@exchangeToMono response.bodyToMono(ProductDTO::class.java)
+            }
+        }
+    }
+
+    //RETRIEVE THE LIST OF WAREHOUSES THAT CONTAIN A PRODUCT GIVEN ITS ID
+    //NO NEED OF AUTHENTICATION -> NO TOKEN
+    @ResponseStatus(HttpStatus.OK)
+    suspend fun productWarehouses(productID: String): Flow<WarehouseDTO> {
+        //specify an HTTP method of a request by invoking method(HttpMethod method)
+        val uriSpec: WebClient.UriSpec<WebClient.RequestBodySpec> = client.method(HttpMethod.GET)
+
+        //Preparing the request: define the URL
+        var bodySpec: WebClient.RequestBodySpec = uriSpec.uri("/products/$productID/warehouses")
+
+        //Preparing a Request: define the Body
+        //in this case there is no body in the Request
+        var headersSpec: WebClient.RequestHeadersSpec<*> = bodySpec.bodyValue("")
+
+        //Preparing a Request: define the Headers
+        val responseSpec: WebClient.ResponseSpec = headersSpec.header(
+            HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_NDJSON_VALUE
+        )
+            .accept(MediaType.APPLICATION_NDJSON)
+            .acceptCharset(StandardCharsets.UTF_8)
+            .ifNoneMatch("*")
+            .ifModifiedSince(ZonedDateTime.now())
+            .retrieve()
+
+        //Get a response
+        return headersSpec.exchangeToFlow { response: ClientResponse ->
+            if (response.statusCode() == HttpStatus.OK) {
+                return@exchangeToFlow response.bodyToFlow<WarehouseDTO>()
+                //TODO fix error cases
+            } else if (response.statusCode().is4xxClientError) {
+                return@exchangeToFlow response.bodyToFlow()
+            } else {
+                return@exchangeToFlow response.bodyToFlow()
             }
         }
     }

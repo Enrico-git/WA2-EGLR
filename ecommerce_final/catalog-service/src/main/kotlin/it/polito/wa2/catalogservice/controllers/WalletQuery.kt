@@ -32,8 +32,6 @@ class WalletQuery(): Query {
     //RETRIEVE INFO ABOUT A WALLET GIVEN ITS ID
     @ResponseStatus(HttpStatus.OK)
     suspend fun wallet(walletID: String, token: String): Mono<WalletDTO>? {
-        //Create a WebClient instance
-
         //specify an HTTP method of a request by invoking method(HttpMethod method)
         val uriSpec: WebClient.UriSpec<WebClient.RequestBodySpec> = client.method(HttpMethod.GET)
 
@@ -97,7 +95,7 @@ class WalletQuery(): Query {
 
         //Get a response
         return headersSpec.exchangeToMono { response: ClientResponse ->
-            if (response.statusCode() == HttpStatus.OK) {
+            if (response.statusCode() == HttpStatus.CREATED) {
                 return@exchangeToMono response.bodyToMono(WalletDTO::class.java)
                 //TODO fix error cases
             } else if (response.statusCode().is4xxClientError) {
@@ -139,7 +137,7 @@ class WalletQuery(): Query {
 
         //Get a response
         return headersSpec.exchangeToMono { response: ClientResponse ->
-            if (response.statusCode() == HttpStatus.OK) {
+            if (response.statusCode() == HttpStatus.CREATED) {
                 return@exchangeToMono response.bodyToMono(TransactionDTO::class.java)
                 //TODO fix error cases
             } else if (response.statusCode().is4xxClientError) {

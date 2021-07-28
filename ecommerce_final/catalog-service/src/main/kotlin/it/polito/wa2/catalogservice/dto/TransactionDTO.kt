@@ -11,7 +11,4 @@ class TransactionDTO(
     val description: String,
     val orderID: String,
 ){
-    override fun toString(): String {
-        return "{id: $id, timestamp: $timestamp, walletID: $walletID, amount: $amount, orderID: $orderID}"
-    }
 }
