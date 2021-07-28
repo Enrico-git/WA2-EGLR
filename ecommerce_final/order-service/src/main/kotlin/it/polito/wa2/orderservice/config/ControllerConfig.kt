@@ -1,4 +1,4 @@
-package it.polito.wa2.orderservice.common
+package it.polito.wa2.orderservice.config
 
 import org.springframework.context.annotation.Configuration
 import org.springframework.data.web.ReactivePageableHandlerMethodArgumentResolver
