@@ -84,5 +84,4 @@ class RouterConfiguration(
         onError<UnauthorizedException> { e, _ ->  status(HttpStatus.UNAUTHORIZED).bodyValueAndAwait(e.localizedMessage)}
         onError<Exception> {e, _ ->  status(HttpStatus.BAD_REQUEST).bodyValueAndAwait(e.localizedMessage)}
     }
-
 }

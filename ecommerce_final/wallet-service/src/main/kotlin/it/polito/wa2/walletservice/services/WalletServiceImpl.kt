@@ -1,21 +1,22 @@
 package it.polito.wa2.walletservice.services
 
-import it.polito.wa2.walletservice.dto.*
+import it.polito.wa2.walletservice.dto.KafkaPaymentRequestDTO
+import it.polito.wa2.walletservice.dto.TransactionDTO
+import it.polito.wa2.walletservice.dto.WalletDTO
+import it.polito.wa2.walletservice.dto.toEntity
+import it.polito.wa2.walletservice.entities.TransactionDescription
 import it.polito.wa2.walletservice.entities.toDTO
 import it.polito.wa2.walletservice.exceptions.NotFoundException
-import it.polito.wa2.walletservice.exceptions.UnauthorizedException
 import it.polito.wa2.walletservice.repositories.TransactionRepository
 import it.polito.wa2.walletservice.repositories.WalletRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.reactive.awaitFirst
+import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.bson.types.ObjectId
 import org.springframework.data.domain.Pageable
-import org.springframework.kafka.annotation.KafkaListener
-import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.security.core.context.ReactiveSecurityContextHolder
-import org.springframework.stereotype.Component
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.math.BigDecimal
@@ -26,7 +27,7 @@ import java.sql.Timestamp
 class WalletServiceImpl(
     private val walletRepository: WalletRepository,
     private val transactionRepository: TransactionRepository,
-    private val kafkaPaymentReqProducer: KafkaTemplate<String, KafkaPaymentRequestDTO>
+    private val mockKafkaPaymentReqProducer: KafkaProducer<String, KafkaPaymentRequestDTO>
 ) : WalletService {
     override suspend fun getWallet(walletID: String): WalletDTO {
         val wallet = walletRepository.findById(ObjectId(walletID)) ?: throw NotFoundException("Wallet was not found")
@@ -38,18 +39,23 @@ class WalletServiceImpl(
         return walletRepository.save(walletDTO.toEntity()).toDTO()
     }
 
+    /**
+     * This is called by admin only (REST) for RECHARGE the wallet.
+     */
     override suspend fun createTransaction(walletID: String, transactionDTO: TransactionDTO): TransactionDTO {
         val wallet = walletRepository.findById(ObjectId(walletID)) ?: throw NotFoundException("Wallet was not found")
         if(transactionDTO.amount <= BigDecimal(0))
             throw IllegalArgumentException("The amount for recharges must be greater than zero")
 
-        val auth = ReactiveSecurityContextHolder.getContext().awaitFirst().authentication //JWT from Catalog
-        val user = auth.principal as UserDetailsDTO
-        if ( wallet.userID != user.id ) // the admin would recharge a user which is not the owner of the wallet
-            throw UnauthorizedException("Forbidden: The user is not the owner of the wallet")
+        //TODO Catalog has to check the userID in the JWT exists!
+//        val auth = ReactiveSecurityContextHolder.getContext().awaitFirst().authentication //JWT from Catalog
+//        val user = auth.principal as UserDetailsDTO
+//        if ( wallet.userID != user.id ) // the admin would recharge a user which is not the owner of the wallet
+//            throw UnauthorizedException("Forbidden: The user is not the owner of the wallet")
 
         transactionDTO.walletID = walletID
         transactionDTO.timestamp = Timestamp(System.currentTimeMillis()) //TODO Why faking two hours ago?
+        transactionDTO.description = TransactionDescription.RECHARGE.toString()
 
         wallet.balance += transactionDTO.amount
         walletRepository.save(wallet)
@@ -92,29 +98,17 @@ class WalletServiceImpl(
 
         val mockPaymentRequestDTO = KafkaPaymentRequestDTO(
             orderID = ObjectId().toHexString(),
-            amount = BigDecimal(Math.random()*10%20),
+            amount = BigDecimal(Math.random()*-10%20),
             token = token
         )
 
         println("MOCK: $mockPaymentRequestDTO")
 
-        kafkaPaymentReqProducer.send(ProducerRecord("payment_request", mockPaymentRequestDTO))
+        mockKafkaPaymentReqProducer.send(ProducerRecord("payment_request", mockPaymentRequestDTO))
         return "OK"
     }
 
     override suspend fun mockAbortPaymentRequest(): String {
         return "OK"
     }
-}
-
-@Component
-class KafkaRequestListener {
-    @KafkaListener(
-        topics=["payment_request"],
-        containerFactory = "paymentRequestContainerFactory"
-    )
-     fun paymentRequest(paymentRequestDTO: KafkaPaymentRequestDTO){
-         println("Received --> $paymentRequestDTO")
-         Thread.sleep(5000)
-     }
 }

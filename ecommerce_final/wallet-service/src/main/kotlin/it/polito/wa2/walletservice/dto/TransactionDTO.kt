@@ -11,9 +11,14 @@ class TransactionDTO(
     var timestamp: Timestamp?,
     var walletID: String?,
     val amount: BigDecimal,
-    val description: String,
+    var description: String?,
     val orderID: String,
-)
+){
+    override fun toString(): String {
+        return "id: $id, timestamp: $timestamp, walletID: $walletID, " +
+                "amount = $amount, description: $description, orderID: $orderID"
+    }
+}
 
 //createTransaction receive DTO and to perform 'save' need an entity
 fun TransactionDTO.toEntity() = Transaction(
@@ -21,6 +26,6 @@ fun TransactionDTO.toEntity() = Transaction(
     timestamp = timestamp!!,
     walletID = ObjectId(walletID),
     amount = amount,
-    description = TransactionDescription.valueOf(description),
+    description = TransactionDescription.valueOf(description!!),
     orderID = ObjectId(orderID)
 )

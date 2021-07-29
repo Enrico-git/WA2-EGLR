@@ -8,4 +8,5 @@ import org.springframework.stereotype.Repository
 
 @Repository
 interface WalletRepository : CoroutineCrudRepository <Wallet, ObjectId> {
+    suspend fun findByUserID(userID: ObjectId): Wallet?
 }

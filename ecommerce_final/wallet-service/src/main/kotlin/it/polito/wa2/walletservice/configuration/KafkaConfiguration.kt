@@ -2,6 +2,7 @@ package it.polito.wa2.walletservice.configuration
 
 import it.polito.wa2.walletservice.dto.KafkaPaymentRequestDTO
 import org.apache.kafka.clients.consumer.ConsumerConfig
+import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerConfig
 import org.apache.kafka.common.serialization.StringDeserializer
 import org.apache.kafka.common.serialization.StringSerializer
@@ -51,18 +52,23 @@ class KafkaConfiguration {
      * debezium that will emit message in "payment_request_ok" partition.
      */
     @Bean
-    fun producerFactory(): ProducerFactory<String, KafkaPaymentRequestDTO> { // payment_request_failed
+    fun producerMockPaymentRequest(): KafkaProducer<String, KafkaPaymentRequestDTO> { // payment_request_failed
         val configProps = mutableMapOf<String, Any>()
         configProps[ProducerConfig.BOOTSTRAP_SERVERS_CONFIG] = bootstrapServers
         configProps[ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG] = StringSerializer::class.java
         configProps[ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG] = JsonSerializer::class.java
         configProps[ProducerConfig.CLIENT_ID_CONFIG] = "mock_order_service_payment_req_producer"
-        return DefaultKafkaProducerFactory(configProps)
+        return KafkaProducer(configProps)
     }
 
     @Bean
-    fun kafkaTemplate(): KafkaTemplate<String, KafkaPaymentRequestDTO> {
-        return KafkaTemplate(producerFactory())
+    fun producerPaymentRequestFailed(): KafkaProducer<String, String> { // payment_request_failed
+        val configProps = mutableMapOf<String, Any>()
+        configProps[ProducerConfig.BOOTSTRAP_SERVERS_CONFIG] = bootstrapServers
+        configProps[ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG] = StringSerializer::class.java
+        configProps[ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG] = StringSerializer::class.java
+        configProps[ProducerConfig.CLIENT_ID_CONFIG] = "wallet_service_payment_req_failed_producer"
+        return KafkaProducer(configProps)
     }
 
     //TODO SAGA2: abort_payment_request (delete_order)
