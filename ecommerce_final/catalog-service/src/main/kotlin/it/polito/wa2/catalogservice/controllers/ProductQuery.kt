@@ -1,6 +1,8 @@
 package it.polito.wa2.catalogservice.controllers
 
 import com.expediagroup.graphql.spring.operations.Query
+import it.polito.wa2.catalogservice.domain.Delivery
+import it.polito.wa2.catalogservice.dto.OrderDTO
 import it.polito.wa2.catalogservice.dto.ProductDTO
 import it.polito.wa2.catalogservice.dto.WarehouseDTO
 import kotlinx.coroutines.flow.Flow
@@ -59,15 +61,9 @@ class ProductQuery(): Query {
             .retrieve()
 
         //Get a response
+        //TODO see if with this logic, if there's an exception it will be thrown
         return headersSpec.exchangeToFlow { response: ClientResponse ->
-            if (response.statusCode() == HttpStatus.OK) {
-                return@exchangeToFlow response.bodyToFlow<ProductDTO>()
-                //TODO fix error cases
-            } else if (response.statusCode().is4xxClientError) {
-                return@exchangeToFlow response.bodyToFlow()
-            } else {
-                return@exchangeToFlow response.bodyToFlow()
-            }
+            return@exchangeToFlow response.bodyToFlow<ProductDTO>()
         }
     }
 
@@ -175,7 +171,6 @@ class ProductQuery(): Query {
     }
 
     //UPDATE THE PICTURE OF A PRODUCT GIVEN ITS ID AND THE NEW PICTURE
-    //TODO fix how to pass the new pictureURL
     @ResponseStatus(HttpStatus.CREATED)
     suspend fun updatePicture(productID: String, picture: String, token: String): Mono<ProductDTO> {
         //specify an HTTP method of a request by invoking method(HttpMethod method)
@@ -245,6 +240,80 @@ class ProductQuery(): Query {
                 return@exchangeToFlow response.bodyToFlow()
             } else {
                 return@exchangeToFlow response.bodyToFlow()
+            }
+        }
+    }
+
+    //PARTIALLY UPDATE A PRODUCT GIVEN ITS ID
+    //TODO fix how to pass ProductDTO (which fields?)
+    @ResponseStatus(HttpStatus.CREATED)
+    suspend fun patchProduct(productID: String, token: String): Mono<ProductDTO> {
+        //specify an HTTP method of a request by invoking method(HttpMethod method)
+        val uriSpec: WebClient.UriSpec<WebClient.RequestBodySpec> = client.method(HttpMethod.PATCH)
+
+        //Preparing the request: define the URL
+        var bodySpec: WebClient.RequestBodySpec = uriSpec.uri("/products/$productID")
+
+        //Preparing a Request: define the Body
+        var headersSpec: WebClient.RequestHeadersSpec<*> = bodySpec.bodyValue("")
+
+        //Preparing a Request: define the Headers
+        val responseSpec: WebClient.ResponseSpec = headersSpec.header(
+            HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_NDJSON_VALUE
+        )
+            .accept(MediaType.APPLICATION_NDJSON)
+            .acceptCharset(StandardCharsets.UTF_8)
+            .ifNoneMatch("*")
+            .ifModifiedSince(ZonedDateTime.now())
+            .header(HttpHeaders.AUTHORIZATION, "Bearer $token")
+            .retrieve()
+
+        //Get a response
+        return headersSpec.exchangeToMono { response: ClientResponse ->
+            if (response.statusCode() == HttpStatus.CREATED) {
+                return@exchangeToMono response.bodyToMono(ProductDTO::class.java)
+                //TODO fix error cases
+            } else if (response.statusCode().is4xxClientError) {
+                return@exchangeToMono response.bodyToMono(ProductDTO::class.java)
+            } else {
+                return@exchangeToMono response.bodyToMono(ProductDTO::class.java)
+            }
+        }
+    }
+
+    //UPDATE A PRODUCT GIVEN ITS ID, OR ADD A NEW ONE IF THE ID DOES NOT EXIST
+    //TODO fix how to pass ProductDTO (which fields?)
+    @ResponseStatus(HttpStatus.CREATED)
+    suspend fun updateProduct(productID: String, token: String): Mono<ProductDTO> {
+        //specify an HTTP method of a request by invoking method(HttpMethod method)
+        val uriSpec: WebClient.UriSpec<WebClient.RequestBodySpec> = client.method(HttpMethod.PUT)
+
+        //Preparing the request: define the URL
+        var bodySpec: WebClient.RequestBodySpec = uriSpec.uri("/products/$productID")
+
+        //Preparing a Request: define the Body
+        var headersSpec: WebClient.RequestHeadersSpec<*> = bodySpec.bodyValue("")
+
+        //Preparing a Request: define the Headers
+        val responseSpec: WebClient.ResponseSpec = headersSpec.header(
+            HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_NDJSON_VALUE
+        )
+            .accept(MediaType.APPLICATION_NDJSON)
+            .acceptCharset(StandardCharsets.UTF_8)
+            .ifNoneMatch("*")
+            .ifModifiedSince(ZonedDateTime.now())
+            .header(HttpHeaders.AUTHORIZATION, "Bearer $token")
+            .retrieve()
+
+        //Get a response
+        return headersSpec.exchangeToMono { response: ClientResponse ->
+            if (response.statusCode() == HttpStatus.CREATED) {
+                return@exchangeToMono response.bodyToMono(ProductDTO::class.java)
+                //TODO fix error cases
+            } else if (response.statusCode().is4xxClientError) {
+                return@exchangeToMono response.bodyToMono(ProductDTO::class.java)
+            } else {
+                return@exchangeToMono response.bodyToMono(ProductDTO::class.java)
             }
         }
     }

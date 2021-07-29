@@ -170,4 +170,80 @@ class WarehouseQuery(): Query {
             }
         }
     }
+
+    //PARTIALLY UPDATE A WAREHOUSE GIVEN ITS ID
+    @ResponseStatus(HttpStatus.CREATED)
+    suspend fun patchProduct(warehouseID: String, products: Set<ProductInfoDTO>,
+                             token: String): Mono<WarehouseDTO> {
+        //specify an HTTP method of a request by invoking method(HttpMethod method)
+        val uriSpec: WebClient.UriSpec<WebClient.RequestBodySpec> = client.method(HttpMethod.PATCH)
+
+        //Preparing the request: define the URL
+        var bodySpec: WebClient.RequestBodySpec = uriSpec.uri("/warehouses/$warehouseID")
+
+        //Preparing a Request: define the Body
+        var warehouseDTO = WarehouseDTO(warehouseID, products)
+        var headersSpec: WebClient.RequestHeadersSpec<*> = bodySpec.bodyValue(warehouseDTO)
+
+        //Preparing a Request: define the Headers
+        val responseSpec: WebClient.ResponseSpec = headersSpec.header(
+            HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_NDJSON_VALUE
+        )
+            .accept(MediaType.APPLICATION_NDJSON)
+            .acceptCharset(StandardCharsets.UTF_8)
+            .ifNoneMatch("*")
+            .ifModifiedSince(ZonedDateTime.now())
+            .header(HttpHeaders.AUTHORIZATION, "Bearer $token")
+            .retrieve()
+
+        //Get a response
+        return headersSpec.exchangeToMono { response: ClientResponse ->
+            if (response.statusCode() == HttpStatus.CREATED) {
+                return@exchangeToMono response.bodyToMono(WarehouseDTO::class.java)
+                //TODO fix error cases
+            } else if (response.statusCode().is4xxClientError) {
+                return@exchangeToMono response.bodyToMono(WarehouseDTO::class.java)
+            } else {
+                return@exchangeToMono response.bodyToMono(WarehouseDTO::class.java)
+            }
+        }
+    }
+
+    //UPDATE A WAREHOUSE GIVEN ITS ID, OR ADD A NEW ONE IF THE ID DOES NOT EXIST
+    @ResponseStatus(HttpStatus.CREATED)
+    suspend fun updateProduct(warehouseID: String, products: Set<ProductInfoDTO>,
+                              token: String): Mono<WarehouseDTO> {
+        //specify an HTTP method of a request by invoking method(HttpMethod method)
+        val uriSpec: WebClient.UriSpec<WebClient.RequestBodySpec> = client.method(HttpMethod.PUT)
+
+        //Preparing the request: define the URL
+        var bodySpec: WebClient.RequestBodySpec = uriSpec.uri("/warehouses/$warehouseID")
+
+        //Preparing a Request: define the Body
+        var warehouseDTO = WarehouseDTO(warehouseID, products)
+        var headersSpec: WebClient.RequestHeadersSpec<*> = bodySpec.bodyValue(warehouseDTO)
+
+        //Preparing a Request: define the Headers
+        val responseSpec: WebClient.ResponseSpec = headersSpec.header(
+            HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_NDJSON_VALUE
+        )
+            .accept(MediaType.APPLICATION_NDJSON)
+            .acceptCharset(StandardCharsets.UTF_8)
+            .ifNoneMatch("*")
+            .ifModifiedSince(ZonedDateTime.now())
+            .header(HttpHeaders.AUTHORIZATION, "Bearer $token")
+            .retrieve()
+
+        //Get a response
+        return headersSpec.exchangeToMono { response: ClientResponse ->
+            if (response.statusCode() == HttpStatus.CREATED) {
+                return@exchangeToMono response.bodyToMono(WarehouseDTO::class.java)
+                //TODO fix error cases
+            } else if (response.statusCode().is4xxClientError) {
+                return@exchangeToMono response.bodyToMono(WarehouseDTO::class.java)
+            } else {
+                return@exchangeToMono response.bodyToMono(WarehouseDTO::class.java)
+            }
+        }
+    }
 }

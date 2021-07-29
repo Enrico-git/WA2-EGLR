@@ -111,7 +111,6 @@ class OrderQuery(): Query {
         var bodySpec: WebClient.RequestBodySpec = uriSpec.uri("/orders")
 
         //Preparing a Request: define the Body
-        //in this case there is no body in the Request
         var orderDTO = OrderDTO(buyer=buyerID,products=products,delivery=Delivery(delivery,null),
             email=email,id=null,status=null)
         var headersSpec: WebClient.RequestHeadersSpec<*> = bodySpec.bodyValue(orderDTO)
