@@ -22,7 +22,6 @@ import java.time.ZonedDateTime
 import java.util.*
 
 @Component
-//@Controller TODO try if graphql needs the Annotation @Controller
 class OrderQuery(): Query {
 
     //Create a WebClient instance
@@ -58,15 +57,9 @@ class OrderQuery(): Query {
             .retrieve()
 
         //Get a response
+        //TODO see if with this logic, if there's an exception it will be thrown
         return headersSpec.exchangeToFlow { response: ClientResponse ->
-            if (response.statusCode() == HttpStatus.OK) {
-                return@exchangeToFlow response.bodyToFlow<OrderDTO>()
-                //TODO fix error cases
-            } else if (response.statusCode().is4xxClientError) {
-                return@exchangeToFlow response.bodyToFlow()
-            } else {
-                return@exchangeToFlow response.bodyToFlow()
-            }
+            return@exchangeToFlow response.bodyToFlow<OrderDTO>()
         }
     }
 

@@ -1,6 +1,5 @@
 package it.polito.wa2.catalogservice.controllers
 
-import it.polito.wa2.catalogservice.services.UserDetailsService
 import org.springframework.stereotype.Component
 import com.expediagroup.graphql.spring.operations.Query
 import it.polito.wa2.catalogservice.dto.*
@@ -18,7 +17,6 @@ import java.util.*
 import java.time.ZonedDateTime
 
 @Component
-//@Controller TODO try if graphql needs the Annotation @Controller
 class WalletQuery(): Query {
 
     //Create a WebClient instance
@@ -108,10 +106,8 @@ class WalletQuery(): Query {
 
     //CREATE A TRANSACTION
     @ResponseStatus(HttpStatus.CREATED)
-    suspend fun newTransaction(walletID: String, amount: BigDecimal, description: String,
+    suspend fun newTransaction(walletID: String, amount: BigDecimal, description: String?,
                                orderID: String, token: String): Mono<TransactionDTO> {
-        //Create a WebClient instance
-
         //specify an HTTP method of a request by invoking method(HttpMethod method)
         val uriSpec: WebClient.UriSpec<WebClient.RequestBodySpec> = client.method(HttpMethod.POST)
 

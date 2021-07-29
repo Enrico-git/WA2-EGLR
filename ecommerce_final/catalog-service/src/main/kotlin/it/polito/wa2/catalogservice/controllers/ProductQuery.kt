@@ -1,9 +1,7 @@
 package it.polito.wa2.catalogservice.controllers
 
 import com.expediagroup.graphql.spring.operations.Query
-import it.polito.wa2.catalogservice.dto.OrderDTO
 import it.polito.wa2.catalogservice.dto.ProductDTO
-import it.polito.wa2.catalogservice.dto.WalletDTO
 import it.polito.wa2.catalogservice.dto.WarehouseDTO
 import kotlinx.coroutines.flow.Flow
 import org.springframework.http.HttpHeaders
@@ -22,7 +20,6 @@ import java.time.ZonedDateTime
 import java.util.*
 
 @Component
-//@Controller TODO try if graphql needs the Annotation @Controller
 class ProductQuery(): Query {
     //Create a WebClient instance
     //building a client by using the DefaultWebClientBuilder class, which allows full customization

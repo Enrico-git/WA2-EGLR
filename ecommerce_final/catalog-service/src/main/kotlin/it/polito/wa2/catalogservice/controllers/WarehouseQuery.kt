@@ -20,7 +20,6 @@ import java.time.ZonedDateTime
 import java.util.*
 
 @Component
-//@Controller TODO try if graphql needs the Annotation @Controller
 class WarehouseQuery(): Query {
 
     //Create a WebClient instance
