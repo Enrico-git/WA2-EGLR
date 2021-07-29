@@ -12,7 +12,7 @@ interface EmailVerificationTokenRepository : CoroutineCrudRepository<EmailVerifi
     fun findByToken(token: String): Optional<EmailVerificationToken>
 
     @Transactional
-    //@Modifying TODO set modifying because this query modifies the collection
+    //@Modifying TODO set modifying because this query modifies the collection and see how to write a query custom
     @Query("delete from EmailVerificationToken e where e.expiryDate<?1")
     fun deleteAllByExpiryDate(actualTime: Timestamp)
 }
