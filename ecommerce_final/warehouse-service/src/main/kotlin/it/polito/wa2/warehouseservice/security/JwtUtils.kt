@@ -3,6 +3,7 @@ package it.polito.wa2.warehouseservice.security
 import io.jsonwebtoken.*
 import io.jsonwebtoken.security.Keys
 import it.polito.wa2.warehouseservice.dto.UserDetailsDTO
+import org.bson.types.ObjectId
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.security.core.Authentication
 import org.springframework.stereotype.Component
@@ -52,14 +53,15 @@ class JwtUtils {
                 .build()
                 .parseClaimsJws(authToken)
                 .body
-        return UserDetailsDTO(
+        val user = UserDetailsDTO(
                 id = null,
                 username = parsedToken["sub"].toString(),
-                roles = parsedToken["sub"].toString(),
+                roles = parsedToken["roles"].toString(),
                 isEnabled = null,
                 password = null,
                 email = null
         )
+        return user
     }
 
 }

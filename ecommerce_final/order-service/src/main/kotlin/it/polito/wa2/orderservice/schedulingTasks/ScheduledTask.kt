@@ -2,7 +2,7 @@ package it.polito.wa2.orderservice.schedulingTasks
 
 import it.polito.wa2.orderservice.domain.toRedisStateMachine
 import it.polito.wa2.orderservice.repositories.RedisStateMachineRepository
-import it.polito.wa2.orderservice.statemachine.StateMachine
+import it.polito.wa2.orderservice.statemachine.StateMachineImpl
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -28,7 +28,7 @@ class ScheduledTask(
      */
     @Lookup
     @Lazy
-    fun getListOfStateMachine(): ConcurrentHashMap<String,StateMachine> {
+    fun getListOfStateMachine(): ConcurrentHashMap<String,StateMachineImpl> {
         return null!!
     }
 

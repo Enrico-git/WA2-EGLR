@@ -1,5 +1,7 @@
-package it.polito.wa2.warehouseservice.security
+package it.polito.wa2.warehouseservice.configuration
 
+import it.polito.wa2.warehouseservice.security.AuthenticationManager
+import it.polito.wa2.warehouseservice.security.SecurityContextRepository
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpMethod
@@ -35,11 +37,13 @@ class WebSecurityConfig(
                     Mono.fromRunnable { swe.response.statusCode = HttpStatus.FORBIDDEN }
                 }.and()
                 //.cors().disable()
+                .formLogin().disable()
+                .httpBasic().disable()
                 .csrf().disable()
                 .authenticationManager(authenticationManager)
                 .securityContextRepository(securityContextRepository)
                 .authorizeExchange()
-                .pathMatchers(*patterns).permitAll() // the endpoint /auth is permitted to access without any token where as all the REST endpoints are secured
+                //.pathMatchers(*patterns).permitAll() // the endpoint /auth is permitted to access without any token where as all the REST endpoints are secured
                 .pathMatchers(HttpMethod.OPTIONS).permitAll()
                 .anyExchange().authenticated()
                 .and()

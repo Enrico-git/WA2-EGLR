@@ -11,9 +11,9 @@ import java.sql.Timestamp
 class Comment (
         @Id
         val id: ObjectId?,
-        val title: String,
-        val body: String,
-        val stars: Float,
+        var title: String,
+        var body: String,
+        var stars: Float,
         val creationDate: Timestamp,
         @Version
         val version: Long = Long.MIN_VALUE

@@ -9,21 +9,18 @@ import it.polito.wa2.orderservice.dto.UserDetailsDTO
 import it.polito.wa2.orderservice.exceptions.InvalidOperationException
 import it.polito.wa2.orderservice.exceptions.NotFoundException
 import it.polito.wa2.orderservice.exceptions.UnauthorizedException
-import it.polito.wa2.orderservice.orchestrator.Orchestrator
+import it.polito.wa2.orderservice.orchestrator.OrchestratorImpl
 import it.polito.wa2.orderservice.repositories.OrderRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.reactive.awaitFirst
-import kotlinx.coroutines.reactor.asFlux
 import org.bson.types.ObjectId
 import org.springframework.data.domain.Pageable
 import org.springframework.security.core.context.ReactiveSecurityContextHolder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.io.BufferedWriter
-import java.io.FileWriter
 import java.math.BigDecimal
 import java.util.logging.Logger
 
@@ -32,7 +29,7 @@ import java.util.logging.Logger
 class OrderServiceImpl(
     private val orderRepository: OrderRepository,
     private val logger: Logger,
-    private val orchestrator: Orchestrator,
+    private val orchestrator: OrchestratorImpl,
     private val mailService: MailService
 ): OrderService {
     override suspend fun getOrders(pageable: Pageable): Flow<OrderDTO> {

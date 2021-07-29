@@ -1,10 +1,16 @@
 package it.polito.wa2.catalogservice.dto
 
-import org.bson.types.ObjectId
 import java.math.BigDecimal
+import java.sql.Timestamp
 
 data class ProductDTO (
-    val id: ObjectId,
-    val amount: Int,
-    val price: BigDecimal
+    val id: String?,
+    val name: String,
+    val description: String,
+    val pictureUrl: String,
+    val category: String,
+    val price: BigDecimal,
+    val avgRating: Double,
+    val creationDate: Timestamp,
+    val comments: List<String>?
 )

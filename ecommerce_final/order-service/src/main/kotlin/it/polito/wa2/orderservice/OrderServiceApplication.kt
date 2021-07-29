@@ -3,8 +3,9 @@ package it.polito.wa2.orderservice
 import it.polito.wa2.orderservice.common.StateMachineEvents
 import it.polito.wa2.orderservice.common.StateMachineStates
 import it.polito.wa2.orderservice.repositories.RedisStateMachineRepository
-import it.polito.wa2.orderservice.statemachine.StateMachine
+import it.polito.wa2.orderservice.statemachine.StateMachineImpl
 import it.polito.wa2.orderservice.statemachine.StateMachineBuilder
+import it.polito.wa2.orderservice.statemachine.StateMachineBuilderImpl
 import kotlinx.coroutines.Job
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
@@ -21,7 +22,7 @@ class OrderServiceApplication{
 
     @Bean(name=["new_order_sm"])
     fun getNewOrderStateMachine(applicationEventPublisher: ApplicationEventPublisher, redisStateMachineRepository: RedisStateMachineRepository): StateMachineBuilder{
-        val builder = StateMachineBuilder(applicationEventPublisher, redisStateMachineRepository)
+        val builder = StateMachineBuilderImpl(applicationEventPublisher, redisStateMachineRepository)
 
         return builder
             .initialState(StateMachineStates.ORDER_REQ) // order creation request
@@ -77,7 +78,7 @@ class OrderServiceApplication{
 
     @Bean(name=["delete_order_sm"])
     fun getDeleteOrderStateMachine(applicationEventPublisher: ApplicationEventPublisher, redisStateMachineRepository: RedisStateMachineRepository): StateMachineBuilder{
-        val builder = StateMachineBuilder(applicationEventPublisher, redisStateMachineRepository)
+        val builder = StateMachineBuilderImpl(applicationEventPublisher, redisStateMachineRepository)
 
         return builder
             .initialState(StateMachineStates.CANCEL_ORDER_REQ) // abort order req
@@ -118,7 +119,7 @@ class OrderServiceApplication{
     fun getJobsList(): ConcurrentHashMap<String, Job> = ConcurrentHashMap()
 
     @Bean
-    fun getSagasList(): ConcurrentHashMap<String, StateMachine> = ConcurrentHashMap()
+    fun getSagasList(): ConcurrentHashMap<String, StateMachineImpl> = ConcurrentHashMap()
 
 }
 
