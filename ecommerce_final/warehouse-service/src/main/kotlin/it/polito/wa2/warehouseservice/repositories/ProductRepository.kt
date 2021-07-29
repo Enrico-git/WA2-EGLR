@@ -1,6 +1,6 @@
 package it.polito.wa2.warehouseservice.repositories
 
-import it.polito.wa2.warehouseservice.domains.Product
+import it.polito.wa2.warehouseservice.domain.Product
 import kotlinx.coroutines.flow.Flow
 import org.bson.types.ObjectId
 import org.springframework.data.domain.Pageable

@@ -1,4 +1,4 @@
-package it.polito.wa2.warehouseservice.domains
+package it.polito.wa2.warehouseservice.domain
 
 import it.polito.wa2.warehouseservice.dto.ProductDTO
 import org.bson.types.ObjectId
@@ -9,7 +9,7 @@ import java.math.BigDecimal
 import java.sql.Timestamp
 
 @Document(collection = "products")
-class Product (
+data class Product (
         @Id
         val id: ObjectId?,
         var name: String,
@@ -33,5 +33,5 @@ fun Product.toDTO() = ProductDTO(
         price = price,
         avgRating = avgRating,
         creationDate = creationDate,
-        comments = comments?.map{ it.toString() }!!.toSet()
+        comments = comments?.map{ it.toString() }?.toSet()
 )

@@ -1,4 +1,4 @@
-package it.polito.wa2.warehouseservice.domains
+package it.polito.wa2.warehouseservice.domain
 
 import it.polito.wa2.warehouseservice.dto.CommentDTO
 import org.bson.types.ObjectId
@@ -15,8 +15,9 @@ class Comment (
         var body: String,
         var stars: Float,
         val creationDate: Timestamp,
+        val userId: String?,
         @Version
-        val version: Long = Long.MIN_VALUE
+        val version: Long? = null
 )
 
 fun Comment.toDTO() = CommentDTO(
