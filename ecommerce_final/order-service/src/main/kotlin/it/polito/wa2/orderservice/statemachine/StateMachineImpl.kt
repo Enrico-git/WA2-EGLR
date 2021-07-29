@@ -63,17 +63,17 @@ class StateMachineImpl(val initialState: StateMachineStates,
 
         when (state) {
             finalState -> {
-                fireEvent(StateMachineEvent(this, "$id-$event" ))
+                fireEvent(StateMachineEvent(this, event ))
                 fireEvent(SagaFinishedEvent(this))
                 completed = true
             }
             initialState -> {
-                fireEvent(StateMachineEvent(this, "$id-$event" ))
+                fireEvent(StateMachineEvent(this, event ))
                 fireEvent(SagaFailureEvent(this))
                 completed = true
             }
             else -> {
-                fireEvent(StateMachineEvent(this, "$id-$event" ))
+                fireEvent(StateMachineEvent(this, event ))
             }
         }
 

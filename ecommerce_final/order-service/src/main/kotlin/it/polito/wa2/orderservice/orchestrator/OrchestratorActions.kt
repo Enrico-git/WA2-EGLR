@@ -31,6 +31,7 @@ import org.springframework.context.annotation.Lazy
 import org.springframework.context.event.ContextRefreshedEvent
 import org.springframework.stereotype.Component
 import java.sql.Timestamp
+import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import java.util.logging.Logger
 
@@ -95,10 +96,10 @@ class OrchestratorActions(
     }
 
 
-    fun onKafkaReceivedEvent(event: String) = CoroutineScope(Dispatchers.Default).launch {
+    fun onKafkaReceivedEvent(event: String, topic: String) = CoroutineScope(Dispatchers.Default).launch {
         val sagas = getListOfStateMachine()
-        val sagaEvent = StateMachineEvents.valueOf(event.substringAfter("-").uppercase())
-        val sagaID = event.substringBefore("-")
+        val sagaEvent = StateMachineEvents.valueOf(topic.uppercase())
+        val sagaID = event
         val saga = sagas[sagaID]
         println(saga)
         val transition = saga?.transitions?.find{it.source == saga.state && it.event == sagaEvent}
@@ -144,6 +145,7 @@ class OrchestratorActions(
         CoroutineScope(Dispatchers.IO).launch {
             val order = orderRepository.findById(ObjectId(sm.id))!!
 //                    TODO hardcoded warehouse response NEED FIX
+//            TODO PUT NEXT 2 LINES IN KAFKA LISTENER
             order.delivery!!.productsWarehouseLocation = setOf(ProductLocation("boh", "wh1", 2))
             sm.productsWarehouseLocation = setOf(ProductLocation("boh", "wh1", 2))
             try {

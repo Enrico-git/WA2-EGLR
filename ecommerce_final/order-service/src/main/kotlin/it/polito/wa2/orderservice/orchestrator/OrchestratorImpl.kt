@@ -10,6 +10,8 @@ import it.polito.wa2.orderservice.statemachine.StateMachineImpl
 import org.springframework.context.event.ContextRefreshedEvent
 import org.springframework.context.event.EventListener
 import org.springframework.kafka.annotation.KafkaListener
+import org.springframework.kafka.support.KafkaHeaders
+import org.springframework.messaging.handler.annotation.Header
 import org.springframework.stereotype.Component
 
 @Component
@@ -29,12 +31,12 @@ class OrchestratorImpl(
         "abort_payment_request_ok",
         "abort_payment_request_failed"
     ])
-    override fun onKafkaEvent(event: String) = orchestratorActions.onKafkaReceivedEvent(event)
+    override fun onKafkaEvent(event: String, @Header(KafkaHeaders.RECEIVED_TOPIC) topic: String) = orchestratorActions.onKafkaReceivedEvent(event, topic)
 
     @EventListener
     override fun onStateMachineEvent(event: StateMachineEvent) {
         val sm = event.source as StateMachineImpl
-        when (StateMachineEvents.valueOf(event.event.substringAfter("-"))) {
+        when (event.stateMachineEvent) {
             StateMachineEvents.RESERVE_PRODUCTS -> orchestratorActions.onReserveProducts(sm)
             StateMachineEvents.RESERVE_PRODUCTS_OK -> orchestratorActions.onReserveProductsOk(sm)
             StateMachineEvents.RESERVE_PRODUCTS_FAILED -> orchestratorActions.onReserveProductsFailed(sm)

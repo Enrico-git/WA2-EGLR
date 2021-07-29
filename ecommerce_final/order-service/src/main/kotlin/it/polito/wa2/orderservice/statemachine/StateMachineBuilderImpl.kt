@@ -40,7 +40,6 @@ class StateMachineBuilderImpl(
 
     override fun state(newState: StateMachineStates?): StateMachineBuilder{
         state = newState
-        println("CHANGED STATE to $newState")
         return this
     }
 

@@ -21,7 +21,7 @@ interface Orchestrator {
      * @param event
      * @return a coroutine job
      */
-    fun onKafkaEvent(event: String): Job
+    fun onKafkaEvent(event: String, topic: String): Job
 
     /**
      * State machine application event listener
