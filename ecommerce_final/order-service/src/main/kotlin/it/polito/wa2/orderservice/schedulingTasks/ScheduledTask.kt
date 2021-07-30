@@ -35,7 +35,7 @@ class ScheduledTask(
     /**
      * Scheduler to remove the finished sagas and order job from the list and free memory
      */
-    @Scheduled(fixedRate = 1000*10)
+    @Scheduled(fixedRate = 1000*10) // 10s
     fun removeCompletedSagasAndJobs() = CoroutineScope(Dispatchers.Default).launch{
         val sagas = getListOfStateMachine()
         logger.info("BEFORE REMOVED SAGAS: $sagas --- REMOVED JOBS: $jobs")

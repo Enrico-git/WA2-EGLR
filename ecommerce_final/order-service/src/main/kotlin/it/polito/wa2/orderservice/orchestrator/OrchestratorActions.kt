@@ -52,6 +52,9 @@ class OrchestratorActions(
     @Value("\${application.kafka.retryDelay}")
     val delay: Long = 0
 
+    @Value("\${application.kafka.numberOfRetries}")
+    val numberOfRetries: Int = 0
+
     @Lookup
     @Lazy
     fun getListOfStateMachine(): ConcurrentHashMap<String, StateMachineImpl> {
@@ -115,7 +118,7 @@ class OrchestratorActions(
 
     fun onReserveProducts(sm: StateMachineImpl) = CoroutineScope(Dispatchers.Default).launch {
         jobs["${sm.id}-${StateMachineEvents.RESERVE_PRODUCTS}"] = CoroutineScope(Dispatchers.IO).launch Job@{
-            repeat(5) {
+            repeat(numberOfRetries) {
                 if (isActive)
                     try {
                         kafkaProdResReqProducer.send(
@@ -146,7 +149,7 @@ class OrchestratorActions(
             val order = orderRepository.findById(ObjectId(sm.id))!!
 //                    TODO hardcoded warehouse response NEED FIX
 //            TODO PUT NEXT 2 LINES IN KAFKA LISTENER
-            order.delivery!!.productsWarehouseLocation = setOf(ProductLocation("boh", "wh1", 2))
+            order.delivery.productsWarehouseLocation = setOf(ProductLocation("boh", "wh1", 2))
             sm.productsWarehouseLocation = setOf(ProductLocation("boh", "wh1", 2))
             try {
                 orderRepository.save(order)
@@ -166,7 +169,7 @@ class OrchestratorActions(
     }
     fun onPaymentRequest(sm: StateMachineImpl) = CoroutineScope(Dispatchers.Default).launch {
         jobs["${sm.id}-${StateMachineEvents.PAYMENT_REQUEST}"] = CoroutineScope(Dispatchers.IO).launch Job@{
-            repeat(5) {
+            repeat(numberOfRetries) {
                 if (isActive)
                     try {
                         kafkaPaymentReqProducer.send(
@@ -198,7 +201,7 @@ class OrchestratorActions(
     fun onAbortPaymentRequest(sm: StateMachineImpl) = CoroutineScope(Dispatchers.Default).launch {
         jobs["${sm.id}-${StateMachineEvents.ABORT_PAYMENT_REQUEST}"] =
             CoroutineScope(Dispatchers.IO).launch Job@{
-                repeat(5) {
+                repeat(numberOfRetries) {
                     if (isActive)
                         try {
                             kafkaPaymentReqProducer.send(ProducerRecord("abort_payment_request", PaymentRequestDTO(
@@ -237,7 +240,7 @@ class OrchestratorActions(
     fun onAbortProductsReservation(sm: StateMachineImpl) = CoroutineScope(Dispatchers.Default).launch {
         jobs["${sm.id}-${StateMachineEvents.ABORT_PRODUCTS_RESERVATION}"] =
             CoroutineScope(Dispatchers.IO).launch Job@{
-                repeat(5) {
+                repeat(numberOfRetries) {
                     if (isActive)
                         try {
                             kafkaAbortProdResReqProducer.send(

@@ -45,7 +45,7 @@ class OrderServiceImpl(
         return order.toDTO()
     }
 
-    override suspend fun updateOrder(orderID: ObjectId, orderDTO: OrderDTO): OrderDTO {
+    override suspend fun updateOrderStatus(orderID: ObjectId, orderDTO: OrderDTO): OrderDTO {
         val order = orderRepository.findById(orderID) ?: throw IllegalArgumentException("Order not found")
         order.status = orderDTO.status!!
         mailService.notifyCustomer(orderDTO.email!!, "Order ${order.id} Notification", order.id.toString(), "UPDATE", order.status )
@@ -69,7 +69,7 @@ class OrderServiceImpl(
                 customerEmail = orderDTO.email!!,
                 amount = order.products.map{ BigDecimal(it.amount).multiply(it.price) }
                     .reduce{acc, elem -> acc+elem },
-                productsWarehouseLocation = order.delivery!!.productsWarehouseLocation,
+                productsWarehouseLocation = order.delivery.productsWarehouseLocation,
                 auth = token
             ))
         }
@@ -84,7 +84,7 @@ class OrderServiceImpl(
             buyer = user.id!!,
             products = orderDTO.products!!,
             status = OrderStatus.PENDING,
-            delivery = orderDTO.delivery
+            delivery = orderDTO.delivery!!
         )
 
         val storedOrder = orderRepository.save(order)
