@@ -10,7 +10,7 @@ data class Product(
     val price: BigDecimal
 )
 
-fun Product.toDTO() = ProductDTO(
-    id = id!!,
-    amount = amount
-)
+//fun Product.toDTO() = ProductDTO(
+//    id = id!!,
+//    amount = amount
+//)

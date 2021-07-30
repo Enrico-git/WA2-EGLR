@@ -18,3 +18,6 @@ application:
     jwtExpirationMs: 1800000
     jwtHeader: Authorization
     jwtHeaderStart: Bearer
+graphql:
+  packages: it.polito.wa2.catalogservice
+

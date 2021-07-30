@@ -14,7 +14,7 @@ data class Order (
     val buyer: ObjectId,
     val products: Set<Product>,
     var status: OrderStatus,
-    val delivery: Delivery?,
+    val delivery: Delivery,
     @Version
     val version: Long? = null
 )

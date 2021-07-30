@@ -8,7 +8,11 @@ class TransactionDTO(
     var timestamp: Timestamp?,
     var walletID: String?,
     val amount: BigDecimal,
-    val description: String,
+    var description: String?,
     val orderID: String,
 ){
+    override fun toString(): String {
+        return "id: $id, timestamp: $timestamp, walletID: $walletID, " +
+                "amount = $amount, description: $description, orderID: $orderID"
+    }
 }

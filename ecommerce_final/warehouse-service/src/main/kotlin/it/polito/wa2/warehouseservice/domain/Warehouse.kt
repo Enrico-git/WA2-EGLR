@@ -1,4 +1,4 @@
-package it.polito.wa2.warehouseservice.domains
+package it.polito.wa2.warehouseservice.domain
 
 import it.polito.wa2.warehouseservice.dto.ProductInfoDTO
 import it.polito.wa2.warehouseservice.dto.WarehouseDTO
@@ -8,7 +8,7 @@ import org.springframework.data.annotation.Version
 import org.springframework.data.mongodb.core.mapping.Document
 
 @Document(collection = "warehouses")
-class Warehouse (
+data class Warehouse (
         @Id
         val id: ObjectId?,
         var products: Set<ProductInfo>?,
@@ -24,5 +24,5 @@ data class ProductInfo(
 
 fun Warehouse.toDTO() = WarehouseDTO(
         id = id.toString(),
-        products = products?.map{ ProductInfoDTO(it.productId.toString(), it.alarm, it.quantity) }
+        products = products?.map{ ProductInfoDTO(it.productId.toString(), it.alarm, it.quantity) }!!.toSet()
 )

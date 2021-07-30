@@ -1,5 +1,6 @@
 package it.polito.wa2.orderservice.services
 
+import it.polito.wa2.orderservice.common.OrderStatus
 import it.polito.wa2.orderservice.dto.OrderDTO
 import kotlinx.coroutines.flow.Flow
 import org.bson.types.ObjectId
@@ -15,7 +16,7 @@ interface OrderService {
     suspend fun getOrderByID(orderID: ObjectId): OrderDTO
 
     @PreAuthorize("hasAuthority(\"ADMIN\")")
-    suspend fun updateOrder(orderID: ObjectId, orderDTO: OrderDTO): OrderDTO
+    suspend fun updateOrderStatus(orderID: ObjectId, orderDTO: OrderDTO): OrderDTO
 
     @PreAuthorize("hasAuthority(\"ADMIN\") or hasAuthority(\"CUSTOMER\")")
     suspend fun deleteOrder(orderID: ObjectId, orderDTO: OrderDTO)

@@ -32,10 +32,14 @@ spring:
     user:
       name: order-service
       password: order-service
+  application:
+    name: order-service
+
 application:
   kafka:
 #    in ms
     retryDelay: 5000
+    numberOfRetries: 5
   admin:
     email: eglrgroup9@gmail.com
   jwt:

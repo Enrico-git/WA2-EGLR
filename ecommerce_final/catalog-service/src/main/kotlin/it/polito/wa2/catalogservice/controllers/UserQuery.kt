@@ -24,7 +24,7 @@ class UserQuery(private val userService: UserDetailsService): Query {
     }
 
     @ResponseStatus(HttpStatus.OK)
-    suspend fun registrationConfirm(token: String): Unit {
+    suspend fun registrationConfirm(token: String) {
         return userService.verifyToken(token)
     }
 }

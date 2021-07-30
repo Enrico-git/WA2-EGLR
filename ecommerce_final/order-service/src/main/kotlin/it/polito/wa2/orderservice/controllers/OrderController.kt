@@ -45,7 +45,7 @@ class OrderController(
         var counter = 5
         while (counter-- > 0){
             try {
-                return orderService.updateOrder(orderID, orderDTO)
+                return orderService.updateOrderStatus(orderID, orderDTO)
             }
             catch(e: OptimisticLockingFailureException){
                 delay(1000)

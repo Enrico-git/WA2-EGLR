@@ -1,6 +1,8 @@
 package it.polito.wa2.warehouseservice.controllers
 
+import it.polito.wa2.warehouseservice.dto.CommentDTO
 import it.polito.wa2.warehouseservice.dto.ProductDTO
+import it.polito.wa2.warehouseservice.services.CommentService
 import it.polito.wa2.warehouseservice.services.ProductService
 import kotlinx.coroutines.flow.Flow
 import org.bson.types.ObjectId
@@ -32,18 +34,32 @@ class ProductController(
         return productService.getProductById(ObjectId(productID))
     }
     /**
+     * API endpoint to insert a product
+     * @param productDTO
+     * @return the product object
+     */
+    @PostMapping("")
+    suspend fun addProduct(@RequestBody productDTO: ProductDTO): ProductDTO{
+        return productService.addProduct(productDTO)
+    }
+    /**
      * API endpoint to modify or insert a product
      * @param productID the ID of the product, @param productDTO which is the product to insert or it owns the product's information to change
      * @return the product object
      * Being a PUT we need the entire ProductDTO
      */
-//    @PutMapping("/{productID}")
-//    suspend fun modifyOrInsertProduct(@PathVariable productID: String, productDTO: ProductDTO): ProductDTO{
-//
-//    }
-
+    @PutMapping("/{productID}")
+    suspend fun modifyOrInsertProduct(@PathVariable productID: String, productDTO: ProductDTO): ProductDTO{
+        return productService.modifyProduct(productDTO, ObjectId(productID))
+    }
+    /**
+     * API endpoint to partial modify a product
+     * @param productID the ID of the product
+     * @param productDTO the DTO with the elements to modify
+     * @return ProductDTO
+     */
     @PatchMapping("/{productID}")
-    suspend fun partialUpdateProduct(@RequestBody productDTO: ProductDTO, @PathVariable productID: String): ProductDTO{
+    suspend fun partialUpdateProduct(@PathVariable productID: String, @RequestBody productDTO: ProductDTO): ProductDTO{
         return productService.partialUpdateProduct(productDTO, ObjectId(productID))
     }
     /**
@@ -75,4 +91,6 @@ class ProductController(
     suspend fun modifyProductPicture(@PathVariable productID: String, @RequestBody pictureURL: String): ProductDTO{
         return productService.modifyProductPicture(pictureURL, ObjectId(productID))
     }
+
+
 }

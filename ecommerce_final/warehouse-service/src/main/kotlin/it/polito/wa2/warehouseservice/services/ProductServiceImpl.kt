@@ -1,10 +1,13 @@
 package it.polito.wa2.warehouseservice.services
 
-import it.polito.wa2.warehouseservice.domains.Product
-import it.polito.wa2.warehouseservice.domains.toDTO
+
+import it.polito.wa2.warehouseservice.domain.Product
+import it.polito.wa2.warehouseservice.domain.toDTO
+import it.polito.wa2.warehouseservice.dto.CommentDTO
 import it.polito.wa2.warehouseservice.dto.ProductDTO
 import it.polito.wa2.warehouseservice.dto.WarehouseDTO
 import it.polito.wa2.warehouseservice.exceptions.*
+import it.polito.wa2.warehouseservice.repositories.CommentRepository
 import it.polito.wa2.warehouseservice.repositories.ProductRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -12,14 +15,13 @@ import org.bson.types.ObjectId
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.math.BigDecimal
-import java.sql.Timestamp
-import kotlin.reflect.full.memberProperties
+import kotlin.IllegalArgumentException
 
 @Service
 @Transactional
 class ProductServiceImpl(
-        private val productRepository: ProductRepository
+        private val productRepository: ProductRepository,
+        private val commentRepository: CommentRepository
 ): ProductService {
     override suspend fun getProductsByCategory(category: String, pageable: Pageable): Flow<ProductDTO> {
         return productRepository.findAllByCategory(category, pageable).map { it.toDTO() }
@@ -30,31 +32,16 @@ class ProductServiceImpl(
         return product.toDTO()
     }
 
-    override suspend fun modifyOrInsertProduct(productDTO: ProductDTO, productID: ObjectId): ProductDTO {
-//        val product = productRepository.existsById(productID)
-//        return if( !product)  //add a new product
-//            addProduct(productDTO)
-//        else // update a product
-//            modifyProduct(productDTO, productID)
-        TODO("Not yet implemented")
-    }
     override suspend fun partialUpdateProduct(productDTO: ProductDTO, productID: ObjectId): ProductDTO{
         val product = productRepository.findById(productID) ?: throw IllegalArgumentException("Product not found")
-        if(productDTO.avgRating != null)
-            product.avgRating = productDTO.avgRating
-        if(productDTO.category != null)
-            product.category = productDTO.category
-        if(productDTO.comments != null)
-            product.comments = productDTO.comments.map{ObjectId(it)}.toSet()
-        if(productDTO.description != null)
-            product.description = productDTO.description
-        if(productDTO.name != null)
-            product.name = productDTO.name
-        if(productDTO.pictureUrl != null)
-            product.pictureUrl = productDTO.pictureUrl
-        if(productDTO.price != null)
-            product.price = productDTO.price
 
+        product.avgRating = productDTO.avgRating ?: product.avgRating
+        product.category = productDTO.category ?: product.category
+        product.comments = productDTO.comments?.map{ObjectId(it)}?.toSet() ?: product.comments
+        product.description = productDTO.description ?: product.description
+        product.name = productDTO.name ?: product.name
+        product.pictureUrl = productDTO.pictureUrl ?: product.pictureUrl
+        product.price = productDTO.price ?: product.price
         return productRepository.save(product).toDTO()
     }
 
@@ -68,17 +55,21 @@ class ProductServiceImpl(
                 price = productDTO.price!!,
                 avgRating = productDTO.avgRating!!,
                 creationDate = productDTO.creationDate!!,
-                comments = productDTO.comments!!.map{ it -> ObjectId(it)}.toSet()
+                comments = productDTO.comments?.map{ObjectId(it)}?.toSet()
         )
         return productRepository.save(product).toDTO()
     }
 
     override suspend fun modifyProduct(productDTO: ProductDTO, productID: ObjectId): ProductDTO {
-        TODO("Not yet implemented")
+        val product = productRepository.existsById(productID)
+        return if(product)
+            partialUpdateProduct(productDTO, productID)
+        else
+            addProduct(productDTO)
     }
 
     override suspend fun deleteProduct(productID: ObjectId) {
-        val product = productRepository.findById(productID) ?: throw IllegalArgumentException("Product not found")
+        productRepository.findById(productID) ?: throw IllegalArgumentException("Product not found")
         return productRepository.deleteById(productID)
     }
 
@@ -95,5 +86,10 @@ class ProductServiceImpl(
 
     override suspend fun getProductWarehouse(productID: ObjectId): Flow<WarehouseDTO> {
         TODO("Not yet implemented")
+    }
+
+    override suspend fun getProductComments(productID: ObjectId): Flow<CommentDTO> {
+        val commentsIds = productRepository.findById(productID)?.comments ?: throw IllegalArgumentException("Comments not found")
+        return commentRepository.findAllById(commentsIds!!.asIterable()).map{ it.toDTO() }
     }
 }

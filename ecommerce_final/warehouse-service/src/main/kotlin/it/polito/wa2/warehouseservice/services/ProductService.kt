@@ -1,5 +1,6 @@
 package it.polito.wa2.warehouseservice.services
 
+import it.polito.wa2.warehouseservice.dto.CommentDTO
 import it.polito.wa2.warehouseservice.dto.ProductDTO
 import it.polito.wa2.warehouseservice.dto.WarehouseDTO
 import kotlinx.coroutines.flow.Flow
@@ -13,9 +14,6 @@ interface ProductService {
 
     @PreAuthorize("hasAuthority(\"ADMIN\") or hasAuthority(\"CUSTOMER\")")
     suspend fun getProductById(productID: ObjectId): ProductDTO
-
-    @PreAuthorize("hasAuthority(\"ADMIN\")")
-    suspend fun modifyOrInsertProduct(productDTO: ProductDTO, productID: ObjectId): ProductDTO
 
     @PreAuthorize("hasAuthority(\"ADMIN\")")
     suspend fun partialUpdateProduct(productDTO: ProductDTO, productID: ObjectId): ProductDTO
@@ -37,4 +35,8 @@ interface ProductService {
 
     @PreAuthorize("hasAuthority(\"ADMIN\") or hasAuthority(\"CUSTOMER\")")
     suspend fun getProductWarehouse(productID: ObjectId): Flow<WarehouseDTO>
+
+    @PreAuthorize("hasAuthority(\"ADMIN\") or hasAuthority(\"CUSTOMER\")")
+    suspend fun getProductComments(productID: ObjectId): Flow<CommentDTO>
+
 }

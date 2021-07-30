@@ -6,6 +6,7 @@ import it.polito.wa2.catalogservice.domain.Product
 import it.polito.wa2.catalogservice.dto.OrderDTO
 import kotlinx.coroutines.flow.Flow
 import org.bson.types.ObjectId
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
@@ -22,15 +23,18 @@ import java.time.ZonedDateTime
 import java.util.*
 
 @Component
-//@Controller TODO try if graphql needs the Annotation @Controller
-class OrderQuery(): Query {
+class OrderQuery(
+    @Qualifier("order-service-client") private val loadBalancedWebClientBuilder: WebClient.Builder
+): Query {
 
     //Create a WebClient instance
     //building a client by using the DefaultWebClientBuilder class, which allows full customization
-    val client: WebClient = WebClient.builder()
-        .baseUrl("http://localhost:6379")
+//    val client: WebClient = WebClient.builder()
+//        .baseUrl("http://localhost:6379")
+//        .defaultUriVariables(Collections.singletonMap("url", "http://localhost:6379"))
+    val client = loadBalancedWebClientBuilder
         .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_NDJSON_VALUE)
-        .defaultUriVariables(Collections.singletonMap("url", "http://localhost:6379"))
+                .defaultUriVariables(Collections.singletonMap("url", "http://order-service"))
         .build()
 
     //RETRIEVE ALL ORDERS OF A CUSTOMER
@@ -58,15 +62,9 @@ class OrderQuery(): Query {
             .retrieve()
 
         //Get a response
+        //TODO see if with this logic, if there's an exception it will be thrown
         return headersSpec.exchangeToFlow { response: ClientResponse ->
-            if (response.statusCode() == HttpStatus.OK) {
-                return@exchangeToFlow response.bodyToFlow<OrderDTO>()
-                //TODO fix error cases
-            } else if (response.statusCode().is4xxClientError) {
-                return@exchangeToFlow response.bodyToFlow()
-            } else {
-                return@exchangeToFlow response.bodyToFlow()
-            }
+            return@exchangeToFlow response.bodyToFlow<OrderDTO>()
         }
     }
 
@@ -118,7 +116,6 @@ class OrderQuery(): Query {
         var bodySpec: WebClient.RequestBodySpec = uriSpec.uri("/orders")
 
         //Preparing a Request: define the Body
-        //in this case there is no body in the Request
         var orderDTO = OrderDTO(buyer=buyerID,products=products,delivery=Delivery(delivery,null),
             email=email,id=null,status=null)
         var headersSpec: WebClient.RequestHeadersSpec<*> = bodySpec.bodyValue(orderDTO)
@@ -149,7 +146,7 @@ class OrderQuery(): Query {
 
     //DELETE AN ORDER GIVEN ITS ID (IF POSSIBLE)
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    suspend fun deleteOrder(orderID: String, token: String): Unit {
+    suspend fun deleteOrder(orderID: String, token: String) {
         //specify an HTTP method of a request by invoking method(HttpMethod method)
         val uriSpec: WebClient.UriSpec<WebClient.RequestBodySpec> = client.method(HttpMethod.DELETE)
 
