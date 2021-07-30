@@ -12,6 +12,6 @@ class ScheduledTasks(
 
     @Scheduled(fixedRate = 1000 * 60 * 60 * 12) //12 HOURS
     fun clearExpiredTokens() {
-        emailVerificationTokenRepository.deleteAllByExpiryDate(Timestamp(System.currentTimeMillis()))
+        emailVerificationTokenRepository.deleteAllByExpiryDateBefore(Timestamp(System.currentTimeMillis()))
     }
 }

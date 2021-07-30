@@ -21,6 +21,7 @@ import java.nio.charset.StandardCharsets
 import java.time.ZonedDateTime
 import java.util.*
 
+//TODO see if with this logic, if there's an exception it will be thrown
 @Component
 class ProductQuery(): Query {
     //Create a WebClient instance
@@ -61,7 +62,6 @@ class ProductQuery(): Query {
             .retrieve()
 
         //Get a response
-        //TODO see if with this logic, if there's an exception it will be thrown
         return headersSpec.exchangeToFlow { response: ClientResponse ->
             return@exchangeToFlow response.bodyToFlow<ProductDTO>()
         }
@@ -93,14 +93,7 @@ class ProductQuery(): Query {
 
         //Get a response
         return headersSpec.exchangeToMono { response: ClientResponse ->
-            if (response.statusCode() == HttpStatus.OK) {
-                return@exchangeToMono response.bodyToMono(ProductDTO::class.java)
-                //TODO fix error cases
-            } else if (response.statusCode().is4xxClientError) {
-                return@exchangeToMono response.bodyToMono(ProductDTO::class.java)
-            } else {
-                return@exchangeToMono response.bodyToMono(ProductDTO::class.java)
-            }
+            return@exchangeToMono response.bodyToMono(ProductDTO::class.java)
         }
     }
 
@@ -159,14 +152,7 @@ class ProductQuery(): Query {
 
         //Get a response
         return headersSpec.exchangeToMono { response: ClientResponse ->
-            if (response.statusCode() == HttpStatus.OK) {
-                return@exchangeToMono response.bodyToMono(String::class.java)
-                //TODO fix error cases
-            } else if (response.statusCode().is4xxClientError) {
-                return@exchangeToMono response.bodyToMono(String::class.java)
-            } else {
-                return@exchangeToMono response.bodyToMono(String::class.java)
-            }
+            return@exchangeToMono response.bodyToMono(String::class.java)
         }
     }
 
@@ -196,14 +182,7 @@ class ProductQuery(): Query {
 
         //Get a response
         return headersSpec.exchangeToMono { response: ClientResponse ->
-            if (response.statusCode() == HttpStatus.CREATED) {
-                return@exchangeToMono response.bodyToMono(ProductDTO::class.java)
-                //TODO fix error cases
-            } else if (response.statusCode().is4xxClientError) {
-                return@exchangeToMono response.bodyToMono(ProductDTO::class.java)
-            } else {
-                return@exchangeToMono response.bodyToMono(ProductDTO::class.java)
-            }
+            return@exchangeToMono response.bodyToMono(ProductDTO::class.java)
         }
     }
 
@@ -233,14 +212,7 @@ class ProductQuery(): Query {
 
         //Get a response
         return headersSpec.exchangeToFlow { response: ClientResponse ->
-            if (response.statusCode() == HttpStatus.OK) {
-                return@exchangeToFlow response.bodyToFlow<WarehouseDTO>()
-                //TODO fix error cases
-            } else if (response.statusCode().is4xxClientError) {
-                return@exchangeToFlow response.bodyToFlow()
-            } else {
-                return@exchangeToFlow response.bodyToFlow()
-            }
+            return@exchangeToFlow response.bodyToFlow<WarehouseDTO>()
         }
     }
 
@@ -270,14 +242,7 @@ class ProductQuery(): Query {
 
         //Get a response
         return headersSpec.exchangeToMono { response: ClientResponse ->
-            if (response.statusCode() == HttpStatus.CREATED) {
-                return@exchangeToMono response.bodyToMono(ProductDTO::class.java)
-                //TODO fix error cases
-            } else if (response.statusCode().is4xxClientError) {
-                return@exchangeToMono response.bodyToMono(ProductDTO::class.java)
-            } else {
-                return@exchangeToMono response.bodyToMono(ProductDTO::class.java)
-            }
+            return@exchangeToMono response.bodyToMono(ProductDTO::class.java)
         }
     }
 
@@ -307,14 +272,16 @@ class ProductQuery(): Query {
 
         //Get a response
         return headersSpec.exchangeToMono { response: ClientResponse ->
-            if (response.statusCode() == HttpStatus.CREATED) {
-                return@exchangeToMono response.bodyToMono(ProductDTO::class.java)
-                //TODO fix error cases
-            } else if (response.statusCode().is4xxClientError) {
-                return@exchangeToMono response.bodyToMono(ProductDTO::class.java)
-            } else {
-                return@exchangeToMono response.bodyToMono(ProductDTO::class.java)
-            }
+            return@exchangeToMono response.bodyToMono(ProductDTO::class.java)
         }
     }
 }
+
+/*
+* if (response.statusCode() == HttpStatus.CREATED) {
+*
+* } else if (response.statusCode().is4xxClientError) {
+*   return@exchangeToMono response.bodyToMono(ProductDTO::class.java)
+  } else {
+    return@exchangeToMono response.bodyToMono(ProductDTO::class.java)
+  }*/

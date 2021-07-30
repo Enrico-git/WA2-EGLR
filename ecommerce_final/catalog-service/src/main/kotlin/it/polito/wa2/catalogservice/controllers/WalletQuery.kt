@@ -53,14 +53,7 @@ class WalletQuery(): Query {
 
         //Get a response
         return headersSpec.exchangeToMono { response: ClientResponse ->
-            if (response.statusCode() == HttpStatus.OK) {
-                return@exchangeToMono response.bodyToMono(WalletDTO::class.java)
-                //TODO fix error cases
-            } else if (response.statusCode().is4xxClientError) {
-                return@exchangeToMono response.bodyToMono(WalletDTO::class.java)
-            } else {
-                return@exchangeToMono response.bodyToMono(WalletDTO::class.java)
-            }
+            return@exchangeToMono response.bodyToMono(WalletDTO::class.java)
         }
     }
 
@@ -93,14 +86,7 @@ class WalletQuery(): Query {
 
         //Get a response
         return headersSpec.exchangeToMono { response: ClientResponse ->
-            if (response.statusCode() == HttpStatus.CREATED) {
-                return@exchangeToMono response.bodyToMono(WalletDTO::class.java)
-                //TODO fix error cases
-            } else if (response.statusCode().is4xxClientError) {
-                return@exchangeToMono response.bodyToMono(WalletDTO::class.java)
-            } else {
-                return@exchangeToMono response.bodyToMono(WalletDTO::class.java)
-            }
+            return@exchangeToMono response.bodyToMono(WalletDTO::class.java)
         }
     }
 
@@ -133,14 +119,7 @@ class WalletQuery(): Query {
 
         //Get a response
         return headersSpec.exchangeToMono { response: ClientResponse ->
-            if (response.statusCode() == HttpStatus.CREATED) {
-                return@exchangeToMono response.bodyToMono(TransactionDTO::class.java)
-                //TODO fix error cases
-            } else if (response.statusCode().is4xxClientError) {
-                return@exchangeToMono response.bodyToMono(TransactionDTO::class.java)
-            } else {
-                return@exchangeToMono response.bodyToMono(TransactionDTO::class.java)
-            }
+            return@exchangeToMono response.bodyToMono(TransactionDTO::class.java)
         }
     }
 
@@ -192,22 +171,13 @@ class WalletQuery(): Query {
 
         //Get a response
         return headersSpec.exchangeToFlow { response: ClientResponse ->
-            if (response.statusCode() == HttpStatus.OK) {
-                return@exchangeToFlow response.bodyToFlow<TransactionDTO>()
-                //TODO fix error cases
-            } else if (response.statusCode().is4xxClientError) {
-                return@exchangeToFlow response.bodyToFlow()
-            } else {
-                return@exchangeToFlow response.bodyToFlow()
-            }
+            return@exchangeToFlow response.bodyToFlow<TransactionDTO>()
         }
     }
 
     //RETTRIEVE THE INFO OF A TRANSACTION GIVEN ITS ID
     @ResponseStatus(HttpStatus.OK)
     suspend fun transaction(walletID: String, transactionID: String, token: String): Mono<TransactionDTO>? {
-        //Create a WebClient instance
-
         //specify an HTTP method of a request by invoking method(HttpMethod method)
         val uriSpec: WebClient.UriSpec<WebClient.RequestBodySpec> = client.method(HttpMethod.POST)
 
@@ -231,14 +201,7 @@ class WalletQuery(): Query {
 
         //Get a response
         return headersSpec.exchangeToMono { response: ClientResponse ->
-            if (response.statusCode() == HttpStatus.OK) {
-                return@exchangeToMono response.bodyToMono(TransactionDTO::class.java)
-                //TODO fix error cases
-            } else if (response.statusCode().is4xxClientError) {
-                return@exchangeToMono response.bodyToMono(TransactionDTO::class.java)
-            } else {
-                return@exchangeToMono response.bodyToMono(TransactionDTO::class.java)
-            }
+            return@exchangeToMono response.bodyToMono(TransactionDTO::class.java)
         }
     }
 }

@@ -57,14 +57,7 @@ class WarehouseQuery(): Query {
 
         //Get a response
         return headersSpec.exchangeToFlow { response: ClientResponse ->
-            if (response.statusCode() == HttpStatus.OK) {
-                return@exchangeToFlow response.bodyToFlow<WarehouseDTO>()
-                //TODO fix error cases
-            } else if (response.statusCode().is4xxClientError) {
-                return@exchangeToFlow response.bodyToFlow()
-            } else {
-                return@exchangeToFlow response.bodyToFlow()
-            }
+            return@exchangeToFlow response.bodyToFlow<WarehouseDTO>()
         }
     }
 
@@ -94,14 +87,7 @@ class WarehouseQuery(): Query {
 
         //Get a response
         return headersSpec.exchangeToMono { response: ClientResponse ->
-            if (response.statusCode() == HttpStatus.OK) {
-                return@exchangeToMono response.bodyToMono(WarehouseDTO::class.java)
-                //TODO fix error cases
-            } else if (response.statusCode().is4xxClientError) {
-                return@exchangeToMono response.bodyToMono(WarehouseDTO::class.java)
-            } else {
-                return@exchangeToMono response.bodyToMono(WarehouseDTO::class.java)
-            }
+            return@exchangeToMono response.bodyToMono(WarehouseDTO::class.java)
         }
     }
 
@@ -160,14 +146,7 @@ class WarehouseQuery(): Query {
 
         //Get a response
         return headersSpec.exchangeToMono { response: ClientResponse ->
-            if (response.statusCode() == HttpStatus.CREATED) {
-                return@exchangeToMono response.bodyToMono(WarehouseDTO::class.java)
-                //TODO fix error cases
-            } else if (response.statusCode().is4xxClientError) {
-                return@exchangeToMono response.bodyToMono(WarehouseDTO::class.java)
-            } else {
-                return@exchangeToMono response.bodyToMono(WarehouseDTO::class.java)
-            }
+            return@exchangeToMono response.bodyToMono(WarehouseDTO::class.java)
         }
     }
 
@@ -198,14 +177,7 @@ class WarehouseQuery(): Query {
 
         //Get a response
         return headersSpec.exchangeToMono { response: ClientResponse ->
-            if (response.statusCode() == HttpStatus.CREATED) {
-                return@exchangeToMono response.bodyToMono(WarehouseDTO::class.java)
-                //TODO fix error cases
-            } else if (response.statusCode().is4xxClientError) {
-                return@exchangeToMono response.bodyToMono(WarehouseDTO::class.java)
-            } else {
-                return@exchangeToMono response.bodyToMono(WarehouseDTO::class.java)
-            }
+            return@exchangeToMono response.bodyToMono(WarehouseDTO::class.java)
         }
     }
 
@@ -236,14 +208,7 @@ class WarehouseQuery(): Query {
 
         //Get a response
         return headersSpec.exchangeToMono { response: ClientResponse ->
-            if (response.statusCode() == HttpStatus.CREATED) {
-                return@exchangeToMono response.bodyToMono(WarehouseDTO::class.java)
-                //TODO fix error cases
-            } else if (response.statusCode().is4xxClientError) {
-                return@exchangeToMono response.bodyToMono(WarehouseDTO::class.java)
-            } else {
-                return@exchangeToMono response.bodyToMono(WarehouseDTO::class.java)
-            }
+            return@exchangeToMono response.bodyToMono(WarehouseDTO::class.java)
         }
     }
 }
