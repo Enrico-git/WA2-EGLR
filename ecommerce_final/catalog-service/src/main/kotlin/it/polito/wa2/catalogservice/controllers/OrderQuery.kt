@@ -6,6 +6,7 @@ import it.polito.wa2.catalogservice.domain.Product
 import it.polito.wa2.catalogservice.dto.OrderDTO
 import kotlinx.coroutines.flow.Flow
 import org.bson.types.ObjectId
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
@@ -22,14 +23,18 @@ import java.time.ZonedDateTime
 import java.util.*
 
 @Component
-class OrderQuery(): Query {
+class OrderQuery(
+    @Qualifier("order-service-client") private val loadBalancedWebClientBuilder: WebClient.Builder
+): Query {
 
     //Create a WebClient instance
     //building a client by using the DefaultWebClientBuilder class, which allows full customization
-    val client: WebClient = WebClient.builder()
-        .baseUrl("http://localhost:6379")
+//    val client: WebClient = WebClient.builder()
+//        .baseUrl("http://localhost:6379")
+//        .defaultUriVariables(Collections.singletonMap("url", "http://localhost:6379"))
+    val client = loadBalancedWebClientBuilder
         .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_NDJSON_VALUE)
-        .defaultUriVariables(Collections.singletonMap("url", "http://localhost:6379"))
+                .defaultUriVariables(Collections.singletonMap("url", "http://order-service"))
         .build()
 
     //RETRIEVE ALL ORDERS OF A CUSTOMER
