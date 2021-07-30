@@ -34,7 +34,6 @@ class ProductServiceImpl(
 
     override suspend fun partialUpdateProduct(productDTO: ProductDTO, productID: ObjectId): ProductDTO{
         val product = productRepository.findById(productID) ?: throw IllegalArgumentException("Product not found")
-        println(product.category)
 
         product.avgRating = productDTO.avgRating ?: product.avgRating
         product.category = productDTO.category ?: product.category
@@ -56,7 +55,7 @@ class ProductServiceImpl(
                 price = productDTO.price!!,
                 avgRating = productDTO.avgRating!!,
                 creationDate = productDTO.creationDate!!,
-                comments = null
+                comments = productDTO.comments?.map{ObjectId(it)}?.toSet()
         )
         return productRepository.save(product).toDTO()
     }
@@ -70,7 +69,7 @@ class ProductServiceImpl(
     }
 
     override suspend fun deleteProduct(productID: ObjectId) {
-        val product = productRepository.findById(productID) ?: throw IllegalArgumentException("Product not found")
+        productRepository.findById(productID) ?: throw IllegalArgumentException("Product not found")
         return productRepository.deleteById(productID)
     }
 

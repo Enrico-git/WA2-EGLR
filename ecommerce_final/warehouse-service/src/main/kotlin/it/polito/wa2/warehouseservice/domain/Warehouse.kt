@@ -8,7 +8,7 @@ import org.springframework.data.annotation.Version
 import org.springframework.data.mongodb.core.mapping.Document
 
 @Document(collection = "warehouses")
-class Warehouse (
+data class Warehouse (
         @Id
         val id: ObjectId?,
         var products: Set<ProductInfo>?,

@@ -8,7 +8,7 @@ import org.springframework.data.mongodb.core.mapping.Document
 import java.sql.Timestamp
 
 @Document(collection = "comments")
-class Comment (
+data class Comment (
         @Id
         val id: ObjectId?,
         var title: String,
@@ -20,10 +20,13 @@ class Comment (
         val version: Long? = null
 )
 
+
+
 fun Comment.toDTO() = CommentDTO(
         id = id.toString(),
         title = title,
         body = body,
         stars = stars,
-        creationDate = creationDate
+        creationDate = creationDate,
+        userId = userId
 )

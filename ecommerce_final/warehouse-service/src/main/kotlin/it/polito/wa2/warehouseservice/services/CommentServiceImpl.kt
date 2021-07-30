@@ -13,6 +13,7 @@ import org.springframework.security.core.context.ReactiveSecurityContextHolder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import it.polito.wa2.warehouseservice.exceptions.*
+import java.sql.Timestamp
 
 @Service
 @Transactional
@@ -22,7 +23,6 @@ class CommentServiceImpl(
         private val productService: ProductService
 ): CommentService {
     override suspend fun addComment(productID: ObjectId, commentDTO: CommentDTO): CommentDTO {
-        println("Service for addComment ok")
         val user = ReactiveSecurityContextHolder.getContext().awaitFirst().authentication.principal as UserDetailsDTO
         val comment = Comment(
             id = null,
@@ -30,14 +30,12 @@ class CommentServiceImpl(
             body = commentDTO.body!!,
             stars = commentDTO.stars!!,
             creationDate = commentDTO.creationDate!!,
-            userId = user.username
+            userId = user.username,
         )
-        println("new comment created")
         val product = productRepository.findById(productID) ?: throw IllegalArgumentException("Product not found")
-        println("product found")
         val commentsLength = product.comments?.size
         val newComment = commentRepository.save(comment)
-        println("new comment added to the db")
+        val comments = product.comments?.plus(newComment.id)?.map{it.toString()}?.toSet()
         val productDTO = ProductDTO(
                 id = null,
                 name = null,
@@ -45,20 +43,55 @@ class CommentServiceImpl(
                 pictureUrl = null,
                 category = null,
                 price = null,
-                avgRating = (product?.avgRating?.times(commentsLength!!)+commentDTO.stars)/(commentsLength!!+1),
+                avgRating = (product.avgRating.times(commentsLength!!)+commentDTO.stars)/(commentsLength+1),
                 creationDate = null,
-                comments = product.comments!!.map{ it.toString() }.toSet() //+ newComment.id.toString()
+                comments = comments
         )
-        println("new productDTo created")
         productService.partialUpdateProduct(productDTO, productID)
         return newComment.toDTO()
     }
 
-    override suspend fun updateComment(productID: ObjectId, commentDTO: CommentDTO): CommentDTO {
-        TODO("Not yet implemented")
+    override suspend fun updateComment(productID: ObjectId, commentId: ObjectId, commentDTO: CommentDTO): CommentDTO {
+        val comment = commentRepository.findById(commentId) ?: throw IllegalArgumentException("Comment not found")
+
+        comment.body = commentDTO.body ?: comment.body
+        comment.title = commentDTO.title ?: comment.title
+        if(commentDTO.stars != null){
+            val product = productRepository.findById(productID) ?: throw IllegalArgumentException("Product not found")
+            val commentsLength = product.comments?.size
+            val productDTO = ProductDTO(
+                    id = null,
+                    name = null,
+                    description = null,
+                    pictureUrl = null,
+                    category = null,
+                    price = null,
+                    avgRating = ((product.avgRating.times(commentsLength!!) - comment.stars) + commentDTO.stars) / (commentsLength),
+                    creationDate = null,
+                    comments = null
+            )
+            productService.partialUpdateProduct(productDTO, productID)
+        }
+        return commentRepository.save(comment).toDTO()
     }
 
-    override suspend fun deleteComment(commentId: ObjectId) {
-        TODO("Not yet implemented")
+    override suspend fun deleteComment(productID: ObjectId, commentId: ObjectId) {
+        val comment = commentRepository.findById(commentId) ?: throw IllegalArgumentException("Comment not found")
+        val product = productRepository.findById(productID) ?: throw IllegalArgumentException("Product not found")
+        val commentsLength = product.comments?.size
+        val comments = product.comments?.minus(commentId)?.map{it.toString()}?.toSet()
+        val productDTO = ProductDTO(
+                id = null,
+                name = null,
+                description = null,
+                pictureUrl = null,
+                category = null,
+                price = null,
+                avgRating = (product.avgRating.times(commentsLength!!)-comment.stars)/(commentsLength-1),
+                creationDate = null,
+                comments = comments
+        )
+        productService.partialUpdateProduct(productDTO, productID)
+        commentRepository.deleteById(commentId)
     }
 }

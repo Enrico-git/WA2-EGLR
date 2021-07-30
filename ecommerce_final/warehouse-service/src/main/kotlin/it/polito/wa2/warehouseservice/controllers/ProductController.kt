@@ -13,8 +13,7 @@ import org.springframework.web.bind.annotation.*
 @RestController
 @RequestMapping("/products")
 class ProductController(
-        private val productService: ProductService,
-        private val commentService: CommentService
+        private val productService: ProductService
 ) {
     /**
      * API endpoint to retrieve a list of products by their category
@@ -92,17 +91,6 @@ class ProductController(
     suspend fun modifyProductPicture(@PathVariable productID: String, @RequestBody pictureURL: String): ProductDTO{
         return productService.modifyProductPicture(pictureURL, ObjectId(productID))
     }
-
-    /**
-     * API endpoint to insert a new comment
-     * @param productID the ID of the product, the body is the comment)
-     * @return the comment object
-     */
-     @PostMapping("/comment/{productID}")
-     suspend fun addComment(@PathVariable productID: String, @RequestBody commentDTO: CommentDTO): CommentDTO{
-        println("controller for addComment ok")
-         return commentService.addComment(ObjectId(productID), commentDTO)
-     }
 
 
 }
