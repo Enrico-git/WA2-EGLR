@@ -3,7 +3,7 @@ package it.polito.wa2.catalogservice.dto
 import java.math.BigDecimal
 import java.sql.Timestamp
 
-class TransactionDTO(
+data class TransactionDTO(
     var id: String?,
     var timestamp: Timestamp?,
     var walletID: String?,

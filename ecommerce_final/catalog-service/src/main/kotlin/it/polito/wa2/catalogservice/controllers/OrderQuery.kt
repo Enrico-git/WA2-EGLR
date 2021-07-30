@@ -107,7 +107,7 @@ class OrderQuery(
 
     //CREATE A NEW ORDER
     @ResponseStatus(HttpStatus.CREATED)
-    suspend fun newOrder(buyerID: ObjectId, products: Set<Product>, delivery: String,
+    suspend fun newOrder(buyerID: String, products: Set<Product>, delivery: String,
                          email: String, token: String): Mono<OrderDTO> {
         //specify an HTTP method of a request by invoking method(HttpMethod method)
         val uriSpec: WebClient.UriSpec<WebClient.RequestBodySpec> = client.method(HttpMethod.POST)
@@ -116,7 +116,7 @@ class OrderQuery(
         var bodySpec: WebClient.RequestBodySpec = uriSpec.uri("/orders")
 
         //Preparing a Request: define the Body
-        var orderDTO = OrderDTO(buyer=buyerID,products=products,delivery=Delivery(delivery,null),
+        var orderDTO = OrderDTO(buyer=ObjectId(buyerID),products=products,delivery=Delivery(delivery,null),
             email=email,id=null,status=null)
         var headersSpec: WebClient.RequestHeadersSpec<*> = bodySpec.bodyValue(orderDTO)
 
@@ -146,7 +146,7 @@ class OrderQuery(
 
     //DELETE AN ORDER GIVEN ITS ID (IF POSSIBLE)
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    suspend fun deleteOrder(orderID: String, token: String) {
+    suspend fun deleteOrder(orderID: String, token: String): Mono<String> {
         //specify an HTTP method of a request by invoking method(HttpMethod method)
         val uriSpec: WebClient.UriSpec<WebClient.RequestBodySpec> = client.method(HttpMethod.DELETE)
 
@@ -169,13 +169,15 @@ class OrderQuery(
             .retrieve()
 
         //Get a response TODO see if the request starts, because this endpoint returns nothing
-        val response = headersSpec.retrieve()
+        return headersSpec.exchangeToMono { response: ClientResponse ->
+            return@exchangeToMono response.bodyToMono(String::class.java)
+        }
     }
 
     //UPDATE AN ORDER GIVEN ITS ID
     @ResponseStatus(HttpStatus.CREATED)
     suspend fun updateOrder(orderID: String, products: Set<Product>, delivery: String?, email: String?,
-                            buyerID: ObjectId?, token: String): Mono<OrderDTO> {
+                            buyerID: String?, token: String): Mono<OrderDTO> {
         //specify an HTTP method of a request by invoking method(HttpMethod method)
         val uriSpec: WebClient.UriSpec<WebClient.RequestBodySpec> = client.method(HttpMethod.PATCH)
 
@@ -187,8 +189,8 @@ class OrderQuery(
         var deliveryObj: Delivery? = null
         if(delivery!=null)
             deliveryObj = Delivery(delivery,null)
-        var orderDTO = OrderDTO(buyer=buyerID,products=products,delivery=deliveryObj,email=email,
-                id=null,status=null)
+        var orderDTO = OrderDTO(buyer=ObjectId(buyerID),products=products,delivery=deliveryObj,
+            email=email,id=null,status=null)
         var headersSpec: WebClient.RequestHeadersSpec<*> = bodySpec.bodyValue(orderDTO)
 
         //Preparing a Request: define the Headers

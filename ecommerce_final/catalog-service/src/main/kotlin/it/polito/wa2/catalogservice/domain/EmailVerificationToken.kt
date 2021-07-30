@@ -6,7 +6,7 @@ import org.springframework.data.mongodb.core.mapping.Document
 import java.sql.Timestamp
 
 @Document(collection = "email_verification_token")
-class EmailVerificationToken(
+data class EmailVerificationToken(
     @Id
     val id: ObjectId? = null,
     val expiryDate: Timestamp,

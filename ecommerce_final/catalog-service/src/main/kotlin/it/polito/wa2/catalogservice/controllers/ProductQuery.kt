@@ -99,7 +99,7 @@ class ProductQuery(): Query {
 
     //DELETE A PRODUCT GIVEN ITS ID
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    suspend fun deleteProduct(productID: String, token: String) {
+    suspend fun deleteProduct(productID: String, token: String): Mono<String> {
         //specify an HTTP method of a request by invoking method(HttpMethod method)
         val uriSpec: WebClient.UriSpec<WebClient.RequestBodySpec> = client.method(HttpMethod.DELETE)
 
@@ -122,7 +122,9 @@ class ProductQuery(): Query {
             .retrieve()
 
         //Get a response TODO see if the request starts, because this endpoint returns nothing
-        val response = headersSpec.retrieve()
+        return headersSpec.exchangeToMono { response: ClientResponse ->
+            return@exchangeToMono response.bodyToMono(String::class.java)
+        }
     }
 
     //RETRIEVE THE PICTURE URL OF A PRODUCT GIVEN ITS ID

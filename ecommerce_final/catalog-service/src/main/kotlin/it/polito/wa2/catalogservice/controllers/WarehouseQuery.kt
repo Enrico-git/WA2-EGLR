@@ -93,7 +93,7 @@ class WarehouseQuery(): Query {
 
     //DELETE A WAREHOUSE GIVEN ITS ID, IF POSSIBLE
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    suspend fun deleteWarehouse(warehouseID: String, token: String) {
+    suspend fun deleteWarehouse(warehouseID: String, token: String): Mono<String> {
         //specify an HTTP method of a request by invoking method(HttpMethod method)
         val uriSpec: WebClient.UriSpec<WebClient.RequestBodySpec> = client.method(HttpMethod.DELETE)
 
@@ -116,7 +116,9 @@ class WarehouseQuery(): Query {
             .retrieve()
 
         //Get a response TODO see if the request starts, because this endpoint returns nothing
-        val response = headersSpec.retrieve()
+        return headersSpec.exchangeToMono { response: ClientResponse ->
+            return@exchangeToMono response.bodyToMono(String::class.java)
+        }
     }
 
     //CREATE A NEW WAREHOUSE WITH A LIST OF PRODUCTS
