@@ -93,7 +93,7 @@ class WarehouseQuery(): Query {
 
     //DELETE A WAREHOUSE GIVEN ITS ID, IF POSSIBLE
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    suspend fun deleteWarehouse(warehouseID: String, token: String): Unit {
+    suspend fun deleteWarehouse(warehouseID: String, token: String) {
         //specify an HTTP method of a request by invoking method(HttpMethod method)
         val uriSpec: WebClient.UriSpec<WebClient.RequestBodySpec> = client.method(HttpMethod.DELETE)
 

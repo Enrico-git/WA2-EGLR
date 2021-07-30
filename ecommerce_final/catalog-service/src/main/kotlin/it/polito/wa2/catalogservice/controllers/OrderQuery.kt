@@ -146,7 +146,7 @@ class OrderQuery(
 
     //DELETE AN ORDER GIVEN ITS ID (IF POSSIBLE)
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    suspend fun deleteOrder(orderID: String, token: String): Unit {
+    suspend fun deleteOrder(orderID: String, token: String) {
         //specify an HTTP method of a request by invoking method(HttpMethod method)
         val uriSpec: WebClient.UriSpec<WebClient.RequestBodySpec> = client.method(HttpMethod.DELETE)
 

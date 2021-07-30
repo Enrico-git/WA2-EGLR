@@ -99,7 +99,7 @@ class ProductQuery(): Query {
 
     //DELETE A PRODUCT GIVEN ITS ID
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    suspend fun deleteProduct(productID: String, token: String): Unit {
+    suspend fun deleteProduct(productID: String, token: String) {
         //specify an HTTP method of a request by invoking method(HttpMethod method)
         val uriSpec: WebClient.UriSpec<WebClient.RequestBodySpec> = client.method(HttpMethod.DELETE)
 
