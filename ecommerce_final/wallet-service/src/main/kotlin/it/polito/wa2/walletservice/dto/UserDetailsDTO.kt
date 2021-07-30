@@ -2,7 +2,6 @@ package it.polito.wa2.walletservice.dto
 
 
 import com.fasterxml.jackson.annotation.JsonProperty
-import it.polito.wa2.walletservice.entities.User
 import org.bson.types.ObjectId
 import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.core.authority.SimpleGrantedAuthority
@@ -54,13 +53,3 @@ data class UserDetailsDTO(
     }
 }
 
-fun User.toDTO(): UserDetailsDTO {
-    return UserDetailsDTO(
-        id = id!!,
-        username = username,
-        password = password,
-        email = email,
-        isEnabled = isEnabled,
-        roles = roles
-    )
-}

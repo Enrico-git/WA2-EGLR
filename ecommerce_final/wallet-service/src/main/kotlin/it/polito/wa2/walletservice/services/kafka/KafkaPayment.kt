@@ -26,8 +26,8 @@ import java.math.BigDecimal
 import java.sql.Timestamp
 
 /**
- * This class is used for reading from "payment_request"
- * and insert in "payment_request_failed" topics.
+ * This class is used for listening from "payment_request"
+ * and for inserting in "payment_request_failed" topics.
  * It works as Service.
  * Moreover it's used for "abort_request_payment" and
  * "abort_request_payment_failed".
@@ -56,14 +56,27 @@ class KafkaPayment(
             val sc = SecurityContextHolder.getContext()
             ReactiveSecurityContextHolder.getContext().awaitFirstOrDefault(sc).authentication = auth
 
-//            val userDetailsDTO = jwtUtils.getDetailsFromJwtToken(paymentRequestDTO.token)
+            val userDetailsDTO = jwtUtils.getDetailsFromJwtToken(paymentRequestDTO.token)
 //            if (userDetailsDTO.id == null){
 //                kafkaPaymentRequestFailedProducer.send(
 //                    ProducerRecord("payment_request_failed", paymentRequestDTO.orderID))
 //                return@launch
 //            }
+//
+//            if (!userDetailsDTO.isEnabled){
+//                kafkaPaymentRequestFailedProducer.send(
+//                    ProducerRecord("payment_request_failed", paymentRequestDTO.orderID))
+//                return@launch
+//            }
 
-            var userIDObj: ObjectId? = null
+            if ((userDetailsDTO.roles?.contains("CUSTOMER", true) != true) &&
+                (userDetailsDTO.roles?.contains("ADMIN", true) != true)){
+                kafkaPaymentRequestFailedProducer.send(
+                    ProducerRecord("payment_request_failed", paymentRequestDTO.orderID))
+                return@launch
+            }
+
+            val userIDObj: ObjectId?
             try{
                 userIDObj = ObjectId("60f66fd598f6d22dc03092d4")
 //                userIDObj = ObjectId(userDetailsDTO.id!!)
