@@ -1,11 +1,7 @@
-package it.polito.wa2.catalogservice.controllers
+package it.polito.wa2.catalogservice.queries
 
-import com.expediagroup.graphql.spring.operations.Query
-import it.polito.wa2.catalogservice.domain.Delivery
-import it.polito.wa2.catalogservice.domain.Product
 import it.polito.wa2.catalogservice.dto.OrderDTO
 import kotlinx.coroutines.flow.Flow
-import org.bson.types.ObjectId
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
@@ -22,10 +18,11 @@ import java.nio.charset.StandardCharsets
 import java.time.ZonedDateTime
 import java.util.*
 
+//I DELETE SUSPEND BECAUSE IT GAVES ME AN ERROR IN OrderWiring.kt, CHECK IF IT WORKS
 @Component
 class OrderQuery(
     @Qualifier("order-service-client") private val loadBalancedWebClientBuilder: WebClient.Builder
-): Query {
+) {
 
     //Create a WebClient instance
     //building a client by using the DefaultWebClientBuilder class, which allows full customization
@@ -34,12 +31,12 @@ class OrderQuery(
 //        .defaultUriVariables(Collections.singletonMap("url", "http://localhost:6379"))
     val client = loadBalancedWebClientBuilder
         .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_NDJSON_VALUE)
-                .defaultUriVariables(Collections.singletonMap("url", "http://order-service"))
+        .defaultUriVariables(Collections.singletonMap("url", "http://order-service"))
         .build()
 
     //RETRIEVE ALL ORDERS OF A CUSTOMER
     @ResponseStatus(HttpStatus.OK)
-    suspend fun orders(token: String): Flow<OrderDTO> {
+    fun orders(token: String): Flow<OrderDTO> {
         //specify an HTTP method of a request by invoking method(HttpMethod method)
         val uriSpec: WebClient.UriSpec<WebClient.RequestBodySpec> = client.method(HttpMethod.GET)
 
@@ -70,7 +67,7 @@ class OrderQuery(
 
     //RETRIEVE AN ORDER GIVEN ITS ID
     @ResponseStatus(HttpStatus.OK)
-    suspend fun order(orderID: String, token: String): Mono<OrderDTO> {
+    fun order(orderID: String, token: String): Mono<OrderDTO> {
         //specify an HTTP method of a request by invoking method(HttpMethod method)
         val uriSpec: WebClient.UriSpec<WebClient.RequestBodySpec> = client.method(HttpMethod.GET)
 
@@ -94,14 +91,7 @@ class OrderQuery(
 
         //Get a response
         return headersSpec.exchangeToMono { response: ClientResponse ->
-            if (response.statusCode() == HttpStatus.OK) {
-                return@exchangeToMono response.bodyToMono(OrderDTO::class.java)
-                //TODO fix error cases
-            } else if (response.statusCode().is4xxClientError) {
-                return@exchangeToMono response.bodyToMono(OrderDTO::class.java)
-            } else {
-                return@exchangeToMono response.bodyToMono(OrderDTO::class.java)
-            }
+            return@exchangeToMono response.bodyToMono(OrderDTO::class.java)
         }
     }
 }

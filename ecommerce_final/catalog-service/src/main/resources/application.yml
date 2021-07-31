@@ -1,4 +1,10 @@
 spring:
+  graphql:
+    websocket:
+      path: /graphql
+    graphiql:
+      enabled: true
+      path: /graphiql
   mail:
     username: eglrgroup9@gmail.com
     password: z5i59QRJLwpAyxT

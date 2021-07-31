@@ -1,6 +1,5 @@
-package it.polito.wa2.catalogservice.controllers
+package it.polito.wa2.catalogservice.queries
 
-import com.expediagroup.graphql.spring.operations.Query
 import it.polito.wa2.catalogservice.dto.LoginDTO
 import it.polito.wa2.catalogservice.dto.RegistrationDTO
 import it.polito.wa2.catalogservice.dto.UserDetailsDTO
@@ -10,7 +9,7 @@ import org.springframework.stereotype.Component
 import org.springframework.web.bind.annotation.ResponseStatus
 
 @Component
-class UserQuery(private val userService: UserDetailsService): Query {
+class UserQuery(private val userService: UserDetailsService) {
 
     @ResponseStatus(HttpStatus.CREATED)
     suspend fun createUser(registrationDTO: RegistrationDTO): UserDetailsDTO {

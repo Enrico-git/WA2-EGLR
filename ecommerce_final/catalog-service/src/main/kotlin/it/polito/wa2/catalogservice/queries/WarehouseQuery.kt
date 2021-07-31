@@ -1,8 +1,6 @@
-package it.polito.wa2.catalogservice.controllers
+package it.polito.wa2.catalogservice.queries
 
-import com.expediagroup.graphql.spring.operations.Query
 import it.polito.wa2.catalogservice.dto.ProductDTO
-import it.polito.wa2.catalogservice.dto.ProductInfoDTO
 import it.polito.wa2.catalogservice.dto.WarehouseDTO
 import kotlinx.coroutines.flow.Flow
 import org.springframework.http.HttpHeaders
@@ -20,8 +18,9 @@ import java.nio.charset.StandardCharsets
 import java.time.ZonedDateTime
 import java.util.*
 
+//I DELETE SUSPEND BECAUSE IT GAVES ME AN ERROR IN OrderWiring.kt, CHECK IF IT WORKS
 @Component
-class WarehouseQuery(): Query {
+class WarehouseQuery() {
 
     //Create a WebClient instance
     //building a client by using the DefaultWebClientBuilder class, which allows full customization
@@ -33,7 +32,7 @@ class WarehouseQuery(): Query {
 
     //RETRIEVE THE LIST OF WAREHOUSES
     @ResponseStatus(HttpStatus.OK)
-    suspend fun warehouses(token: String): Flow<WarehouseDTO> {
+    fun warehouses(token: String): Flow<WarehouseDTO> {
         //specify an HTTP method of a request by invoking method(HttpMethod method)
         val uriSpec: WebClient.UriSpec<WebClient.RequestBodySpec> = client.method(HttpMethod.GET)
 
@@ -63,7 +62,7 @@ class WarehouseQuery(): Query {
 
     //RETRIEVE INFO ABOUT A WAREHOUSE GIVEN ITS ID
     @ResponseStatus(HttpStatus.OK)
-    suspend fun warehouse(warehouseID: String, token: String): Mono<WarehouseDTO> {
+    fun warehouse(warehouseID: String, token: String): Mono<WarehouseDTO> {
         //specify an HTTP method of a request by invoking method(HttpMethod method)
         val uriSpec: WebClient.UriSpec<WebClient.RequestBodySpec> = client.method(HttpMethod.GET)
 
@@ -94,7 +93,7 @@ class WarehouseQuery(): Query {
     //RETRIEVE ALL THE PRODUCTS, OR ALL THE PRODUCTS OF A GIVEN CATEGORY
     //NO NEED OF AUTHENTICATION -> NO TOKEN
     @ResponseStatus(HttpStatus.OK)
-    suspend fun products(category: String?): Flow<ProductDTO> {
+    fun products(category: String?): Flow<ProductDTO> {
         //specify an HTTP method of a request by invoking method(HttpMethod method)
         val uriSpec: WebClient.UriSpec<WebClient.RequestBodySpec> = client.method(HttpMethod.GET)
 
@@ -128,7 +127,7 @@ class WarehouseQuery(): Query {
     //RETRIEVE INFO ABOUT A PRODUCT GIVEN ITS ID
     //NO NEED OF AUTHENTICATION -> NO TOKEN
     @ResponseStatus(HttpStatus.OK)
-    suspend fun product(productID: String): Mono<ProductDTO> {
+    fun product(productID: String): Mono<ProductDTO> {
         //specify an HTTP method of a request by invoking method(HttpMethod method)
         val uriSpec: WebClient.UriSpec<WebClient.RequestBodySpec> = client.method(HttpMethod.GET)
 
@@ -158,7 +157,7 @@ class WarehouseQuery(): Query {
     //RETRIEVE THE PICTURE URL OF A PRODUCT GIVEN ITS ID
     //NO NEED OF AUTHENTICATION -> NO TOKEN
     @ResponseStatus(HttpStatus.OK)
-    suspend fun picture(productID: String): Mono<String> {
+    fun picture(productID: String): Mono<String> {
         //specify an HTTP method of a request by invoking method(HttpMethod method)
         val uriSpec: WebClient.UriSpec<WebClient.RequestBodySpec> = client.method(HttpMethod.GET)
 
@@ -189,7 +188,7 @@ class WarehouseQuery(): Query {
     //RETRIEVE THE LIST OF WAREHOUSES THAT CONTAIN A PRODUCT GIVEN ITS ID
     //NO NEED OF AUTHENTICATION -> NO TOKEN
     @ResponseStatus(HttpStatus.OK)
-    suspend fun productWarehouses(productID: String): Flow<WarehouseDTO> {
+    fun productWarehouses(productID: String): Flow<WarehouseDTO> {
         //specify an HTTP method of a request by invoking method(HttpMethod method)
         val uriSpec: WebClient.UriSpec<WebClient.RequestBodySpec> = client.method(HttpMethod.GET)
 

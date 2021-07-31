@@ -1,6 +1,5 @@
-package it.polito.wa2.catalogservice.controllers
+package it.polito.wa2.catalogservice.queries
 
-import com.expediagroup.graphql.spring.operations.Mutation
 import it.polito.wa2.catalogservice.dto.ProductDTO
 import it.polito.wa2.catalogservice.dto.ProductInfoDTO
 import it.polito.wa2.catalogservice.dto.WarehouseDTO
@@ -18,7 +17,7 @@ import java.time.ZonedDateTime
 import java.util.*
 
 @Component
-class WarehouseMutation(): Mutation {
+class WarehouseMutation() {
     //Create a WebClient instance
     //building a client by using the DefaultWebClientBuilder class, which allows full customization
     val client: WebClient = WebClient.builder()

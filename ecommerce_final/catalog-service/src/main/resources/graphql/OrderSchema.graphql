@@ -1,0 +1,118 @@
+schema {
+    query: QueryType
+    mutation: MutationType
+}
+
+type QueryType {
+    signIn(loginDTO: LoginDTO!): LoginDTO
+    registrationConfirm(token: String!): String
+    orders(token: String!): [OrderDTO]
+    order(orderID: String!, token: String!): OrderDTO
+    wallet(walletID: String!, token: String!): WalletDTO
+    transactions(walletID: String!, from: Int, to: Int, page: Int, size: Int, token: String!): [TransactionDTO]
+    transaction(walletID: String!, transactionID: String!, token: String!): TransactionDTO
+    warehouses(token: String!): [WarehouseDTO]
+    warehouse(warehouseID: String!, token: String!): WarehouseDTO
+    products(category: String): [ProductDTO]
+    product(productID: String!): ProductDTO
+    picture(productID: String!): String
+    productWarehouses(productID: String!): [WarehouseDTO]
+}
+
+type MutationType {
+    createUser(registrationDTO: RegistrationDTO): UserDetailsDTO
+}
+
+enum Rolename { CUSTOMER, ADMIN }
+
+input RegistrationDTO {
+    username: String!
+    password: String!
+    confirmPassword: String!
+    email: String!
+}
+
+
+type LoginDTO {
+    jwt: String
+    username: String!
+    password: String
+    roles: [Rolename]
+}
+
+type UserDetailsDTO {
+    id: String
+    username: String
+    password: String
+    isEnabled: Boolean
+    email: String
+    roles: String
+}
+
+enum OrderStatus {
+PENDING, ISSUED, DELIVERING, DELIVERED, FAILED, CANCELED
+}
+
+type Product {
+    id: String
+    amount: Int!
+    price: Float!
+}
+
+type ProductLocation {
+    productID: String!
+    warehouseID: String!
+    amount: Int!
+}
+
+type Delivery {
+    shippingAddress: String!
+    productWarehouseLocation: [ProductLocation]
+}
+
+type OrderDTO {
+    id: String
+    buyer: String
+    products: [Product]
+    delivery: Delivery
+    status: OrderStatus
+    email: String
+}
+
+type WalletDTO {
+    id: String
+    balance: Float
+    userID: String!
+}
+
+type TransactionDTO {
+    id: String
+    timestamp: String
+    walletID: String
+    amount: Float!
+    description: String
+    orderID: String!
+}
+
+type ProductInfoDTO {
+    id: String!
+    alarm: Int!
+    quantity: Int!
+}
+
+type WarehouseDTO {
+    id: String
+    products: [ProductInfoDTO]
+}
+
+type ProductDTO {
+    id: String
+    name: String
+    description: String
+    pictureUrl: String
+    category: String
+    price: Float
+    avgRating: Float
+    creationDate: String
+    comments: [String]
+}

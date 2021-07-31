@@ -1,7 +1,6 @@
-package it.polito.wa2.catalogservice.controllers
+package it.polito.wa2.catalogservice.queries
 
 import org.springframework.stereotype.Component
-import com.expediagroup.graphql.spring.operations.Query
 import it.polito.wa2.catalogservice.dto.*
 import kotlinx.coroutines.flow.Flow
 import org.springframework.http.*
@@ -11,13 +10,13 @@ import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.bodyToFlow
 import org.springframework.web.reactive.function.client.exchangeToFlow
 import reactor.core.publisher.Mono
-import java.math.BigDecimal
 import java.nio.charset.StandardCharsets
 import java.util.*
 import java.time.ZonedDateTime
 
+//I DELETE SUSPEND BECAUSE IT GAVES ME AN ERROR IN OrderWiring.kt, CHECK IF IT WORKS
 @Component
-class WalletQuery(): Query {
+class WalletQuery() {
 
     //Create a WebClient instance
     //building a client by using the DefaultWebClientBuilder class, which allows full customization
@@ -29,7 +28,7 @@ class WalletQuery(): Query {
 
     //RETRIEVE INFO ABOUT A WALLET GIVEN ITS ID
     @ResponseStatus(HttpStatus.OK)
-    suspend fun wallet(walletID: String, token: String): Mono<WalletDTO>? {
+    fun wallet(walletID: String, token: String): Mono<WalletDTO>? {
         //specify an HTTP method of a request by invoking method(HttpMethod method)
         val uriSpec: WebClient.UriSpec<WebClient.RequestBodySpec> = client.method(HttpMethod.GET)
 
@@ -59,7 +58,7 @@ class WalletQuery(): Query {
 
     //GET LIST OF TRANSACTION OF A GIVEN WALLET, OPTIONALLY IN A RANGE OF TIME
     @ResponseStatus(HttpStatus.OK)
-    suspend fun transactions(walletID: String, from: Long?, to: Long?, page: Int?, size: Int?,
+    fun transactions(walletID: String, from: Long?, to: Long?, page: Int?, size: Int?,
                              token: String): Flow<TransactionDTO> {
         //Create a WebClient instance
 
@@ -111,7 +110,7 @@ class WalletQuery(): Query {
 
     //RETRIEVE THE INFO OF A TRANSACTION GIVEN ITS ID
     @ResponseStatus(HttpStatus.OK)
-    suspend fun transaction(walletID: String, transactionID: String, token: String): Mono<TransactionDTO>? {
+    fun transaction(walletID: String, transactionID: String, token: String): Mono<TransactionDTO>? {
         //specify an HTTP method of a request by invoking method(HttpMethod method)
         val uriSpec: WebClient.UriSpec<WebClient.RequestBodySpec> = client.method(HttpMethod.GET)
 

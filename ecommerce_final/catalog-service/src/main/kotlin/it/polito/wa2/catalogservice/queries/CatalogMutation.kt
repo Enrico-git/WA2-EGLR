@@ -1,6 +1,5 @@
-package it.polito.wa2.catalogservice.controllers
+package it.polito.wa2.catalogservice.queries
 
-import com.expediagroup.graphql.spring.operations.Mutation
 import it.polito.wa2.catalogservice.domain.Delivery
 import it.polito.wa2.catalogservice.domain.Product
 import it.polito.wa2.catalogservice.dto.CreateWalletDTO
@@ -26,7 +25,7 @@ import java.util.*
 @Component
 class CatalogMutation(
     @Qualifier("order-service-client") private val loadBalancedWebClientBuilder: WebClient.Builder
-): Mutation {
+) {
 
     //Create a WebClient instance FOR WALLET SERVICE
     //building a client by using the DefaultWebClientBuilder class, which allows full customization
