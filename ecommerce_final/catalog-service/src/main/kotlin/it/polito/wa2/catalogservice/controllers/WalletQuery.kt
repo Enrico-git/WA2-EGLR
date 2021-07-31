@@ -57,72 +57,6 @@ class WalletQuery(): Query {
         }
     }
 
-    //ADD A WALLET FOR A GIVEN CUSTOMER
-    @ResponseStatus(HttpStatus.CREATED)
-    suspend fun newWallet(customerID: String, token: String): Mono<WalletDTO> {
-        //Create a WebClient instance
-
-        //specify an HTTP method of a request by invoking method(HttpMethod method)
-        val uriSpec: WebClient.UriSpec<WebClient.RequestBodySpec> = client.method(HttpMethod.POST)
-
-        //Preparing the request: define the URL
-        var bodySpec: WebClient.RequestBodySpec = uriSpec.uri("/wallets")
-
-        //Preparing a Request: define the Body
-        //in this case there is no body in the Request
-        val wallet = CreateWalletDTO(customerID)
-        var headersSpec: WebClient.RequestHeadersSpec<*> = bodySpec.bodyValue(wallet)
-
-        //Preparing a Request: define the Headers
-        val responseSpec: WebClient.ResponseSpec = headersSpec.header(
-            HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_NDJSON_VALUE
-        )
-            .accept(MediaType.APPLICATION_NDJSON)
-            .acceptCharset(StandardCharsets.UTF_8)
-            .ifNoneMatch("*")
-            .ifModifiedSince(ZonedDateTime.now())
-            .header(HttpHeaders.AUTHORIZATION, "Bearer $token")
-            .retrieve()
-
-        //Get a response
-        return headersSpec.exchangeToMono { response: ClientResponse ->
-            return@exchangeToMono response.bodyToMono(WalletDTO::class.java)
-        }
-    }
-
-    //CREATE A TRANSACTION
-    @ResponseStatus(HttpStatus.CREATED)
-    suspend fun newTransaction(walletID: String, amount: BigDecimal, description: String?,
-                               orderID: String, token: String): Mono<TransactionDTO> {
-        //specify an HTTP method of a request by invoking method(HttpMethod method)
-        val uriSpec: WebClient.UriSpec<WebClient.RequestBodySpec> = client.method(HttpMethod.POST)
-
-        //Preparing the request: define the URL
-        var bodySpec: WebClient.RequestBodySpec = uriSpec.uri("/wallets/$walletID/transactions")
-
-        //Preparing a Request: define the Body
-        //in this case there is no body in the Request
-        val transaction = TransactionDTO(amount = amount, orderID = orderID, description = description,
-            id = null, timestamp = null, walletID = null)
-        var headersSpec: WebClient.RequestHeadersSpec<*> = bodySpec.bodyValue(transaction)
-
-        //Preparing a Request: define the Headers
-        val responseSpec: WebClient.ResponseSpec = headersSpec.header(
-            HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_NDJSON_VALUE
-        )
-            .accept(MediaType.APPLICATION_NDJSON)
-            .acceptCharset(StandardCharsets.UTF_8)
-            .ifNoneMatch("*")
-            .ifModifiedSince(ZonedDateTime.now())
-            .header(HttpHeaders.AUTHORIZATION, "Bearer $token")
-            .retrieve()
-
-        //Get a response
-        return headersSpec.exchangeToMono { response: ClientResponse ->
-            return@exchangeToMono response.bodyToMono(TransactionDTO::class.java)
-        }
-    }
-
     //GET LIST OF TRANSACTION OF A GIVEN WALLET, OPTIONALLY IN A RANGE OF TIME
     @ResponseStatus(HttpStatus.OK)
     suspend fun transactions(walletID: String, from: Long?, to: Long?, page: Int?, size: Int?,
@@ -175,11 +109,11 @@ class WalletQuery(): Query {
         }
     }
 
-    //RETTRIEVE THE INFO OF A TRANSACTION GIVEN ITS ID
+    //RETRIEVE THE INFO OF A TRANSACTION GIVEN ITS ID
     @ResponseStatus(HttpStatus.OK)
     suspend fun transaction(walletID: String, transactionID: String, token: String): Mono<TransactionDTO>? {
         //specify an HTTP method of a request by invoking method(HttpMethod method)
-        val uriSpec: WebClient.UriSpec<WebClient.RequestBodySpec> = client.method(HttpMethod.POST)
+        val uriSpec: WebClient.UriSpec<WebClient.RequestBodySpec> = client.method(HttpMethod.GET)
 
         //Preparing the request: define the URL
         var bodySpec: WebClient.RequestBodySpec = uriSpec.uri("/wallets/$walletID/transactions/$transactionID")

@@ -16,4 +16,7 @@ interface CommentService {
     @PreAuthorize("hasAuthority(\"ADMIN\") or hasAuthority(\"CUSTOMER\")")
     suspend fun deleteComment(productID: ObjectId, commentId: ObjectId)
 
+    @PreAuthorize("hasAuthority(\"ADMIN\") or hasAuthority(\"CUSTOMER\")")
+    suspend fun getComment(commentId: ObjectId): CommentDTO
+
 }

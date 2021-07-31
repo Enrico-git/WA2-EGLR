@@ -10,7 +10,6 @@ import org.springframework.stereotype.Component
 import org.springframework.web.bind.annotation.ResponseStatus
 
 @Component
-//@Controller TODO try if graphql needs the Annotation @Controller
 class UserQuery(private val userService: UserDetailsService): Query {
 
     @ResponseStatus(HttpStatus.CREATED)

@@ -13,7 +13,6 @@ import org.springframework.security.core.context.ReactiveSecurityContextHolder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import it.polito.wa2.warehouseservice.exceptions.*
-import java.sql.Timestamp
 
 @Service
 @Transactional
@@ -68,7 +67,7 @@ class CommentServiceImpl(
                     price = null,
                     avgRating = ((product.avgRating.times(commentsLength!!) - comment.stars) + commentDTO.stars) / (commentsLength),
                     creationDate = null,
-                    comments = null
+                    comments = emptySet()
             )
             productService.partialUpdateProduct(productDTO, productID)
         }
@@ -93,5 +92,10 @@ class CommentServiceImpl(
         )
         productService.partialUpdateProduct(productDTO, productID)
         commentRepository.deleteById(commentId)
+    }
+
+    override suspend fun getComment(commentId: ObjectId): CommentDTO {
+        val comment = commentRepository.findById(commentId) ?: throw NotFoundException("Comment not found")
+        return comment.toDTO()
     }
 }

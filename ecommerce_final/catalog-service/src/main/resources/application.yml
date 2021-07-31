@@ -20,4 +20,5 @@ application:
     jwtHeaderStart: Bearer
 graphql:
   packages: it.polito.wa2.catalogservice
-
+server:
+  port: 8080
