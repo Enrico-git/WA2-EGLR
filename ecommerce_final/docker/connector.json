@@ -8,9 +8,14 @@
     "mongodb.user": "debezium",
     "mongodb.password": "debezium",
     "mongodb.authsource": "admin",
-    "transforms": "route",
-    "transforms.route.type": "org.apache.kafka.connect.transforms.RegexRouter",
-    "transforms.route.regex": "(.*)orderservice(.*)",
-    "transforms.route.replacement": "orders_ok"    
-   }
+    "value.converter": "org.apache.kafka.connect.json.JsonConverter",
+    "value.converter.schemas.enable": false,
+    "transforms": "route,unwrap,key",
+    "transforms.unwrap.type": "io.debezium.connector.mongodb.transforms.ExtractNewDocumentState",
+    "transforms.key.type": "org.apache.kafka.connect.transforms.ExtractField$Value",
+    "transforms.key.field": "id",  
+    "transforms.route.type": "io.debezium.transforms.ContentBasedRouter",
+    "transforms.route.language": "jsr223.groovy",
+    "transforms.route.topic.expression": "def status = (new groovy.json.JsonSlurper()).parseText(value.after).status; if (status == 'ISSUED') return 'orders_ok'; else if (status == 'CANCELED') return 'orders_ko'; else return null" 
+  }
 }
