@@ -15,18 +15,34 @@ class OrderServiceLoadBalancingConfig(@Qualifier("eurekaClient") private val eur
     @Bean
     @Primary
     fun getServiceInstanceListSupplier() : ServiceInstanceListSupplier{
-        return OrderServiceInstanceListSupplier("order-service", eurekaClient)
+        return ServiceInstanceListSupplier("order-service", eurekaClient)
     }
 }
 
-class OrderServiceInstanceListSupplier(private val serviceID: String, private val eurekaClient: EurekaClient) : ServiceInstanceListSupplier{
-    override fun get(): Flux<List<ServiceInstance>> {
-    return Flux.just(eurekaClient
-                .getApplication(serviceID)
-                .instances
-                .map { DefaultServiceInstance(it.instanceId, it.appName, it.hostName, it.port, false) })
+@Configuration
+class WalletServiceLoadBalancingConfig(@Qualifier("eurekaClient") private val eurekaClient: EurekaClient) {
+    @Bean
+    @Primary
+    fun getServiceInstanceListSupplier() : ServiceInstanceListSupplier{
+        return ServiceInstanceListSupplier("wallet-service", eurekaClient)
     }
+}
 
+@Configuration
+class WarehouseServiceLoadBalancingConfig(@Qualifier("eurekaClient") private val eurekaClient: EurekaClient) {
+    @Bean
+    @Primary
+    fun getServiceInstanceListSupplier() : ServiceInstanceListSupplier{
+        return ServiceInstanceListSupplier("warehouse-service", eurekaClient)
+    }
+}
+
+class ServiceInstanceListSupplier(private val serviceID: String, private val eurekaClient: EurekaClient) : ServiceInstanceListSupplier{
+    override fun get(): Flux<List<ServiceInstance>> {
+        return Flux.just(eurekaClient
+            .getApplication(serviceID)
+            .instances
+            .map { DefaultServiceInstance(it.instanceId, it.appName, it.hostName, it.port, false) })
+    }
     override fun getServiceId(): String = serviceID
-
 }

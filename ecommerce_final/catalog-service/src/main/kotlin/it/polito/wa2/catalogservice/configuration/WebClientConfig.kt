@@ -9,9 +9,29 @@ import org.springframework.web.reactive.function.client.WebClient
 
 @Configuration
 @LoadBalancerClient(name = "order-service", configuration = [OrderServiceLoadBalancingConfig::class])
-class WebClientConfig {
+class OrderServiceWebClientConfig {
     @LoadBalanced
     @Bean(name = ["order-service-client"])
+    fun webClientBuilder(): WebClient.Builder {
+        return WebClient.builder()
+    }
+}
+
+@Configuration
+@LoadBalancerClient(name = "wallet-service", configuration = [WalletServiceLoadBalancingConfig::class])
+class WalletServiceWebClientConfig {
+    @LoadBalanced
+    @Bean(name = ["wallet-service-client"])
+    fun webClientBuilder(): WebClient.Builder {
+        return WebClient.builder()
+    }
+}
+
+@Configuration
+@LoadBalancerClient(name = "warehouse-service", configuration = [WarehouseServiceLoadBalancingConfig::class])
+class WebClientConfig {
+    @LoadBalanced
+    @Bean(name = ["warehouse-service-client"])
     fun webClientBuilder(): WebClient.Builder {
         return WebClient.builder()
     }
