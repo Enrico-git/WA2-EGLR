@@ -9,19 +9,21 @@ import it.polito.wa2.warehouseservice.dto.WarehouseDTO
 import it.polito.wa2.warehouseservice.exceptions.*
 import it.polito.wa2.warehouseservice.repositories.CommentRepository
 import it.polito.wa2.warehouseservice.repositories.ProductRepository
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
+import it.polito.wa2.warehouseservice.repositories.WarehouseRepository
+import kotlinx.coroutines.flow.*
 import org.bson.types.ObjectId
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.sql.Timestamp
 import kotlin.IllegalArgumentException
 
 @Service
 @Transactional
 class ProductServiceImpl(
         private val productRepository: ProductRepository,
-        private val commentRepository: CommentRepository
+        private val commentRepository: CommentRepository,
+        private val warehouseRepository: WarehouseRepository
 ): ProductService {
     override suspend fun getProductsByCategory(category: String, pageable: Pageable): Flow<ProductDTO> {
         return productRepository.findAllByCategory(category, pageable).map { it.toDTO() }
@@ -54,10 +56,10 @@ class ProductServiceImpl(
                 category = productDTO.category!!,
                 price = productDTO.price!!,
                 avgRating = productDTO.avgRating!!,
-                creationDate = productDTO.creationDate!!,
+                creationDate = Timestamp(System.currentTimeMillis()),
                 comments = productDTO.comments?.map{ObjectId(it)}?.toSet()
         )
-        return productRepository.save(product).toDTO()
+       return productRepository.save(product).toDTO()
     }
 
     override suspend fun modifyProduct(productDTO: ProductDTO, productID: ObjectId): ProductDTO {
@@ -84,12 +86,41 @@ class ProductServiceImpl(
         return productRepository.save(product).toDTO()
     }
 
-    override suspend fun getProductWarehouse(productID: ObjectId): Flow<WarehouseDTO> {
-        TODO("Not yet implemented")
+    override suspend fun getProductWarehouses(productID: ObjectId): Flow<WarehouseDTO> {
+        return  warehouseRepository.findAll()
+//                .map{
+//                    it.products
+//                }
+
+                .map { it ->
+                    run {
+                        println(it.products)
+                        it.products?.filter {
+                            it.productId == productID
+                        }
+                        println(it.products)
+                    }
+                    it.toDTO()
+                }
+
+
+
+//                .onEach { it -> it.products!!
+//                        .filter{
+//                            (it.productId == productID)
+//                        }
+//                }.map { it.toDTO() }
+////                .forEach { it.products!!
+//                            .filter{
+//                                it.productId == productID
+//                            }
+//                }
+        //return warehouses.map{ it.toDTO() }
+
     }
 
     override suspend fun getProductComments(productID: ObjectId): Flow<CommentDTO> {
         val commentsIds = productRepository.findById(productID)?.comments ?: throw IllegalArgumentException("Comments not found")
-        return commentRepository.findAllById(commentsIds!!.asIterable()).map{ it.toDTO() }
+        return commentRepository.findAllById(commentsIds.asIterable()).map{ it.toDTO() }
     }
 }

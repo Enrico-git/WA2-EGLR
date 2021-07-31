@@ -13,6 +13,7 @@ import org.springframework.security.core.context.ReactiveSecurityContextHolder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import it.polito.wa2.warehouseservice.exceptions.*
+import java.sql.Timestamp
 
 @Service
 @Transactional
@@ -28,7 +29,7 @@ class CommentServiceImpl(
             title = commentDTO.title!!,
             body = commentDTO.body!!,
             stars = commentDTO.stars!!,
-            creationDate = commentDTO.creationDate!!,
+            creationDate = Timestamp(System.currentTimeMillis()),
             userId = user.username,
         )
         val product = productRepository.findById(productID) ?: throw IllegalArgumentException("Product not found")
@@ -67,8 +68,9 @@ class CommentServiceImpl(
                     price = null,
                     avgRating = ((product.avgRating.times(commentsLength!!) - comment.stars) + commentDTO.stars) / (commentsLength),
                     creationDate = null,
-                    comments = emptySet()
+                    comments = product.comments!!.map{it.toString()}.toSet()
             )
+            comment.stars = commentDTO.stars
             productService.partialUpdateProduct(productDTO, productID)
         }
         return commentRepository.save(comment).toDTO()

@@ -26,3 +26,9 @@ fun Warehouse.toDTO() = WarehouseDTO(
         id = id.toString(),
         products = products?.map{ ProductInfoDTO(it.productId.toString(), it.alarm, it.quantity) }!!.toSet()
 )
+
+fun ProductInfo.toDTO() = ProductInfoDTO(
+        id = productId.toString(),
+        alarm = alarm,
+        quantity = quantity
+)

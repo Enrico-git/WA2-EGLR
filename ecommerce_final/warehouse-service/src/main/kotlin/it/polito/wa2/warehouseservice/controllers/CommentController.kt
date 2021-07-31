@@ -22,7 +22,8 @@ class CommentController(
 
     /**
      * API endpoint to update a comment
-     * @param productID the ID of the product, the body is the comment
+     * @param productID the ID of the product
+     * @requestBody CommentDTO
      * @return the comment object
      */
     @PutMapping("/{productID}/{commentID}")
@@ -31,9 +32,10 @@ class CommentController(
     }
 
     /**
-     * API endpoint to update a comment
-     * @param productID the ID of the product, the body is the comment
-     * @return the comment object
+     * API endpoint to delete a comment
+     * @param productID the ID of the product
+     * @param commentID the id of the comment
+     * @return
      */
     @DeleteMapping("/{productID}/{commentID}")
     suspend fun deleteComment(@PathVariable productID: String, @PathVariable commentID: String) {
@@ -42,14 +44,13 @@ class CommentController(
 
     /**
      * API endpoint to get a comment
-     * @param productID the ID of the product
+     * @param commentID the ID of the product
      * @return the comment object
      */
-    @DeleteMapping("/{productID}/{commentID}")
-    suspend fun getComment(@PathVariable commentID: String): CommentDTO {
+    @GetMapping("/{commentID}")
+    suspend fun getComment(@PathVariable commentID: String): CommentDTO{
         return commentService.getComment(ObjectId(commentID))
     }
-    
     
 
 }

@@ -2,7 +2,7 @@ package it.polito.wa2.warehouseservice.controllers
 
 import it.polito.wa2.warehouseservice.dto.CommentDTO
 import it.polito.wa2.warehouseservice.dto.ProductDTO
-import it.polito.wa2.warehouseservice.services.CommentService
+import it.polito.wa2.warehouseservice.dto.WarehouseDTO
 import it.polito.wa2.warehouseservice.services.ProductService
 import kotlinx.coroutines.flow.Flow
 import org.bson.types.ObjectId
@@ -92,5 +92,24 @@ class ProductController(
         return productService.modifyProductPicture(pictureURL, ObjectId(productID))
     }
 
+    /**
+     * API endpoint to get all the comments of the product
+     * @param productID the ID of the product
+     * @return flow of CommentDTO
+     */
+    @GetMapping("/{productID}/comments")
+    suspend fun getProductComments(@PathVariable productID: String): Flow<CommentDTO>{
+        return productService.getProductComments(ObjectId(productID))
+    }
+
+    /**
+     * API endpoint to get all the warehouses which contain the productID
+     * @param productID the ID of the product
+     * @return flow of WarehouseDTO
+     */
+    @GetMapping("/{productID}/warehouses")
+    suspend fun getProductWarehouses(@PathVariable productID: String): Flow<WarehouseDTO>{
+        return productService.getProductWarehouses(ObjectId(productID))
+    }
 
 }
