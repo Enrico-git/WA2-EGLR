@@ -2,6 +2,8 @@ package it.polito.wa2.orderservice.services
 
 import it.polito.wa2.orderservice.common.OrderStatus
 import it.polito.wa2.orderservice.dto.OrderDTO
+import it.polito.wa2.orderservice.statemachine.StateMachine
+import it.polito.wa2.orderservice.statemachine.StateMachineImpl
 import kotlinx.coroutines.flow.Flow
 import org.bson.types.ObjectId
 import org.springframework.data.domain.Pageable
@@ -23,4 +25,6 @@ interface OrderService {
 
     @PreAuthorize("hasAuthority(\"ADMIN\") or hasAuthority(\"CUSTOMER\")")
     suspend fun createOrder(orderDTO: OrderDTO): OrderDTO
+
+    suspend fun updateOrderOnSagaEnding(sm: StateMachineImpl, status: OrderStatus, mailType: String)
 }

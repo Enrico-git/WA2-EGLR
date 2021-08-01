@@ -4,9 +4,9 @@ schema {
 }
 
 type QueryType {
-    signIn(loginDTO: LoginDTO!): LoginDTO
+    signIn(loginDTO: LoginDTOInput!): LoginDTO
     registrationConfirm(token: String!): String
-    orders(token: String!): [OrderDTO]
+    orders: [OrderDTO]
     order(orderID: String!, token: String!): OrderDTO
     wallet(walletID: String!, token: String!): WalletDTO
     transactions(walletID: String!, from: Int, to: Int, page: Int, size: Int, token: String!): [TransactionDTO]
@@ -123,4 +123,11 @@ type ProductDTO {
     avgRating: Float
     creationDate: String
     comments: [String]
+}
+
+input LoginDTOInput {
+      jwt: String
+      username: String!
+      password: String
+      roles: [Rolename]
 }

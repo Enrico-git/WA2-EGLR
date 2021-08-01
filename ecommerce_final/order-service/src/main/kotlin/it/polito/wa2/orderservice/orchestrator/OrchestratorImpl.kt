@@ -16,7 +16,7 @@ import org.springframework.stereotype.Component
 
 @Component
 class OrchestratorImpl(
-    private val orchestratorActions: OrchestratorActions
+    private val orchestratorActions: OrchestratorActionsImpl
 ) : Orchestrator {
 
     override suspend fun createSaga(sagaDTO: SagaDTO) = orchestratorActions.createSaga(sagaDTO)
@@ -61,11 +61,6 @@ class OrchestratorImpl(
     @EventListener
     override fun onSagaFailureEvent(sagaFailureEvent: SagaFailureEvent) = orchestratorActions.onSagaFailureEvent(sagaFailureEvent)
 
-    /**
-     * On startup check if there are pending sagas by querying redis
-     * if there are, this service crashed before completing them
-     * @param event the event emitted when all beans are loaded
-     */
     @EventListener
     override fun onApplicationStartUp(event: ContextRefreshedEvent) = orchestratorActions.onApplicationStartUp(event)
 }

@@ -39,6 +39,7 @@ class WebSecurityConfig(
             .authorizeExchange()
             .pathMatchers(HttpMethod.OPTIONS).permitAll()
             .pathMatchers("/graphql").permitAll()
+            .pathMatchers("/graphiql").permitAll()
             .anyExchange().authenticated()
             .and().build()
     }

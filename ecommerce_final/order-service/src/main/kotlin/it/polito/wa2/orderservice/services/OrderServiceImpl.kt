@@ -1,6 +1,7 @@
 package it.polito.wa2.orderservice.services
 
 import it.polito.wa2.orderservice.common.OrderStatus
+import it.polito.wa2.orderservice.common.StateMachineStates
 import it.polito.wa2.orderservice.domain.Order
 import it.polito.wa2.orderservice.domain.toDTO
 import it.polito.wa2.orderservice.dto.OrderDTO
@@ -11,6 +12,8 @@ import it.polito.wa2.orderservice.exceptions.NotFoundException
 import it.polito.wa2.orderservice.exceptions.UnauthorizedException
 import it.polito.wa2.orderservice.orchestrator.OrchestratorImpl
 import it.polito.wa2.orderservice.repositories.OrderRepository
+import it.polito.wa2.orderservice.statemachine.StateMachine
+import it.polito.wa2.orderservice.statemachine.StateMachineImpl
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
@@ -33,7 +36,9 @@ class OrderServiceImpl(
     private val mailService: MailService
 ): OrderService {
     override suspend fun getOrders(pageable: Pageable): Flow<OrderDTO> {
+        println("QUA DENTRO 2")
         val user = ReactiveSecurityContextHolder.getContext().awaitFirst().authentication.principal as UserDetailsDTO
+        println(user)
         return orderRepository.findAllByBuyer(user.id!!, pageable).map { it.toDTO() }
     }
 
@@ -108,5 +113,13 @@ class OrderServiceImpl(
 //        bw.close()
 
         return storedOrder.toDTO()
+    }
+
+    override suspend fun updateOrderOnSagaEnding(sm: StateMachineImpl, status: OrderStatus, mailType: String) {
+        val order = orderRepository.findById(ObjectId(sm.id)) ?: throw IllegalArgumentException("Order not found")
+        order.status = status
+        orderRepository.save(order)
+        mailService.notifyCustomer(sm.customerEmail, "ORDER ${sm.id} NOTIFICATION", sm.id,  mailType)
+        mailService.notifyAdmin("ORDER ${sm.id} NOTIFICATION", sm.id,  mailType)
     }
 }
