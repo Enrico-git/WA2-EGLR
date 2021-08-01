@@ -8,12 +8,9 @@ import it.polito.wa2.catalogservice.queries.OrderQuery
 import it.polito.wa2.catalogservice.queries.WalletQuery
 import it.polito.wa2.catalogservice.queries.WarehouseQuery
 import it.polito.wa2.catalogservice.dto.*
-<<<<<<< HEAD
 import it.polito.wa2.catalogservice.queries.CatalogMutation
-=======
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
->>>>>>> add authentication on graphql queries. need to convert simple query so subscription
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.launch
@@ -32,12 +29,14 @@ class OrderWiring(
     ): RuntimeWiringBuilderCustomizer {
 
     override fun customize(builder: RuntimeWiring.Builder) {
-<<<<<<< HEAD
         builder.type(
             "QueryType"
         ) { wiring: TypeRuntimeWiring.Builder ->
             wiring.dataFetcher("orders",
-                DataFetcher<Flow<OrderDTO>> { env: DataFetchingEnvironment? -> orderQuery.orders(env!!.getArgument("token")) })
+                DataFetcher<Flux<OrderDTO>>{ env: DataFetchingEnvironment? ->
+                    orderQuery.orders()
+
+                })
         }
         builder.type(
             "QueryType"
@@ -125,17 +124,6 @@ class OrderWiring(
             wiring.dataFetcher("productWarehouses",
                 DataFetcher<Flow<WarehouseDTO>> { env: DataFetchingEnvironment? -> warehouseQuery.productWarehouses(env!!.getArgument("productID")) })
         }
-=======
-            builder.type(
-                "QueryType"
-            ) { wiring: TypeRuntimeWiring.Builder ->
-                wiring.dataFetcher("orders",
-                    DataFetcher<Flux<OrderDTO>>{ env: DataFetchingEnvironment? ->
-                        orderQuery.orders()
->>>>>>> add authentication on graphql queries. need to convert simple query so subscription
-
-                    })
-            }
                 .type(
                     "QueryType"
                 ) { wiring: TypeRuntimeWiring.Builder ->

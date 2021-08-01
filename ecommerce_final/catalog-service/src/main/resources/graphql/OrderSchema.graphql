@@ -21,10 +21,10 @@ type QueryType {
 
 type MutationType {
     createUser(registrationDTO: RegistrationDTO!): UserDetailsDTO
-    newOrder(buyerID: String!, products: [Product]!, delivery: String!,
+    newOrder(buyerID: String!, products: [ProductInput]!, delivery: String!,
         email: String!, token: String!): OrderDTO
     deleteOrder(orderID: String!, token: String!): String
-    updateOrder(orderID: String!, products: [Product]!, delivery: String, email: String,
+    updateOrder(orderID: String!, products: [ProductInput]!, delivery: String, email: String,
         buyerID: String, token: String!): OrderDTO
     newWallet(customerID: String!, token: String!): WalletDTO
     newTransaction(walletID: String!, amount: Float!, description: String,
@@ -62,6 +62,11 @@ PENDING, ISSUED, DELIVERING, DELIVERED, FAILED, CANCELED
 }
 
 type Product {
+    id: String
+    amount: Int!
+    price: Float!
+}
+input ProductInput {
     id: String
     amount: Int!
     price: Float!
