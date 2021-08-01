@@ -39,9 +39,19 @@ class OrderWiring(
         builder.type(
             "MutationType"
         ) { wiring ->
+            wiring.dataFetcher("newOrder") { env ->
+                catalogMutation.newOrder(
+                    env.getArgument("buyerID"),
+                    env.getArgument("products"),
+                    env.getArgument("delivery"),
+                    env.getArgument("email"),
+                    env.getArgument("token")) }
+        }
+        builder.type(
+            "MutationType"
+        ) { wiring ->
             wiring.dataFetcher("deleteOrder") { env ->
-                catalogMutation.deleteOrder(env.getArgument("orderID"),env.getArgument("token"))
-            }
+                catalogMutation.deleteOrder(env.getArgument("orderID"),env.getArgument("token")) }
         }
         builder.type(
             "QueryType"
