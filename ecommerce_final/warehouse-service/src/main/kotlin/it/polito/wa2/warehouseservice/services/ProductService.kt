@@ -1,6 +1,7 @@
 package it.polito.wa2.warehouseservice.services
 
 import it.polito.wa2.warehouseservice.dto.CommentDTO
+import it.polito.wa2.warehouseservice.dto.PictureDTO
 import it.polito.wa2.warehouseservice.dto.ProductDTO
 import it.polito.wa2.warehouseservice.dto.WarehouseDTO
 import kotlinx.coroutines.flow.Flow
@@ -28,10 +29,10 @@ interface ProductService {
     suspend fun deleteProduct(productID: ObjectId)
 
     @PreAuthorize("hasAuthority(\"ADMIN\") or hasAuthority(\"CUSTOMER\")")
-    suspend fun getProductPicture(productID: ObjectId): String
+    suspend fun getProductPicture(productID: ObjectId): PictureDTO
 
     @PreAuthorize("hasAuthority(\"ADMIN\")")
-    suspend fun modifyProductPicture(newPicture: String, productID: ObjectId): ProductDTO
+    suspend fun modifyProductPicture(pictureDTO: PictureDTO, productID: ObjectId): ProductDTO
 
     @PreAuthorize("hasAuthority(\"ADMIN\") or hasAuthority(\"CUSTOMER\")")
     suspend fun getProductWarehouses(productID: ObjectId): Flow<WarehouseDTO>

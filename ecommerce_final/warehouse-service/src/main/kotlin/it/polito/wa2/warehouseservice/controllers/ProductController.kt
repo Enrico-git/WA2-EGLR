@@ -1,12 +1,14 @@
 package it.polito.wa2.warehouseservice.controllers
 
 import it.polito.wa2.warehouseservice.dto.CommentDTO
+import it.polito.wa2.warehouseservice.dto.PictureDTO
 import it.polito.wa2.warehouseservice.dto.ProductDTO
 import it.polito.wa2.warehouseservice.dto.WarehouseDTO
 import it.polito.wa2.warehouseservice.services.ProductService
 import kotlinx.coroutines.flow.Flow
 import org.bson.types.ObjectId
 import org.springframework.data.domain.Pageable
+import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.*
 
@@ -39,6 +41,7 @@ class ProductController(
      * @return the product object
      */
     @PostMapping("")
+    @ResponseStatus(HttpStatus.CREATED)
     suspend fun addProduct(@RequestBody productDTO: ProductDTO): ProductDTO{
         return productService.addProduct(productDTO)
     }
@@ -49,6 +52,7 @@ class ProductController(
      * Being a PUT we need the entire ProductDTO
      */
     @PutMapping("/{productID}")
+    @ResponseStatus(HttpStatus.CREATED)
     suspend fun modifyOrInsertProduct(@PathVariable productID: String, productDTO: ProductDTO): ProductDTO{
         return productService.modifyProduct(productDTO, ObjectId(productID))
     }
@@ -59,6 +63,7 @@ class ProductController(
      * @return ProductDTO
      */
     @PatchMapping("/{productID}")
+    @ResponseStatus(HttpStatus.CREATED)
     suspend fun partialUpdateProduct(@PathVariable productID: String, @RequestBody productDTO: ProductDTO): ProductDTO{
         return productService.partialUpdateProduct(productDTO, ObjectId(productID))
     }
@@ -68,6 +73,7 @@ class ProductController(
      * @return nothing
      */
     @DeleteMapping("/{productID}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     suspend fun deleteProduct(@PathVariable productID: String){
         return productService.deleteProduct(ObjectId(productID))
     }
@@ -78,7 +84,7 @@ class ProductController(
      * @return the string of the picture
      */
     @GetMapping("/{productID}/picture")
-    suspend fun getProductPicture(@PathVariable productID: String): String{
+    suspend fun getProductPicture(@PathVariable productID: String): PictureDTO{
         return productService.getProductPicture(ObjectId(productID))
     }
 
@@ -88,8 +94,9 @@ class ProductController(
      * @return the product object
      */
     @PostMapping("/{productID}/picture")
-    suspend fun modifyProductPicture(@PathVariable productID: String, @RequestBody pictureURL: String): ProductDTO{
-        return productService.modifyProductPicture(pictureURL, ObjectId(productID))
+    @ResponseStatus(HttpStatus.CREATED)
+    suspend fun modifyProductPicture(@PathVariable productID: String, @RequestBody pictureDTO: PictureDTO): ProductDTO{
+        return productService.modifyProductPicture(pictureDTO, ObjectId(productID))
     }
 
     /**

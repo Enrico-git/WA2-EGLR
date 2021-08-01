@@ -16,7 +16,8 @@ import kotlin.IllegalArgumentException
 @Service
 @Transactional
 class WarehouseServiceImpl(
-        private val warehouseRepository: WarehouseRepository
+        private val warehouseRepository: WarehouseRepository,
+        private val mailService: MailService
 ): WarehouseService {
     override suspend fun getWarehouses(): Flow<WarehouseDTO> {
         return warehouseRepository.findAll().map { it.toDTO() }
@@ -46,8 +47,15 @@ class WarehouseServiceImpl(
 
     override suspend fun partialUpdateWarehouses(warehouseID: ObjectId, warehouseDTO: WarehouseDTO): WarehouseDTO {
         val warehouse = warehouseRepository.findById(warehouseID) ?: throw IllegalArgumentException("Warehouse not found")
-        warehouse.products = warehouseDTO.products?.map { it.toEntity() }?.toSet() ?: warehouse.products
-
+        if(warehouse.products != null) {
+            warehouse.products = warehouseDTO.products?.map { it.toEntity() }?.toSet()
+            warehouse.products!!.forEach {
+                if(it.quantity < it.alarm){
+                    //to email admin
+                    mailService.notifyAdmin("Order ${it.productId} Notification", it.productId.toString())
+                }
+            }
+        }
         return warehouseRepository.save(warehouse).toDTO()
     }
 

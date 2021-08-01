@@ -81,6 +81,9 @@ class CommentServiceImpl(
         val product = productRepository.findById(productID) ?: throw IllegalArgumentException("Product not found")
         val commentsLength = product.comments?.size
         val comments = product.comments?.minus(commentId)?.map{it.toString()}?.toSet()
+        var avgRating = 0.0
+        if(commentsLength != 0)
+            avgRating =  (product.avgRating.times(commentsLength!!)-comment.stars)/(commentsLength-1)
         val productDTO = ProductDTO(
                 id = null,
                 name = null,
@@ -88,7 +91,7 @@ class CommentServiceImpl(
                 pictureUrl = null,
                 category = null,
                 price = null,
-                avgRating = (product.avgRating.times(commentsLength!!)-comment.stars)/(commentsLength-1),
+                avgRating = avgRating,
                 creationDate = null,
                 comments = comments
         )

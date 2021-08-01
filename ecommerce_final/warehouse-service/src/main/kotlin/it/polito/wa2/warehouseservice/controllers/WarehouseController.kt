@@ -1,11 +1,10 @@
 package it.polito.wa2.warehouseservice.controllers
 
-import it.polito.wa2.warehouseservice.dto.CommentDTO
 import it.polito.wa2.warehouseservice.dto.WarehouseDTO
-import it.polito.wa2.warehouseservice.repositories.WarehouseRepository
 import it.polito.wa2.warehouseservice.services.WarehouseService
 import kotlinx.coroutines.flow.Flow
 import org.bson.types.ObjectId
+import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.*
 
 @RestController
@@ -39,6 +38,7 @@ class WarehouseController(
      * @return the warehouse object
      */
     @PostMapping("")
+    @ResponseStatus(HttpStatus.CREATED)
     suspend fun addWarehouse(@RequestBody warehouseDTO: WarehouseDTO): WarehouseDTO {
         return warehouseService.addWarehouse(warehouseDTO)
     }
@@ -49,6 +49,7 @@ class WarehouseController(
      * @return the warehouse object
      */
     @PutMapping("/{warehouseID}")
+    @ResponseStatus(HttpStatus.CREATED)
     suspend fun updateWarehouse(@PathVariable warehouseID: String, @RequestBody warehouseDTO: WarehouseDTO): WarehouseDTO {
         return warehouseService.updateWarehouses(ObjectId(warehouseID), warehouseDTO)
     }
@@ -59,6 +60,7 @@ class WarehouseController(
      * @return the warehouse object
      */
     @PatchMapping("/{warehouseID}")
+    @ResponseStatus(HttpStatus.CREATED)
     suspend fun partialUpdateWarehouse(@PathVariable warehouseID: String, @RequestBody warehouseDTO: WarehouseDTO): WarehouseDTO {
         return warehouseService.partialUpdateWarehouses(ObjectId(warehouseID), warehouseDTO)
     }
@@ -69,6 +71,7 @@ class WarehouseController(
      * @return nothing
      */
     @DeleteMapping("/{warehouseID}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     suspend fun deleteWarehouse(@PathVariable warehouseID: String) {
         return warehouseService.deleteWarehouses(ObjectId(warehouseID))
     }

@@ -4,6 +4,7 @@ package it.polito.wa2.warehouseservice.services
 import it.polito.wa2.warehouseservice.domain.Product
 import it.polito.wa2.warehouseservice.domain.toDTO
 import it.polito.wa2.warehouseservice.dto.CommentDTO
+import it.polito.wa2.warehouseservice.dto.PictureDTO
 import it.polito.wa2.warehouseservice.dto.ProductDTO
 import it.polito.wa2.warehouseservice.dto.WarehouseDTO
 import it.polito.wa2.warehouseservice.exceptions.*
@@ -16,7 +17,6 @@ import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.sql.Timestamp
-import kotlin.IllegalArgumentException
 
 @Service
 @Transactional
@@ -48,6 +48,7 @@ class ProductServiceImpl(
     }
 
     override suspend fun addProduct(productDTO: ProductDTO): ProductDTO {
+
         val product = Product(
                 id = null,
                 name = productDTO.name!!,
@@ -75,48 +76,25 @@ class ProductServiceImpl(
         return productRepository.deleteById(productID)
     }
 
-    override suspend fun getProductPicture(productID: ObjectId): String {
+    override suspend fun getProductPicture(productID: ObjectId): PictureDTO {
         val product = productRepository.findById(productID) ?: throw NotFoundException("Product not found")
-        return product.pictureUrl
+        return PictureDTO(product.pictureUrl)
     }
 
-    override suspend fun modifyProductPicture(newPicture: String, productID: ObjectId): ProductDTO {
+    override suspend fun modifyProductPicture(pictureDTO: PictureDTO, productID: ObjectId): ProductDTO {
         var product = productRepository.findById(productID) ?: throw NotFoundException("Product not found")
-        product.pictureUrl = newPicture
+        product.pictureUrl = pictureDTO.pictureUrl
         return productRepository.save(product).toDTO()
     }
 
     override suspend fun getProductWarehouses(productID: ObjectId): Flow<WarehouseDTO> {
-        return  warehouseRepository.findAll()
-//                .map{
-//                    it.products
-//                }
-
-                .map { it ->
-                    run {
-                        println(it.products)
-                        it.products?.filter {
-                            it.productId == productID
-                        }
-                        println(it.products)
-                    }
-                    it.toDTO()
-                }
-
-
-
-//                .onEach { it -> it.products!!
-//                        .filter{
-//                            (it.productId == productID)
-//                        }
-//                }.map { it.toDTO() }
-////                .forEach { it.products!!
-//                            .filter{
-//                                it.productId == productID
-//                            }
-//                }
-        //return warehouses.map{ it.toDTO() }
-
+        val product = productRepository.findById(productID) ?: throw IllegalArgumentException("Product not found")
+        return warehouseRepository.findAll().filter{    //filter only the warehouses which contain the product
+            it -> it.products!!
+                .any{
+                it.productId == productID
+            }
+        }.map { it.toDTO() }
     }
 
     override suspend fun getProductComments(productID: ObjectId): Flow<CommentDTO> {

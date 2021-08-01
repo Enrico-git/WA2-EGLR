@@ -3,6 +3,7 @@ package it.polito.wa2.warehouseservice.controllers
 import it.polito.wa2.warehouseservice.dto.CommentDTO
 import it.polito.wa2.warehouseservice.services.CommentService
 import org.bson.types.ObjectId
+import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.*
 
 @RestController
@@ -16,6 +17,7 @@ class CommentController(
      * @return the comment object
      */
     @PostMapping("/{productID}")
+    @ResponseStatus(HttpStatus.CREATED)
     suspend fun addComment(@PathVariable productID: String, @RequestBody commentDTO: CommentDTO): CommentDTO {
         return commentService.addComment(ObjectId(productID), commentDTO)
     }
@@ -27,6 +29,7 @@ class CommentController(
      * @return the comment object
      */
     @PutMapping("/{productID}/{commentID}")
+    @ResponseStatus(HttpStatus.CREATED)
     suspend fun updateComment(@PathVariable productID: String, @PathVariable commentID: String, @RequestBody commentDTO: CommentDTO): CommentDTO {
         return commentService.updateComment(ObjectId(productID), ObjectId(commentID), commentDTO)
     }
@@ -38,6 +41,7 @@ class CommentController(
      * @return
      */
     @DeleteMapping("/{productID}/{commentID}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     suspend fun deleteComment(@PathVariable productID: String, @PathVariable commentID: String) {
         return commentService.deleteComment(ObjectId(productID), ObjectId(commentID))
     }
