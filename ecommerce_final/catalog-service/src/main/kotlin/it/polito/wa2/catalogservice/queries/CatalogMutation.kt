@@ -22,6 +22,7 @@ import java.nio.charset.StandardCharsets
 import java.time.ZonedDateTime
 import java.util.*
 
+//I DELETE SUSPEND BECAUSE IT GAVES ME AN ERROR IN OrderWiring.kt, CHECK IF IT WORKS
 @Component
 class CatalogMutation(
     @Qualifier("order-service-client") private val loadBalancedWebClientBuilder: WebClient.Builder
@@ -47,7 +48,7 @@ class CatalogMutation(
 
     //ADD A WALLET FOR A GIVEN CUSTOMER
     @ResponseStatus(HttpStatus.CREATED)
-    suspend fun newWallet(customerID: String, token: String): Mono<WalletDTO> {
+    fun newWallet(customerID: String, token: String): Mono<WalletDTO> {
         //Create a WebClient instance
 
         //specify an HTTP method of a request by invoking method(HttpMethod method)
@@ -80,7 +81,7 @@ class CatalogMutation(
 
     //CREATE A TRANSACTION
     @ResponseStatus(HttpStatus.CREATED)
-    suspend fun newTransaction(walletID: String, amount: BigDecimal, description: String?,
+    fun newTransaction(walletID: String, amount: BigDecimal, description: String?,
                                orderID: String, token: String): Mono<TransactionDTO> {
         //specify an HTTP method of a request by invoking method(HttpMethod method)
         val uriSpec: WebClient.UriSpec<WebClient.RequestBodySpec> = walletClient.method(HttpMethod.POST)
@@ -113,7 +114,7 @@ class CatalogMutation(
 
     //CREATE A NEW ORDER
     @ResponseStatus(HttpStatus.CREATED)
-    suspend fun newOrder(buyerID: String, products: Set<Product>, delivery: String,
+    fun newOrder(buyerID: String, products: Set<Product>, delivery: String,
                          email: String, token: String): Mono<OrderDTO> {
         //specify an HTTP method of a request by invoking method(HttpMethod method)
         val uriSpec: WebClient.UriSpec<WebClient.RequestBodySpec> = orderClient.method(HttpMethod.POST)
@@ -152,7 +153,7 @@ class CatalogMutation(
 
     //DELETE AN ORDER GIVEN ITS ID (IF POSSIBLE)
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    suspend fun deleteOrder(orderID: String, token: String): Mono<String> {
+    fun deleteOrder(orderID: String, token: String): Mono<String> {
         //specify an HTTP method of a request by invoking method(HttpMethod method)
         val uriSpec: WebClient.UriSpec<WebClient.RequestBodySpec> = orderClient.method(HttpMethod.DELETE)
 
@@ -182,7 +183,7 @@ class CatalogMutation(
 
     //UPDATE AN ORDER GIVEN ITS ID
     @ResponseStatus(HttpStatus.CREATED)
-    suspend fun updateOrder(orderID: String, products: Set<Product>, delivery: String?, email: String?,
+    fun updateOrder(orderID: String, products: Set<Product>, delivery: String?, email: String?,
                             buyerID: String?, token: String): Mono<OrderDTO> {
         //specify an HTTP method of a request by invoking method(HttpMethod method)
         val uriSpec: WebClient.UriSpec<WebClient.RequestBodySpec> = orderClient.method(HttpMethod.PATCH)
