@@ -3,10 +3,7 @@ package it.polito.wa2.warehouseservice.services
 
 import it.polito.wa2.warehouseservice.domain.Product
 import it.polito.wa2.warehouseservice.domain.toDTO
-import it.polito.wa2.warehouseservice.dto.CommentDTO
-import it.polito.wa2.warehouseservice.dto.PictureDTO
-import it.polito.wa2.warehouseservice.dto.ProductDTO
-import it.polito.wa2.warehouseservice.dto.WarehouseDTO
+import it.polito.wa2.warehouseservice.dto.*
 import it.polito.wa2.warehouseservice.exceptions.*
 import it.polito.wa2.warehouseservice.repositories.CommentRepository
 import it.polito.wa2.warehouseservice.repositories.ProductRepository
@@ -23,7 +20,8 @@ import java.sql.Timestamp
 class ProductServiceImpl(
         private val productRepository: ProductRepository,
         private val commentRepository: CommentRepository,
-        private val warehouseRepository: WarehouseRepository
+        private val warehouseRepository: WarehouseRepository,
+        private val warehouseService: WarehouseService
 ): ProductService {
     override suspend fun getProductsByCategory(category: String, pageable: Pageable): Flow<ProductDTO> {
         return productRepository.findAllByCategory(category, pageable).map { it.toDTO() }
@@ -56,9 +54,9 @@ class ProductServiceImpl(
                 pictureUrl = productDTO.pictureUrl!!,
                 category = productDTO.category!!,
                 price = productDTO.price!!,
-                avgRating = productDTO.avgRating!!,
+                avgRating = productDTO.avgRating ?: 0.0,
                 creationDate = Timestamp(System.currentTimeMillis()),
-                comments = productDTO.comments?.map{ObjectId(it)}?.toSet()
+                comments = productDTO.comments?.map{ObjectId(it)}?.toSet() ?: emptySet()
         )
        return productRepository.save(product).toDTO()
     }
@@ -73,6 +71,21 @@ class ProductServiceImpl(
 
     override suspend fun deleteProduct(productID: ObjectId) {
         productRepository.findById(productID) ?: throw IllegalArgumentException("Product not found")
+        val comments = getProductComments(productID)
+        comments.onEach {
+            commentRepository.deleteById(ObjectId(it.id))
+        }
+        val warehouses = getProductWarehouses(productID)
+        warehouses.onEach {
+            val productInfoDTO = it.products!!.filter { it.id == productID.toString() }
+            val products = it.products.minus(productInfoDTO)
+            warehouseService.partialUpdateWarehouses(
+                    ObjectId(it.id), WarehouseDTO(
+                        id = null,
+                        products = products
+                    )
+            )
+        }
         return productRepository.deleteById(productID)
     }
 

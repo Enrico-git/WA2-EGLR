@@ -18,7 +18,7 @@ data class Warehouse (
 
 data class ProductInfo(
         val productId: ObjectId, //ProductId
-        val alarm: Int,
+        var alarm: Int,
         val quantity: Int
 )
 

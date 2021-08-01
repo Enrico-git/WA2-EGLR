@@ -53,7 +53,7 @@ class ProductController(
      */
     @PutMapping("/{productID}")
     @ResponseStatus(HttpStatus.CREATED)
-    suspend fun modifyOrInsertProduct(@PathVariable productID: String, productDTO: ProductDTO): ProductDTO{
+    suspend fun modifyOrInsertProduct(@PathVariable productID: String, @RequestBody productDTO: ProductDTO): ProductDTO{
         return productService.modifyProduct(productDTO, ObjectId(productID))
     }
     /**

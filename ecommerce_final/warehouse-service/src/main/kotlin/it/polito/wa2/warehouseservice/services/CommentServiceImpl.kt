@@ -79,11 +79,12 @@ class CommentServiceImpl(
     override suspend fun deleteComment(productID: ObjectId, commentId: ObjectId) {
         val comment = commentRepository.findById(commentId) ?: throw IllegalArgumentException("Comment not found")
         val product = productRepository.findById(productID) ?: throw IllegalArgumentException("Product not found")
-        val commentsLength = product.comments?.size
+        var commentsLength = product.comments?.size
         val comments = product.comments?.minus(commentId)?.map{it.toString()}?.toSet()
+        commentsLength = product.comments?.size
         var avgRating = 0.0
         if(commentsLength != 0)
-            avgRating =  (product.avgRating.times(commentsLength!!)-comment.stars)/(commentsLength-1)
+            avgRating =  (product.avgRating.times(commentsLength!!)-comment.stars)/(commentsLength)
         val productDTO = ProductDTO(
                 id = null,
                 name = null,
