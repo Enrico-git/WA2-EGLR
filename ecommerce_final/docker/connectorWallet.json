@@ -1,0 +1,21 @@
+{
+  "name": "wallet-connector",
+  "config": {
+    "connector.class": "io.debezium.connector.mongodb.MongoDbConnector",
+    "collection.include.list": "walletservice.transactions",
+    "mongodb.hosts": "rs0/mongo:27017",
+    "mongodb.name": "mongodb",
+    "mongodb.user": "debezium",
+    "mongodb.password": "debezium",
+    "mongodb.authsource": "admin",
+    "value.converter": "org.apache.kafka.connect.json.JsonConverter",
+    "value.converter.schemas.enable": false,
+    "transforms": "route,unwrap,key",
+    "transforms.unwrap.type": "io.debezium.connector.mongodb.transforms.ExtractNewDocumentState",
+    "transforms.key.type": "org.apache.kafka.connect.transforms.ExtractField$Value",
+    "transforms.key.field": "orderID",
+    "transforms.route.type": "io.debezium.transforms.ContentBasedRouter",
+    "transforms.route.language": "jsr223.groovy",
+    "transforms.route.topic.expression": "def description = (new groovy.json.JsonSlurper()).parseText(value.after).description; if (description == 'PAYMENT') return 'payment_request_ok'; else if (description == 'REFUND') return 'abort_payment_request_ok'; else return null"
+  }
+}

@@ -46,6 +46,23 @@ class KafkaConfiguration {
         return factory
     }
 
+    @Bean
+    fun mockPaymentRequestOkConsumerFactory(): ConsumerFactory<String, String>{ //payment_request
+        val configProps = mutableMapOf<String, Any>()
+        configProps[ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG] = bootstrapServers
+        configProps[ConsumerConfig.GROUP_ID_CONFIG] = "wallet_service"
+        configProps[ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG] = StringDeserializer::class.java
+        configProps[ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG] = StringDeserializer::class.java
+        return DefaultKafkaConsumerFactory(configProps, StringDeserializer(), StringDeserializer())
+    }
+
+    @Bean
+    fun mockPaymentRequestOkContainerFactory(): ConcurrentKafkaListenerContainerFactory<String, String>{
+        val factory = ConcurrentKafkaListenerContainerFactory<String, String>()
+        factory.consumerFactory = mockPaymentRequestOkConsumerFactory()
+        return factory
+    }
+
     /**
      * Producer will put message {orderID} in "payment_request_failed" in case of error.
      * If the payment is fine, the insert in transactionRepository will trigger

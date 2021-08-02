@@ -169,12 +169,14 @@ class WalletServiceImpl(
         wallet.balance -= paymentRequestDTO.amount
         walletRepository.save(wallet)
 
-        println("payment_request_ok: $transactionDTO")
         //This will trigger debezium that signals "payment_request_ok"
-        transactionRepository.save(transactionDTO.toEntity())
+        println(transactionRepository.save(transactionDTO.toEntity()))
         return true
     }
 
+    /**
+     * This method is to simulate what order-service will sent by means of kafka
+     */
     override suspend fun mockPaymentRequest(): String {
         val auth = ReactiveSecurityContextHolder.getContext().awaitFirst().authentication //JWT from Catalog
         val token = auth.credentials as String
