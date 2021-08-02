@@ -8,7 +8,8 @@ schema {
 type QueryType {
     signIn(loginDTO: LoginDTOInput!): LoginDTO
     registrationConfirm(token: String!): String
-    orders(token: String!): [OrderDTO]
+    #REMEMBER TO PUT TOKEN AS ARGUMENT
+    orders: [OrderDTO]
     order(orderID: String!, token: String!): OrderDTO
     wallet(walletID: String!, token: String!): WalletDTO
     transactions(walletID: String!, from: Int, to: Int, page: Int, size: Int, token: String!): [TransactionDTO]
