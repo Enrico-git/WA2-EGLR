@@ -3,9 +3,9 @@ package it.polito.wa2.orderservice
 import it.polito.wa2.orderservice.common.StateMachineEvents
 import it.polito.wa2.orderservice.common.StateMachineStates
 import it.polito.wa2.orderservice.repositories.RedisStateMachineRepository
-import it.polito.wa2.orderservice.statemachine.StateMachineImpl
 import it.polito.wa2.orderservice.statemachine.StateMachineBuilder
 import it.polito.wa2.orderservice.statemachine.StateMachineBuilderImpl
+import it.polito.wa2.orderservice.statemachine.StateMachineImpl
 import kotlinx.coroutines.Job
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
@@ -15,7 +15,7 @@ import java.util.concurrent.ConcurrentHashMap
 import java.util.logging.Logger
 
 
-@SpringBootApplication()
+@SpringBootApplication
 class OrderServiceApplication{
     @Bean
     fun getLogger(): Logger = Logger.getLogger("OrderServiceLogger")
