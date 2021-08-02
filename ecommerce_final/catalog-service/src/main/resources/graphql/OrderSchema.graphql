@@ -3,6 +3,8 @@ schema {
     mutation: MutationType
 }
 
+#SEE IF WE CAN MODULARIZE SCHEMA
+
 type QueryType {
     signIn(loginDTO: LoginDTOInput!): LoginDTO
     registrationConfirm(token: String!): String

@@ -24,100 +24,26 @@ import java.util.*
 
 //I DELETE SUSPEND BECAUSE IT GAVES ME AN ERROR IN OrderWiring.kt, CHECK IF IT WORKS
 @Component
-class CatalogMutation(
+class OrderMutation(
     @Qualifier("order-service-client") private val loadBalancedWebClientBuilder: WebClient.Builder
 ) {
-
-    //Create a WebClient instance FOR WALLET SERVICE
-    //building a client by using the DefaultWebClientBuilder class, which allows full customization
-    val walletClient: WebClient = WebClient.builder()
-        .baseUrl("http://localhost:8100")
-        .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_NDJSON_VALUE)
-        .defaultUriVariables(Collections.singletonMap("url", "http://localhost:8100"))
-        .build()
 
     //Create a WebClient instance FOR ORDER SERVICE
     //building a client by using the DefaultWebClientBuilder class, which allows full customization
 //    val client: WebClient = WebClient.builder()
 //        .baseUrl("http://localhost:6379")
 //        .defaultUriVariables(Collections.singletonMap("url", "http://localhost:6379"))
-    val orderClient = loadBalancedWebClientBuilder
+    val client = loadBalancedWebClientBuilder
         .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_NDJSON_VALUE)
         .defaultUriVariables(Collections.singletonMap("url", "http://order-service"))
         .build()
-
-    //ADD A WALLET FOR A GIVEN CUSTOMER
-    @ResponseStatus(HttpStatus.CREATED)
-    fun newWallet(customerID: String, token: String): Mono<WalletDTO> {
-        //Create a WebClient instance
-
-        //specify an HTTP method of a request by invoking method(HttpMethod method)
-        val uriSpec: WebClient.UriSpec<WebClient.RequestBodySpec> = walletClient.method(HttpMethod.POST)
-
-        //Preparing the request: define the URL
-        var bodySpec: WebClient.RequestBodySpec = uriSpec.uri("/wallets")
-
-        //Preparing a Request: define the Body
-        //in this case there is no body in the Request
-        val wallet = CreateWalletDTO(customerID)
-        var headersSpec: WebClient.RequestHeadersSpec<*> = bodySpec.bodyValue(wallet)
-
-        //Preparing a Request: define the Headers
-        val responseSpec: WebClient.ResponseSpec = headersSpec.header(
-            HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_NDJSON_VALUE
-        )
-            .accept(MediaType.APPLICATION_NDJSON)
-            .acceptCharset(StandardCharsets.UTF_8)
-            .ifNoneMatch("*")
-            .ifModifiedSince(ZonedDateTime.now())
-            .header(HttpHeaders.AUTHORIZATION, "Bearer $token")
-            .retrieve()
-
-        //Get a response
-        return headersSpec.exchangeToMono { response: ClientResponse ->
-            return@exchangeToMono response.bodyToMono(WalletDTO::class.java)
-        }
-    }
-
-    //CREATE A TRANSACTION
-    @ResponseStatus(HttpStatus.CREATED)
-    fun newTransaction(walletID: String, amount: BigDecimal, description: String?,
-                               orderID: String, token: String): Mono<TransactionDTO> {
-        //specify an HTTP method of a request by invoking method(HttpMethod method)
-        val uriSpec: WebClient.UriSpec<WebClient.RequestBodySpec> = walletClient.method(HttpMethod.POST)
-
-        //Preparing the request: define the URL
-        var bodySpec: WebClient.RequestBodySpec = uriSpec.uri("/wallets/$walletID/transactions")
-
-        //Preparing a Request: define the Body
-        //in this case there is no body in the Request
-        val transaction = TransactionDTO(amount = amount, orderID = orderID, description = description,
-            id = null, timestamp = null, walletID = null)
-        var headersSpec: WebClient.RequestHeadersSpec<*> = bodySpec.bodyValue(transaction)
-
-        //Preparing a Request: define the Headers
-        val responseSpec: WebClient.ResponseSpec = headersSpec.header(
-            HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_NDJSON_VALUE
-        )
-            .accept(MediaType.APPLICATION_NDJSON)
-            .acceptCharset(StandardCharsets.UTF_8)
-            .ifNoneMatch("*")
-            .ifModifiedSince(ZonedDateTime.now())
-            .header(HttpHeaders.AUTHORIZATION, "Bearer $token")
-            .retrieve()
-
-        //Get a response
-        return headersSpec.exchangeToMono { response: ClientResponse ->
-            return@exchangeToMono response.bodyToMono(TransactionDTO::class.java)
-        }
-    }
 
     //CREATE A NEW ORDER
     @ResponseStatus(HttpStatus.CREATED)
     fun newOrder(buyerID: String, products: Set<Product>, delivery: String,
                          email: String, token: String): Mono<OrderDTO> {
         //specify an HTTP method of a request by invoking method(HttpMethod method)
-        val uriSpec: WebClient.UriSpec<WebClient.RequestBodySpec> = orderClient.method(HttpMethod.POST)
+        val uriSpec: WebClient.UriSpec<WebClient.RequestBodySpec> = client.method(HttpMethod.POST)
 
         //Preparing the request: define the URL
         var bodySpec: WebClient.RequestBodySpec = uriSpec.uri("/orders")
@@ -155,7 +81,7 @@ class CatalogMutation(
     @ResponseStatus(HttpStatus.NO_CONTENT)
     fun deleteOrder(orderID: String, token: String): Mono<String> {
         //specify an HTTP method of a request by invoking method(HttpMethod method)
-        val uriSpec: WebClient.UriSpec<WebClient.RequestBodySpec> = orderClient.method(HttpMethod.DELETE)
+        val uriSpec: WebClient.UriSpec<WebClient.RequestBodySpec> = client.method(HttpMethod.DELETE)
 
         //Preparing the request: define the URL
         var bodySpec: WebClient.RequestBodySpec = uriSpec.uri("/orders/$orderID")
@@ -186,7 +112,7 @@ class CatalogMutation(
     fun updateOrder(orderID: String, products: Set<Product>, delivery: String?, email: String?,
                             buyerID: String?, token: String): Mono<OrderDTO> {
         //specify an HTTP method of a request by invoking method(HttpMethod method)
-        val uriSpec: WebClient.UriSpec<WebClient.RequestBodySpec> = orderClient.method(HttpMethod.PATCH)
+        val uriSpec: WebClient.UriSpec<WebClient.RequestBodySpec> = client.method(HttpMethod.PATCH)
 
         //Preparing the request: define the URL
         var bodySpec: WebClient.RequestBodySpec = uriSpec.uri("/orders/$orderID")

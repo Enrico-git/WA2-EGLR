@@ -18,12 +18,14 @@ import java.util.*
 
 @Component
 class WarehouseMutation() {
+
+    val serviceURL = "http://localhost:8200"
     //Create a WebClient instance
     //building a client by using the DefaultWebClientBuilder class, which allows full customization
     val client: WebClient = WebClient.builder()
-        .baseUrl("http://localhost:8200")
+        .baseUrl(serviceURL)
         .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_NDJSON_VALUE)
-        .defaultUriVariables(Collections.singletonMap("url", "http://localhost:8200"))
+        .defaultUriVariables(Collections.singletonMap("url", serviceURL))
         .build()
 
     //DELETE A PRODUCT GIVEN ITS ID

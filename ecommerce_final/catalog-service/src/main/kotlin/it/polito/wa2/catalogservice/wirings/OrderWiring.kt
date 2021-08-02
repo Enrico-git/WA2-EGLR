@@ -6,23 +6,19 @@ import graphql.schema.idl.RuntimeWiring
 import graphql.schema.idl.TypeRuntimeWiring
 import it.polito.wa2.catalogservice.dto.*
 import it.polito.wa2.catalogservice.queries.*
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.toList
-import kotlinx.coroutines.launch
 import org.springframework.graphql.boot.RuntimeWiringBuilderCustomizer
 import org.springframework.stereotype.Component
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 
-
+//TODO see if we can modularize wirings, dividing queries by service
 @Component
 class OrderWiring(
     private val orderQuery: OrderQuery,
     private val walletQuery: WalletQuery,
     private val warehouseQuery: WarehouseQuery,
-    private val catalogMutation: CatalogMutation,
+    private val orderMutation: OrderMutation,
+    private val walletMutation: WalletMutation,
     private val warehouseMutation: WarehouseMutation
     ): RuntimeWiringBuilderCustomizer {
 
@@ -31,10 +27,7 @@ class OrderWiring(
             "QueryType"
         ) { wiring: TypeRuntimeWiring.Builder ->
             wiring.dataFetcher("orders",
-                DataFetcher<Flux<OrderDTO>>{ env: DataFetchingEnvironment? ->
-                    orderQuery.orders()
-
-                })
+                DataFetcher<Flux<OrderDTO>>{ env: DataFetchingEnvironment? -> orderQuery.orders() })
         }
         builder.type(
             "QueryType"
@@ -46,7 +39,7 @@ class OrderWiring(
             "MutationType"
         ) { wiring ->
             wiring.dataFetcher("newOrder") { env ->
-                catalogMutation.newOrder(
+                orderMutation.newOrder(
                     env.getArgument("buyerID"),
                     env.getArgument("products"),
                     env.getArgument("delivery"),
@@ -57,13 +50,13 @@ class OrderWiring(
             "MutationType"
         ) { wiring ->
             wiring.dataFetcher("deleteOrder") { env ->
-                catalogMutation.deleteOrder(env.getArgument("orderID"),env.getArgument("token")) }
+                orderMutation.deleteOrder(env.getArgument("orderID"),env.getArgument("token")) }
         }
         builder.type(
             "MutationType"
         ) { wiring ->
             wiring.dataFetcher("updateOrder") { env ->
-                catalogMutation.updateOrder(
+                orderMutation.updateOrder(
                     env.getArgument("orderID"),
                     env.getArgument("buyerID"),
                     env.getArgument("products"),
@@ -102,7 +95,7 @@ class OrderWiring(
             "MutationType"
         ) { wiring ->
             wiring.dataFetcher("newWallet") { env ->
-                catalogMutation.newWallet(
+                walletMutation.newWallet(
                     env.getArgument("customerID"),
                     env.getArgument("token")) }
         }
@@ -110,7 +103,7 @@ class OrderWiring(
             "MutationType"
         ) { wiring ->
             wiring.dataFetcher("newTransaction") { env ->
-                catalogMutation.newTransaction(
+                walletMutation.newTransaction(
                     env.getArgument("walletID"),
                     env.getArgument("amount"),
                     env.getArgument("description"),

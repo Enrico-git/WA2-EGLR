@@ -19,12 +19,13 @@ import java.time.ZonedDateTime
 @Component
 class WalletQuery() {
 
+    val serviceURL = "http://localhost:8100"
     //Create a WebClient instance
     //building a client by using the DefaultWebClientBuilder class, which allows full customization
     val client: WebClient = WebClient.builder()
-        .baseUrl("http://localhost:8100")
+        .baseUrl(serviceURL)
         .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_NDJSON_VALUE)
-        .defaultUriVariables(Collections.singletonMap("url", "http://localhost:8100"))
+        .defaultUriVariables(Collections.singletonMap("url", serviceURL))
         .build()
 
     //RETRIEVE INFO ABOUT A WALLET GIVEN ITS ID
