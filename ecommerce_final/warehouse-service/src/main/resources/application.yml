@@ -1,20 +1,20 @@
 server:
   port: 8200
 spring:
+  data:
+    mongodb:
+      database: warehouseservice
+      host: localhost
+      port: 27017
+      username: warehouseservice
+      password: warehouseservice
+      authentication-database: admin
   application:
     name: warehouse
-    security:
-      user:
-        name: warehouse-service
-        password: warehouse-service
-    data:
-      mongodb:
-        host: localhost
-        port: 27017
-        username: warehouseservice
-        password: warehouseservice
-        authentication-database: admin
-        database: warehouseservice
+  security:
+    user:
+      name: warehouse-service
+      password: warehouse-service
   kafka:
     bootstrap-servers: "localhost:29092"
   mail:

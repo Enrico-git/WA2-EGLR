@@ -32,7 +32,7 @@ class WarehouseServiceImpl(
     override suspend fun addWarehouse(warehouseDTO: WarehouseDTO): WarehouseDTO {
         val warehouse = Warehouse(
                 id = null,
-                products = emptySet()
+                products = mutableSetOf()
         )
         return warehouseRepository.save(warehouse).toDTO()
     }
@@ -48,7 +48,7 @@ class WarehouseServiceImpl(
 
     override suspend fun partialUpdateWarehouses(warehouseID: ObjectId, warehouseDTO: WarehouseDTO): WarehouseDTO {
         val warehouse = warehouseRepository.findById(warehouseID) ?: throw IllegalArgumentException("Warehouse not found")
-        var products: MutableSet<ProductInfoDTO>? = warehouse.products?.map{it.toDTO()}?.toMutableSet()
+        val products: MutableSet<ProductInfoDTO>? = warehouse.products?.map{it.toDTO()}?.toMutableSet()
         val oldProductIds = products?.map{it.id} //oldProductIds contains the ids already present in the warehouse
         val warehouseDTOIds = warehouseDTO.products?.map{it.id} // warehouseDTOIds contains the ids in the warehouseDTO (used to modify the warehouse)
         val warehouseIds = oldProductIds?.intersect(warehouseDTOIds!!.toSet()) //warehouseIds contains the ids of the product already present in the warehouse which are present also in warehouseDTO
@@ -75,9 +75,9 @@ class WarehouseServiceImpl(
         }
         products!!.forEach {
             if(it.quantity <= it.alarm)
-                mailService.notifyAdmin("Product ${it.id} Notification", it.id)
+                mailService.notifyAdmin("Warehouse $warehouseID Notification", it.id)
         }
-        warehouse.products = products.map { it.toEntity() }.toSet()
+        warehouse.products = products.map { it.toEntity() }.toMutableSet()
         return warehouseRepository.save(warehouse).toDTO()
     }
 
