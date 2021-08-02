@@ -14,4 +14,6 @@ interface TransactionRepository : CoroutineCrudRepository<Transaction, ObjectId>
                                                to: Timestamp, pageable: Pageable): Flow<Transaction>
 
     fun findAllByWalletID(walletID: ObjectId, pageable: Pageable): Flow<Transaction>
+
+    suspend fun findByOrderID(orderID: ObjectId): Transaction?
 }

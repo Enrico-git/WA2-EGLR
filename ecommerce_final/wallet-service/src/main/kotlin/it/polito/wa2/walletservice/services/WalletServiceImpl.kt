@@ -9,12 +9,14 @@ import it.polito.wa2.walletservice.entities.toDTO
 import it.polito.wa2.walletservice.exceptions.NotFoundException
 import it.polito.wa2.walletservice.repositories.TransactionRepository
 import it.polito.wa2.walletservice.repositories.WalletRepository
+import it.polito.wa2.walletservice.security.JwtUtils
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.reactive.awaitFirst
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.bson.types.ObjectId
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.data.domain.Pageable
 import org.springframework.security.core.context.ReactiveSecurityContextHolder
 import org.springframework.stereotype.Service
@@ -27,8 +29,14 @@ import java.sql.Timestamp
 class WalletServiceImpl(
     private val walletRepository: WalletRepository,
     private val transactionRepository: TransactionRepository,
-    private val mockKafkaPaymentReqProducer: KafkaProducer<String, KafkaPaymentRequestDTO>
+    private val jwtUtils: JwtUtils,
+    private val mockKafkaPaymentReqProducer: KafkaProducer<String, KafkaPaymentRequestDTO>,
+    private val kafkaPaymentRequestFailedProducer: KafkaProducer<String, String>
 ) : WalletService {
+
+    @Value("\${spring.kafka.retryDelay}")
+    private val retryDelay: Long = 0
+
     override suspend fun getWallet(walletID: String): WalletDTO {
         val wallet = walletRepository.findById(ObjectId(walletID)) ?: throw NotFoundException("Wallet was not found")
         return wallet.toDTO()
@@ -42,7 +50,7 @@ class WalletServiceImpl(
     /**
      * This is called by admin only (REST) for RECHARGE the wallet.
      */
-    override suspend fun createTransaction(walletID: String, transactionDTO: TransactionDTO): TransactionDTO {
+    override suspend fun createRechargeTransaction(walletID: String, transactionDTO: TransactionDTO): TransactionDTO {
         val wallet = walletRepository.findById(ObjectId(walletID)) ?: throw NotFoundException("Wallet was not found")
         if(transactionDTO.amount <= BigDecimal(0))
             throw IllegalArgumentException("The amount for recharges must be greater than zero")
@@ -92,14 +100,90 @@ class WalletServiceImpl(
         return transaction.toDTO()
     }
 
+    /**
+     * this is catch from kafka lister of "request_payment" and returns "request_payment_failed" or
+     * by means of the insert in the collections "request_payment_ok"
+     */
+    override suspend fun createPaymentTransaction(paymentRequestDTO: KafkaPaymentRequestDTO): Boolean? {
+        // Avoid to process order already canceled by Order-Service
+        if( Timestamp(paymentRequestDTO.timestamp.time + retryDelay) < Timestamp(System.currentTimeMillis()))
+            return null
+
+        // Checks that this request has not been served yet.
+        // (Orders try 5 times, and maybe Wallet served it and then crashed)
+        // in case of "request_failed" we don't have this information in DB
+        // but order-service will handle it.
+        val orderIDObj: ObjectId?
+        try{
+            orderIDObj = ObjectId(paymentRequestDTO.orderID)
+        }
+        catch (e: IllegalArgumentException){
+            return false
+        }
+
+        val targetTransaction = transactionRepository.findByOrderID(orderIDObj)
+        if(targetTransaction != null)
+            return null
+
+        // Security Checks
+        val userDetailsDTO = jwtUtils.getDetailsFromJwtToken(paymentRequestDTO.token)
+//        if (userDetailsDTO.id == null){
+//            return false
+//        }
+//
+//        if (!userDetailsDTO.isEnabled){
+//            return false
+//        }
+
+        if ((userDetailsDTO.roles?.contains("CUSTOMER", true) != true) &&
+            (userDetailsDTO.roles?.contains("ADMIN", true) != true)){
+            return false
+        }
+
+        // UserID and Wallet checks
+        //TODO The catalog has to check that the userID in JWT exists!
+        val userIDObj: ObjectId?
+        try{
+            userIDObj = ObjectId("60f66fd598f6d22dc03092d4")
+//                userIDObj = ObjectId(userDetailsDTO.id!!)
+        }
+        catch (e: IllegalArgumentException){
+            return false
+        }
+
+        val wallet = walletRepository.findByUserID(userIDObj) ?: return false
+
+        val transactionDTO = TransactionDTO(
+            id = null,
+            timestamp = Timestamp(System.currentTimeMillis()),
+            walletID = wallet.id!!.toHexString(),
+            amount = paymentRequestDTO.amount,
+            description = TransactionDescription.PAYMENT.toString(),
+            orderID = paymentRequestDTO.orderID
+        )
+
+        if ( (wallet.balance - paymentRequestDTO.amount) < BigDecimal(0) ) {
+            return false
+        }
+
+        wallet.balance -= paymentRequestDTO.amount
+        walletRepository.save(wallet)
+
+        println("payment_request_ok: $transactionDTO")
+        //This will trigger debezium that signals "payment_request_ok"
+        transactionRepository.save(transactionDTO.toEntity())
+        return true
+    }
+
     override suspend fun mockPaymentRequest(): String {
         val auth = ReactiveSecurityContextHolder.getContext().awaitFirst().authentication //JWT from Catalog
         val token = auth.credentials as String
 
         val mockPaymentRequestDTO = KafkaPaymentRequestDTO(
             orderID = ObjectId().toHexString(),
-            amount = BigDecimal(Math.random()*-10%20),
-            token = token
+            amount = BigDecimal(Math.random()*10%20),
+            token = token,
+            timestamp = Timestamp(System.currentTimeMillis())
         )
 
         println("MOCK: $mockPaymentRequestDTO")

@@ -17,6 +17,7 @@ spring:
 #      database: walletservice
   kafka:
     bootstrap-servers: "localhost:29092"
+    retryDelay: 25000
 eureka:
   instance:
     hostname: localhost

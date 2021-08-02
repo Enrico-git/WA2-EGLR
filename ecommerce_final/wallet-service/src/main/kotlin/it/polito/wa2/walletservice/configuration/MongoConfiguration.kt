@@ -9,11 +9,15 @@ import org.springframework.context.annotation.Primary
 import org.springframework.core.convert.converter.Converter
 import org.springframework.data.convert.ReadingConverter
 import org.springframework.data.convert.WritingConverter
+import org.springframework.data.mongodb.ReactiveMongoTransactionManager
+import org.springframework.data.mongodb.SessionSynchronization
 import org.springframework.data.mongodb.config.AbstractReactiveMongoConfiguration
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate
 import org.springframework.data.mongodb.core.convert.MongoCustomConversions
 import org.springframework.data.mongodb.repository.config.EnableReactiveMongoRepositories
 import org.springframework.stereotype.Component
+import org.springframework.transaction.ReactiveTransactionManager
+import org.springframework.transaction.reactive.TransactionalOperator
 import java.sql.Timestamp
 import java.util.*
 
@@ -33,10 +37,16 @@ class MongoConfiguration : AbstractReactiveMongoConfiguration() {
     override fun getDatabaseName() = "walletservice"
 
     @Bean
-    @Primary
-    fun reactiveMongoTemplate()
-            = ReactiveMongoTemplate(mongoClient(), "walletservice")
+    fun reactiveMongoTemplate(): ReactiveMongoTemplate {
+        val template = ReactiveMongoTemplate(mongoClient(), "walletservice")
+        template.setSessionSynchronization(SessionSynchronization.ALWAYS)
+        return template
+    }
 
+    /**
+     * These converters are needed from handle the Timestamp
+     * in Transaction entity.
+     */
     override fun customConversions(): MongoCustomConversions {
         return MongoCustomConversions(
             listOf( // writing converter, reader converter
@@ -57,5 +67,19 @@ class MongoConfiguration : AbstractReactiveMongoConfiguration() {
         override fun convert(source: Timestamp): Date {
             return Date(source.time)
         }
+    }
+
+    /**
+     * This is used for apply @Transacitonal in ReactiveMongo
+     * https://spring.io/blog/2019/05/16/reactive-transactions-with-spring
+     */
+    @Bean
+    fun getTM(): ReactiveTransactionManager {
+        return ReactiveMongoTransactionManager(reactiveMongoTemplate().mongoDatabaseFactory)
+    }
+
+    @Bean
+    fun getOperator(): TransactionalOperator {
+        return TransactionalOperator.create(getTM())
     }
 }

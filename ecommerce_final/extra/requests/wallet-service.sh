@@ -92,7 +92,7 @@ curl -i -v -H "Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJyb2xlcyI6IkNVU1RPTU
 ## GET /wallets/ -> MOCK for KAFKA "payment_request" or "abort_payment_request
 ################################################################################
 
-curl -i -v -H "Authorization: Bearer eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJyb2xlcyI6IkNVU1RPTUVSIiwic3ViIjoiYWxpY2VfaW5fd29uZGVybGFuZCIsImlhdCI6MTUxNjIzOTAyMiwiZXhwIjoxODE2MjM5MDIyfQ.VOu9FelxRLawUkJIkpJQAH2ESbAacWVQo1JYjyCYoqZPuYEuWhXzLA_g_qxrUeq-e9MIsvVyc6nBeXDXHqS4uw" \
+curl -i -v -H "Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJyb2xlcyI6IkFETUlOIiwic3ViIjoiYWxpY2VfaW5fd29uZGVybGFuZCIsImlhdCI6MTAxNjIzOTAyMiwiZXhwIjo2MDE2MjM5MDIyfQ.UgdtjYTDBh7jt5z-lA3pyVLwdS1fzFwJQqRnaHw8q6yctUkgLzHHfIDRMJYoO5qHq3DISeClH09oRKM92RLVpw" \
  "172.20.208.1:8100/wallets/"
 
 #list all topics in kafka

@@ -46,7 +46,7 @@ class WalletHandler(
         return ServerResponse
             .ok()
             .json()
-            .bodyValueAndAwait(walletService.createTransaction(walletID, transactionDTO))
+            .bodyValueAndAwait(walletService.createRechargeTransaction(walletID, transactionDTO))
     }
 
     suspend fun getAllTransactions(request: ServerRequest): ServerResponse{

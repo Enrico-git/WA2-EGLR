@@ -1,6 +1,7 @@
 package it.polito.wa2.walletservice.services
 
 import it.polito.wa2.walletservice.annotations.PreAuthorizeCustomerOrAdmin
+import it.polito.wa2.walletservice.dto.KafkaPaymentRequestDTO
 import it.polito.wa2.walletservice.dto.TransactionDTO
 import it.polito.wa2.walletservice.dto.WalletDTO
 import kotlinx.coroutines.flow.Flow
@@ -15,7 +16,9 @@ interface WalletService {
     suspend fun createWallet(walletDTO: WalletDTO): WalletDTO
 
     @PreAuthorize("hasAuthority(\"ADMIN\")") // recharge wallet
-    suspend fun createTransaction(walletID: String, transactionDTO: TransactionDTO): TransactionDTO
+    suspend fun createRechargeTransaction(walletID: String, transactionDTO: TransactionDTO): TransactionDTO
+
+    suspend fun createPaymentTransaction (paymentRequestDTO: KafkaPaymentRequestDTO): Boolean?
 
     @PreAuthorizeCustomerOrAdmin
     suspend fun getAllTransactions(walletID: String, from: Long?, to: Long?, pageable: Pageable): Flow<TransactionDTO>

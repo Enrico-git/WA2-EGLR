@@ -47,12 +47,12 @@ WSL2:$ docker exec kafka kafka-topics --delete --zookeeper zookeeper:2181 --topi
 /////////////////////////////////////////////////////////////////
 
 /////////////////////////////////////////////////////////////////
-// check connector online
+// check connector online (DEBEZIUM)
 /////////////////////////////////////////////////////////////////
 curl -H "Accept:application/json" localhost:8083/connectors/
 
 /////////////////////////////////////////////////////////////////
-// delete connector 
+// delete connector
 /////////////////////////////////////////////////////////////////
 curl -i -X DELETE -H "Accept:application/json" localhost:8083/connectors/orders-connector
 
@@ -60,3 +60,19 @@ curl -i -X DELETE -H "Accept:application/json" localhost:8083/connectors/orders-
 // add connector
 /////////////////////////////////////////////////////////////////
 curl -i -X POST -H "Accept:application/json" -H "Content-Type:application/json" localhost:8083/connectors/ -d "$(cat connector.json )"
+
+/////////////////////////////////////////////////////////////////
+// Debezium configuration
+/////////////////////////////////////////////////////////////////
+{
+  "name": "orders-connector",
+  "config": { //esiste un modo per distinguere tra insert, update, all
+    "collection.include.list": "walletservice.transactions", <----- collections da osservare
+    ...
+    "transforms": "route", <- trasforma la route del topic evitando messaggi superflui
+    "transforms.route.type": "org.apache.kafka.connect.transforms.RegexRouter",
+    "transforms.route.regex": "(.*)orderservice(.*)",
+    ...
+    "transforms.route.replacement": "topic_name", <- topic che debezium invierà al consumer in ascolto
+  }
+}
