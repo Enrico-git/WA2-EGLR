@@ -10,5 +10,5 @@ data class WarehouseDTO (
 
 fun WarehouseDTO.toEntity() = Warehouse(
         id = ObjectId(id),
-        products = products?.map{it.toEntity()}?.toSet()
+        products = products?.map{it.toEntity()}?.toMutableSet()
 )

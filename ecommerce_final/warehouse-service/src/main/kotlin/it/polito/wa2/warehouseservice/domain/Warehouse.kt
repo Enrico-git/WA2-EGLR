@@ -11,24 +11,24 @@ import org.springframework.data.mongodb.core.mapping.Document
 data class Warehouse (
         @Id
         val id: ObjectId?,
-        var products: Set<ProductInfo>?,
+        var products: MutableSet<ProductInfo>?,
         @Version
         val version: Long? = null
 )
 
 data class ProductInfo(
         val productId: ObjectId, //ProductId
-        var alarm: Int,
-        var quantity: Int
+        var alarm: Int?,
+        var quantity: Int?
 )
 
 fun Warehouse.toDTO() = WarehouseDTO(
         id = id.toString(),
-        products = products?.map{ ProductInfoDTO(it.productId.toString(), it.alarm, it.quantity) }!!.toSet()
+        products = products?.map{ ProductInfoDTO(it.productId.toString(), it.alarm!!, it.quantity!!) }!!.toSet()
 )
 
 fun ProductInfo.toDTO() = ProductInfoDTO(
         id = productId.toString(),
-        alarm = alarm,
-        quantity = quantity
+        alarm = alarm!!,
+        quantity = quantity!!
 )

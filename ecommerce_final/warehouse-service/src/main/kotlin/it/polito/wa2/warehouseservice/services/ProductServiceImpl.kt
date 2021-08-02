@@ -2,19 +2,18 @@ package it.polito.wa2.warehouseservice.services
 
 
 import it.polito.wa2.warehouseservice.domain.Product
+import it.polito.wa2.warehouseservice.domain.ProductInfo
 import it.polito.wa2.warehouseservice.domain.toDTO
 import it.polito.wa2.warehouseservice.dto.*
 import it.polito.wa2.warehouseservice.exceptions.*
 import it.polito.wa2.warehouseservice.repositories.CommentRepository
 import it.polito.wa2.warehouseservice.repositories.ProductRepository
 import it.polito.wa2.warehouseservice.repositories.WarehouseRepository
-import kotlinx.coroutines.async
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.runBlocking
 import org.bson.types.ObjectId
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
+import org.springframework.transaction.ReactiveTransactionManager
 import org.springframework.transaction.annotation.Transactional
 import java.sql.Timestamp
 
@@ -26,6 +25,9 @@ class ProductServiceImpl(
         private val warehouseRepository: WarehouseRepository,
         private val warehouseService: WarehouseService
 ): ProductService {
+
+
+
     override suspend fun getProductsByCategory(category: String, pageable: Pageable): Flow<ProductDTO> {
         return productRepository.findAllByCategory(category, pageable).map { it.toDTO() }
     }
@@ -72,33 +74,53 @@ class ProductServiceImpl(
             addProduct(productDTO)
     }
 
-    override suspend fun deleteProduct(productID: ObjectId):
-        Unit = coroutineScope {
-        productRepository.findById(productID) ?: throw IllegalArgumentException("Product not found")
-        val commentDelete = async {
-            val comments = getProductComments(productID)
-
-            comments.onEach {
-                commentRepository.deleteById(ObjectId(it.id))
-            }
-        }
-        val warehouseDelete = async {
-            val warehouses = getProductWarehouses(productID)
-            warehouses.onEach {
-                val productInfoDTO = it.products!!.filter {
-                    it.id == productID.toString()
+    override suspend fun deleteProduct(productID: ObjectId) {
+        val product = productRepository.findById(productID) ?: throw IllegalArgumentException("Product not found")
+//        if(product.comments != null)
+//            commentRepository.deleteAllById(product.comments!!.toSet())
+        println("After delete comments")
+        val warehouses = warehouseRepository.findAll()/*.filter{    //filter only the warehouses which contain the product
+            it ->
+            println(it.products)
+            it.products!!
+                .any{
+                    it.productId == productID
                 }
-                val products = it.products.minus(productInfoDTO)
-                warehouseService.partialUpdateWarehouses(
-                        ObjectId(it.id), WarehouseDTO(
-                            id = null,
-                            products = products
-                        )
-                )
+        }*/
+        val newWarehouses = warehouses.toSet().filter { ot->
+            ot.products!!.any {
+                it.productId != productID
             }
+        }.toMutableSet()
+
+        newWarehouses.forEach {
+            println(it.products)
         }
-        val productDelete = async { productRepository.deleteById(productID)}
-        runBlocking{ commentDelete.await(); warehouseDelete.await(); productDelete.await() }
+
+
+        /*warehouses.onEach {
+            it.products!!.filter {
+                it.productId != productID
+            }
+        }*/
+        //warehouseRepository.saveAll(warehouses)
+//        return productRepository.deleteById(productID)
+
+
+//        val warehouses = getProductWarehouses(productID)
+//        warehouses.onEach {
+//            val productInfoDTO = it.products!!.filter {
+//                it.id == productID.toString()
+//            }
+//            val products = it.products.minus(productInfoDTO)
+//            warehouseService.partialUpdateWarehouses(
+//                    ObjectId(it.id), WarehouseDTO(
+//                        id = null,
+//                        products = products
+//                    )
+//            )
+//        }
+
     }
 
     override suspend fun getProductPicture(productID: ObjectId): PictureDTO {
