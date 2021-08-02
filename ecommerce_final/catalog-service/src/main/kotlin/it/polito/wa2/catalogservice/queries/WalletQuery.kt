@@ -9,6 +9,7 @@ import org.springframework.web.reactive.function.client.ClientResponse
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.bodyToFlow
 import org.springframework.web.reactive.function.client.exchangeToFlow
+import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import java.nio.charset.StandardCharsets
 import java.util.*
@@ -59,7 +60,7 @@ class WalletQuery() {
     //GET LIST OF TRANSACTION OF A GIVEN WALLET, OPTIONALLY IN A RANGE OF TIME
     @ResponseStatus(HttpStatus.OK)
     fun transactions(walletID: String, from: Long?, to: Long?, page: Int?, size: Int?,
-                             token: String): Flow<TransactionDTO> {
+                             token: String): Flux<TransactionDTO> {
         //Create a WebClient instance
 
         //specify an HTTP method of a request by invoking method(HttpMethod method)
@@ -103,8 +104,8 @@ class WalletQuery() {
             .retrieve()
 
         //Get a response
-        return headersSpec.exchangeToFlow { response: ClientResponse ->
-            return@exchangeToFlow response.bodyToFlow<TransactionDTO>()
+        return headersSpec.exchangeToFlux { response: ClientResponse ->
+            return@exchangeToFlux response.bodyToFlux(TransactionDTO::class.java)
         }
     }
 

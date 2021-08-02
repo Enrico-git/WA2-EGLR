@@ -13,6 +13,7 @@ import org.springframework.web.reactive.function.client.ClientResponse
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.bodyToFlow
 import org.springframework.web.reactive.function.client.exchangeToFlow
+import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import java.nio.charset.StandardCharsets
 import java.time.ZonedDateTime
@@ -32,7 +33,7 @@ class WarehouseQuery() {
 
     //RETRIEVE THE LIST OF WAREHOUSES
     @ResponseStatus(HttpStatus.OK)
-    fun warehouses(token: String): Flow<WarehouseDTO> {
+    fun warehouses(token: String): Flux<WarehouseDTO> {
         //specify an HTTP method of a request by invoking method(HttpMethod method)
         val uriSpec: WebClient.UriSpec<WebClient.RequestBodySpec> = client.method(HttpMethod.GET)
 
@@ -55,8 +56,8 @@ class WarehouseQuery() {
             .retrieve()
 
         //Get a response
-        return headersSpec.exchangeToFlow { response: ClientResponse ->
-            return@exchangeToFlow response.bodyToFlow<WarehouseDTO>()
+        return headersSpec.exchangeToFlux { response: ClientResponse ->
+            return@exchangeToFlux response.bodyToFlux(WarehouseDTO::class.java)
         }
     }
 
@@ -93,7 +94,7 @@ class WarehouseQuery() {
     //RETRIEVE ALL THE PRODUCTS, OR ALL THE PRODUCTS OF A GIVEN CATEGORY
     //NO NEED OF AUTHENTICATION -> NO TOKEN
     @ResponseStatus(HttpStatus.OK)
-    fun products(category: String?): Flow<ProductDTO> {
+    fun products(category: String?): Flux<ProductDTO> {
         //specify an HTTP method of a request by invoking method(HttpMethod method)
         val uriSpec: WebClient.UriSpec<WebClient.RequestBodySpec> = client.method(HttpMethod.GET)
 
@@ -119,8 +120,8 @@ class WarehouseQuery() {
             .retrieve()
 
         //Get a response
-        return headersSpec.exchangeToFlow { response: ClientResponse ->
-            return@exchangeToFlow response.bodyToFlow<ProductDTO>()
+        return headersSpec.exchangeToFlux { response: ClientResponse ->
+            return@exchangeToFlux response.bodyToFlux(ProductDTO::class.java)
         }
     }
 
@@ -188,7 +189,7 @@ class WarehouseQuery() {
     //RETRIEVE THE LIST OF WAREHOUSES THAT CONTAIN A PRODUCT GIVEN ITS ID
     //NO NEED OF AUTHENTICATION -> NO TOKEN
     @ResponseStatus(HttpStatus.OK)
-    fun productWarehouses(productID: String): Flow<WarehouseDTO> {
+    fun productWarehouses(productID: String): Flux<WarehouseDTO> {
         //specify an HTTP method of a request by invoking method(HttpMethod method)
         val uriSpec: WebClient.UriSpec<WebClient.RequestBodySpec> = client.method(HttpMethod.GET)
 
@@ -210,8 +211,8 @@ class WarehouseQuery() {
             .retrieve()
 
         //Get a response
-        return headersSpec.exchangeToFlow { response: ClientResponse ->
-            return@exchangeToFlow response.bodyToFlow<WarehouseDTO>()
+        return headersSpec.exchangeToFlux { response: ClientResponse ->
+            return@exchangeToFlux response.bodyToFlux(WarehouseDTO::class.java)
         }
     }
 }

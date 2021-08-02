@@ -28,7 +28,7 @@ class WarehouseMutation() {
 
     //DELETE A PRODUCT GIVEN ITS ID
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    suspend fun deleteProduct(productID: String, token: String): Mono<String> {
+    fun deleteProduct(productID: String, token: String): Mono<String> {
         //specify an HTTP method of a request by invoking method(HttpMethod method)
         val uriSpec: WebClient.UriSpec<WebClient.RequestBodySpec> = client.method(HttpMethod.DELETE)
 
@@ -58,7 +58,7 @@ class WarehouseMutation() {
 
     //UPDATE THE PICTURE OF A PRODUCT GIVEN ITS ID AND THE NEW PICTURE
     @ResponseStatus(HttpStatus.CREATED)
-    suspend fun updatePicture(productID: String, picture: String, token: String): Mono<ProductDTO> {
+    fun updatePicture(productID: String, picture: String, token: String): Mono<ProductDTO> {
         //specify an HTTP method of a request by invoking method(HttpMethod method)
         val uriSpec: WebClient.UriSpec<WebClient.RequestBodySpec> = client.method(HttpMethod.POST)
 
@@ -89,7 +89,7 @@ class WarehouseMutation() {
     //PARTIALLY UPDATE A PRODUCT GIVEN ITS ID
     //TODO fix how to pass ProductDTO (which fields?)
     @ResponseStatus(HttpStatus.CREATED)
-    suspend fun patchProduct(productID: String, token: String): Mono<ProductDTO> {
+    fun patchProduct(productID: String, token: String): Mono<ProductDTO> {
         //specify an HTTP method of a request by invoking method(HttpMethod method)
         val uriSpec: WebClient.UriSpec<WebClient.RequestBodySpec> = client.method(HttpMethod.PATCH)
 
@@ -119,7 +119,7 @@ class WarehouseMutation() {
     //UPDATE A PRODUCT GIVEN ITS ID, OR ADD A NEW ONE IF THE ID DOES NOT EXIST
     //TODO fix how to pass ProductDTO (which fields?)
     @ResponseStatus(HttpStatus.CREATED)
-    suspend fun updateProduct(productID: String, token: String): Mono<ProductDTO> {
+    fun updateProduct(productID: String, token: String): Mono<ProductDTO> {
         //specify an HTTP method of a request by invoking method(HttpMethod method)
         val uriSpec: WebClient.UriSpec<WebClient.RequestBodySpec> = client.method(HttpMethod.PUT)
 
@@ -148,7 +148,7 @@ class WarehouseMutation() {
 
     //DELETE A WAREHOUSE GIVEN ITS ID, IF POSSIBLE
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    suspend fun deleteWarehouse(warehouseID: String, token: String): Mono<String> {
+    fun deleteWarehouse(warehouseID: String, token: String): Mono<String> {
         //specify an HTTP method of a request by invoking method(HttpMethod method)
         val uriSpec: WebClient.UriSpec<WebClient.RequestBodySpec> = client.method(HttpMethod.DELETE)
 
@@ -178,7 +178,7 @@ class WarehouseMutation() {
 
     //CREATE A NEW WAREHOUSE WITH A LIST OF PRODUCTS
     @ResponseStatus(HttpStatus.CREATED)
-    suspend fun newWarehouse(products: Set<ProductInfoDTO>, token: String): Mono<WarehouseDTO> {
+    fun newWarehouse(products: Set<ProductInfoDTO>, token: String): Mono<WarehouseDTO> {
         //specify an HTTP method of a request by invoking method(HttpMethod method)
         val uriSpec: WebClient.UriSpec<WebClient.RequestBodySpec> = client.method(HttpMethod.POST)
 
@@ -209,7 +209,7 @@ class WarehouseMutation() {
 
     //PARTIALLY UPDATE A WAREHOUSE GIVEN ITS ID
     @ResponseStatus(HttpStatus.CREATED)
-    suspend fun patchProduct(warehouseID: String, products: Set<ProductInfoDTO>,
+    fun patchWarehouse(warehouseID: String, products: Set<ProductInfoDTO>,
                              token: String): Mono<WarehouseDTO> {
         //specify an HTTP method of a request by invoking method(HttpMethod method)
         val uriSpec: WebClient.UriSpec<WebClient.RequestBodySpec> = client.method(HttpMethod.PATCH)
@@ -240,7 +240,7 @@ class WarehouseMutation() {
 
     //UPDATE A WAREHOUSE GIVEN ITS ID, OR ADD A NEW ONE IF THE ID DOES NOT EXIST
     @ResponseStatus(HttpStatus.CREATED)
-    suspend fun updateProduct(warehouseID: String, products: Set<ProductInfoDTO>,
+    fun updateWarehouse(warehouseID: String, products: Set<ProductInfoDTO>,
                               token: String): Mono<WarehouseDTO> {
         //specify an HTTP method of a request by invoking method(HttpMethod method)
         val uriSpec: WebClient.UriSpec<WebClient.RequestBodySpec> = client.method(HttpMethod.PUT)

@@ -6,7 +6,7 @@ schema {
 type QueryType {
     signIn(loginDTO: LoginDTOInput!): LoginDTO
     registrationConfirm(token: String!): String
-    orders: [OrderDTO]
+    orders(token: String!): [OrderDTO]
     order(orderID: String!, token: String!): OrderDTO
     wallet(walletID: String!, token: String!): WalletDTO
     transactions(walletID: String!, from: Int, to: Int, page: Int, size: Int, token: String!): [TransactionDTO]
@@ -29,6 +29,13 @@ type MutationType {
     newWallet(customerID: String!, token: String!): WalletDTO
     newTransaction(walletID: String!, amount: Float!, description: String,
         orderID: String!, token: String!): TransactionDTO
+    #MISS PUT AND PATCH PRODUCT
+    deleteProduct(productID: String!, token: String!): String
+    updatePicture(productID: String!, picture: String!, token: String!): ProductDTO
+    deleteWarehouse(warehouseID: String!, token: String!): String
+    newWarehouse(products: [ProductInfoDTOInput]!, token: String!): WarehouseDTO
+    patchWarehouse(warehouseID: String!, products: [ProductInfoDTOInput], token: String!): WarehouseDTO
+    updateWarehouse(warehouseID: String!, products: [ProductInfoDTOInput], token: String!): WarehouseDTO
 }
 
 enum Rolename { CUSTOMER, ADMIN }
@@ -39,7 +46,6 @@ input RegistrationDTO {
     confirmPassword: String!
     email: String!
 }
-
 
 type LoginDTO {
     jwt: String
@@ -105,6 +111,12 @@ type TransactionDTO {
     amount: Float!
     description: String
     orderID: String!
+}
+
+input ProductInfoDTOInput {
+    id: String!
+    alarm: Int!
+    quantity: Int!
 }
 
 type ProductInfoDTO {
