@@ -19,7 +19,7 @@ data class Warehouse (
 data class ProductInfo(
         val productId: ObjectId, //ProductId
         var alarm: Int,
-        val quantity: Int
+        var quantity: Int
 )
 
 fun Warehouse.toDTO() = WarehouseDTO(

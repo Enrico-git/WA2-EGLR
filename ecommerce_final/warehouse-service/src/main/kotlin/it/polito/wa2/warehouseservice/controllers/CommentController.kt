@@ -2,7 +2,9 @@ package it.polito.wa2.warehouseservice.controllers
 
 import it.polito.wa2.warehouseservice.dto.CommentDTO
 import it.polito.wa2.warehouseservice.services.CommentService
+import kotlinx.coroutines.delay
 import org.bson.types.ObjectId
+import org.springframework.dao.OptimisticLockingFailureException
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.*
 
@@ -31,7 +33,16 @@ class CommentController(
     @PutMapping("/{productID}/{commentID}")
     @ResponseStatus(HttpStatus.CREATED)
     suspend fun updateComment(@PathVariable productID: String, @PathVariable commentID: String, @RequestBody commentDTO: CommentDTO): CommentDTO {
-        return commentService.updateComment(ObjectId(productID), ObjectId(commentID), commentDTO)
+        var counter = 5
+        while(counter-- > 0){
+            try{
+                return commentService.updateComment(ObjectId(productID), ObjectId(commentID), commentDTO)
+            }
+            catch(e: OptimisticLockingFailureException){
+                delay(1000)
+            }
+        }
+        throw OptimisticLockingFailureException("Comment")
     }
 
     /**
@@ -43,7 +54,16 @@ class CommentController(
     @DeleteMapping("/{productID}/{commentID}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     suspend fun deleteComment(@PathVariable productID: String, @PathVariable commentID: String) {
-        return commentService.deleteComment(ObjectId(productID), ObjectId(commentID))
+        var counter = 5
+        while(counter-- > 0){
+            try{
+                return commentService.deleteComment(ObjectId(productID), ObjectId(commentID))
+            }
+            catch(e: OptimisticLockingFailureException){
+                delay(1000)
+            }
+        }
+        throw OptimisticLockingFailureException("Comment")
     }
 
     /**

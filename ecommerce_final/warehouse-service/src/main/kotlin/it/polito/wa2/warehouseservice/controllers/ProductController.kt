@@ -5,8 +5,10 @@ import it.polito.wa2.warehouseservice.dto.PictureDTO
 import it.polito.wa2.warehouseservice.dto.ProductDTO
 import it.polito.wa2.warehouseservice.dto.WarehouseDTO
 import it.polito.wa2.warehouseservice.services.ProductService
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import org.bson.types.ObjectId
+import org.springframework.dao.OptimisticLockingFailureException
 import org.springframework.data.domain.Pageable
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
@@ -54,7 +56,16 @@ class ProductController(
     @PutMapping("/{productID}")
     @ResponseStatus(HttpStatus.CREATED)
     suspend fun modifyOrInsertProduct(@PathVariable productID: String, @RequestBody productDTO: ProductDTO): ProductDTO{
-        return productService.modifyProduct(productDTO, ObjectId(productID))
+        var counter = 5
+        while(counter-- > 0){
+            try{
+                return productService.modifyProduct(productDTO, ObjectId(productID))
+            }
+            catch(e: OptimisticLockingFailureException){
+                delay(1000)
+            }
+        }
+        throw OptimisticLockingFailureException("Product")
     }
     /**
      * API endpoint to partial modify a product
@@ -75,7 +86,16 @@ class ProductController(
     @DeleteMapping("/{productID}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     suspend fun deleteProduct(@PathVariable productID: String){
-        return productService.deleteProduct(ObjectId(productID))
+        var counter = 5
+        while(counter-- > 0){
+            try{
+                return productService.deleteProduct(ObjectId(productID))
+            }
+            catch(e: OptimisticLockingFailureException){
+                delay(1000)
+            }
+        }
+        throw OptimisticLockingFailureException("Product")
     }
 
     /**
@@ -96,7 +116,16 @@ class ProductController(
     @PostMapping("/{productID}/picture")
     @ResponseStatus(HttpStatus.CREATED)
     suspend fun modifyProductPicture(@PathVariable productID: String, @RequestBody pictureDTO: PictureDTO): ProductDTO{
-        return productService.modifyProductPicture(pictureDTO, ObjectId(productID))
+        var counter = 5
+        while(counter-- > 0){
+            try{
+                return productService.modifyProductPicture(pictureDTO, ObjectId(productID))
+            }
+            catch(e: OptimisticLockingFailureException){
+                delay(1000)
+            }
+        }
+        throw OptimisticLockingFailureException("Product")
     }
 
     /**

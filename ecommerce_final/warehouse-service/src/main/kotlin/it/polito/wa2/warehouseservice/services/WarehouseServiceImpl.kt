@@ -47,69 +47,35 @@ class WarehouseServiceImpl(
     }
 
     override suspend fun partialUpdateWarehouses(warehouseID: ObjectId, warehouseDTO: WarehouseDTO): WarehouseDTO {
-//        val warehouse = warehouseRepository.findById(warehouseID) ?: throw IllegalArgumentException("Warehouse not found")
-//        if(warehouse.products != null) {
-//            val productInfoIds = warehouseDTO.products!!.map{it.id}
-//            val oldProductInfo = warehouse.products?.filter{
-//                productInfoIds.contains(it.productId.toString())
-//            }
-//            if(oldProductInfo!!.isEmpty()){
-//                warehouse.products = warehouseDTO.products.map { it.toEntity() }?.toSet()
-//                warehouse.products!!.forEach {
-//                    if(it.quantity < it.alarm){
-//                        //to email admin
-//                        mailService.notifyAdmin("Order ${it.productId} Notification", it.productId.toString())
-//                    }
-//                }
-//            }else{
-//                warehouse.products!!.minus(oldProductInfo)
-//                val newProductInfo = warehouseDTO.products.filter {
-//                    it.id == oldProductInfo.first().productId.toString()
-//                }
-//                oldProductInfo.first().alarm = newProductInfo.first().alarm ?: oldProductInfo.first().alarm
-//                oldProductInfo.first().quantity = newProductInfo.first().quantity
-//            }
-//            warehouse.products = warehouseDTO.products?.map { it.toEntity() }?.toSet()
-//            warehouse.products!!.forEach {
-//                if(it.quantity < it.alarm){
-//                    //to email admin
-//                    mailService.notifyAdmin("Order ${it.productId} Notification", it.productId.toString())
-//                }
-//            }
-//        }
         val warehouse = warehouseRepository.findById(warehouseID) ?: throw IllegalArgumentException("Warehouse not found")
-        var products = warehouse.products?.map{it.toDTO()}
-        val oldProductInfos = (products?.intersect(warehouseDTO.products!!.toSet()))
+        var products: MutableSet<ProductInfoDTO>? = warehouse.products?.map{it.toDTO()}?.toMutableSet()
+        val oldProductIds = products?.map{it.id} //oldProductIds contains the ids already present in the warehouse
+        val warehouseDTOIds = warehouseDTO.products?.map{it.id} // warehouseDTOIds contains the ids in the warehouseDTO (used to modify the warehouse)
+        val warehouseIds = oldProductIds?.intersect(warehouseDTOIds!!.toSet()) //warehouseIds contains the ids of the product already present in the warehouse which are present also in warehouseDTO
+        val oldProductInfos = products?.filter { warehouseIds!!.contains(it.id) } //oldProductInfos contains the ProductInfos whose ids are in the warehouse (already present to delete)
+        val updatedOldProductInfos = warehouseDTO.products?.filter { warehouseIds!!.contains(it.id) } //updatedOldProductInfos contains the ProductInfos whose ids are in the warehouseDTO (they are used to update the already present DTO)
         if(oldProductInfos!!.isNotEmpty()) { //modify the already present ProductInfo
-            println(oldProductInfos.forEach{it.id})
-            val newOldProductInfos = setOf<ProductInfo>()
-            oldProductInfos.forEach {
-                newOldProductInfos.plusElement(ProductInfo(
+            oldProductInfos.forEach { products!!.remove(it) } //remove the ProductInfo to update
+            updatedOldProductInfos!!.forEach{
+                val productInfo = ProductInfo(  //create a new ProductInfo to update the already present in the warehouse
                         productId = ObjectId(it.id),
                         alarm = it.alarm,
                         quantity = it.quantity
-                ))
-                products!!.minusElement(it.toEntity())
-            }
-            newOldProductInfos.forEach{
-                products!!.plusElement(it)
-                println(products)
+                )
+                products!!.add(productInfo.toDTO())
             }
         }
-        val newProductInfos = warehouseDTO.products?.subtract(oldProductInfos)
+        val newProductIds = warehouseDTOIds?.subtract(oldProductIds!!.toSet()) //newProductIds are the ids of the new product to add (not already present in the warehouse)
+        val newProductInfos = warehouseDTO.products?.filter { newProductIds!!.contains(it.id) } //newProductInfos are the products whose ids are newProductIds
         if(newProductInfos!!.isNotEmpty()) {
             newProductInfos.forEach{
-                products!!.plusElement(it.toEntity())
+                products!!.add(it)
                 println(products)
             }
-
-//            newProductInfos.map {
-//                warehouse.products!!.plus(it.toEntity())
-//            }
         }
         products!!.forEach {
             if(it.quantity <= it.alarm)
-                mailService.notifyAdmin("Order ${it.id} Notification", it.id)
+                mailService.notifyAdmin("Product ${it.id} Notification", it.id)
         }
         warehouse.products = products.map { it.toEntity() }.toSet()
         return warehouseRepository.save(warehouse).toDTO()

@@ -2,8 +2,10 @@ package it.polito.wa2.warehouseservice.controllers
 
 import it.polito.wa2.warehouseservice.dto.WarehouseDTO
 import it.polito.wa2.warehouseservice.services.WarehouseService
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import org.bson.types.ObjectId
+import org.springframework.dao.OptimisticLockingFailureException
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.*
 
@@ -51,7 +53,16 @@ class WarehouseController(
     @PutMapping("/{warehouseID}")
     @ResponseStatus(HttpStatus.CREATED)
     suspend fun updateWarehouse(@PathVariable warehouseID: String, @RequestBody warehouseDTO: WarehouseDTO): WarehouseDTO {
-        return warehouseService.updateWarehouses(ObjectId(warehouseID), warehouseDTO)
+        var counter = 5
+        while(counter-- > 0){
+            try{
+                return warehouseService.updateWarehouses(ObjectId(warehouseID), warehouseDTO)
+            }
+            catch(e: OptimisticLockingFailureException){
+                delay(1000)
+            }
+        }
+        throw OptimisticLockingFailureException("Warehouse")
     }
 
     /**
@@ -62,7 +73,16 @@ class WarehouseController(
     @PatchMapping("/{warehouseID}")
     @ResponseStatus(HttpStatus.CREATED)
     suspend fun partialUpdateWarehouse(@PathVariable warehouseID: String, @RequestBody warehouseDTO: WarehouseDTO): WarehouseDTO {
-        return warehouseService.partialUpdateWarehouses(ObjectId(warehouseID), warehouseDTO)
+        var counter = 5
+        while(counter-- > 0){
+            try{
+                return warehouseService.partialUpdateWarehouses(ObjectId(warehouseID), warehouseDTO)
+            }
+            catch(e: OptimisticLockingFailureException){
+                delay(1000)
+            }
+        }
+        throw OptimisticLockingFailureException("Warehouse")
     }
 
     /**
@@ -73,7 +93,16 @@ class WarehouseController(
     @DeleteMapping("/{warehouseID}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     suspend fun deleteWarehouse(@PathVariable warehouseID: String) {
-        return warehouseService.deleteWarehouses(ObjectId(warehouseID))
+        var counter = 5
+        while(counter-- > 0){
+            try{
+                return warehouseService.deleteWarehouses(ObjectId(warehouseID))
+            }
+            catch(e: OptimisticLockingFailureException){
+                delay(1000)
+            }
+        }
+        throw OptimisticLockingFailureException("Warehouse")
     }
 
 }
