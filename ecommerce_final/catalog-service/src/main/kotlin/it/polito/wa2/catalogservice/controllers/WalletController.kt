@@ -1,20 +1,19 @@
 package it.polito.wa2.catalogservice.controllers
 
-import it.polito.wa2.catalogservice.dto.CreateWalletDTO
 import it.polito.wa2.catalogservice.dto.TransactionDTO
 import it.polito.wa2.catalogservice.dto.WalletDTO
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.reactive.asFlow
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.ResponseStatus
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.security.core.context.ReactiveSecurityContextHolder
+import org.springframework.web.bind.annotation.*
 import org.springframework.web.reactive.function.client.ClientResponse
 import org.springframework.web.reactive.function.client.WebClient
-import reactor.core.publisher.Flux
+import org.springframework.web.reactive.function.client.bodyToFlux
 import reactor.core.publisher.Mono
-import java.math.BigDecimal
 import java.nio.charset.StandardCharsets
 import java.time.ZonedDateTime
 import java.util.*
@@ -32,8 +31,9 @@ class WalletController {
         .build()
 
     //RETRIEVE INFO ABOUT A WALLET GIVEN ITS ID
+    @GetMapping("/{walletID}")
     @ResponseStatus(HttpStatus.OK)
-    suspend fun getWallet(walletID: String, token: String): Mono<WalletDTO>? {
+    suspend fun getWallet(@PathVariable walletID: String): Mono<WalletDTO> {
         //specify an HTTP method of a request by invoking method(HttpMethod method)
         val uriSpec: WebClient.UriSpec<WebClient.RequestBodySpec> = client.method(HttpMethod.GET)
 
@@ -52,7 +52,7 @@ class WalletController {
             .acceptCharset(StandardCharsets.UTF_8)
             .ifNoneMatch("*")
             .ifModifiedSince(ZonedDateTime.now())
-            .header(HttpHeaders.AUTHORIZATION, "Bearer $token")
+            //.header(HttpHeaders.AUTHORIZATION, "Bearer $token")
             .retrieve()
 
         //Get a response
@@ -62,16 +62,13 @@ class WalletController {
     }
 
     //GET LIST OF TRANSACTION OF A GIVEN WALLET, OPTIONALLY IN A RANGE OF TIME
+    @GetMapping("/{walletID}/transactions")
     @ResponseStatus(HttpStatus.OK)
-    suspend fun getTransactions(walletID: String, from: Long?, to: Long?, page: Int?, size: Int?,
-                     token: String): Flux<TransactionDTO> {
-        //Create a WebClient instance
-
-        //specify an HTTP method of a request by invoking method(HttpMethod method)
-        val uriSpec: WebClient.UriSpec<WebClient.RequestBodySpec> = client.method(HttpMethod.GET)
-
+    suspend fun getTransactions(@PathVariable walletID: Long,
+                                @RequestParam from: Long?,
+                                @RequestParam to: Long?): Flow<TransactionDTO> {
         //Preparing the request: define the URL
-        var query: String = ""
+        var query = ""
         if(from!=null)
             query = "?from=$from"
         if(to!=null && query!="") {
@@ -79,43 +76,21 @@ class WalletController {
         } else if(to!=null && query=="") {
             query += "?to=$to"
         }
-        if(page!=null && query!="") {
-            query += "&page=$page"
-        } else if(page!=null && query=="") {
-            query += "?page=$page"
-        }
-        if(size!=null && query!="") {
-            query += "&size=$size"
-        } else if(size!=null && query=="") {
-            query += "?size=$size"
-        }
-        var bodySpec: WebClient.RequestBodySpec = uriSpec.uri("/wallets/$walletID/transactions$query")
-
-
-        //Preparing a Request: define the Body
-        //in this case there is no body in the Request
-        var headersSpec: WebClient.RequestHeadersSpec<*> = bodySpec.bodyValue("")
-
-        //Preparing a Request: define the Headers
-        val responseSpec: WebClient.ResponseSpec = headersSpec.header(
-            HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_NDJSON_VALUE
-        )
-            .accept(MediaType.APPLICATION_NDJSON)
-            .acceptCharset(StandardCharsets.UTF_8)
-            .ifNoneMatch("*")
-            .ifModifiedSince(ZonedDateTime.now())
-            .header(HttpHeaders.AUTHORIZATION, "Bearer $token")
-            .retrieve()
-
-        //Get a response
-        return headersSpec.exchangeToFlux { response: ClientResponse ->
-            return@exchangeToFlux response.bodyToFlux(TransactionDTO::class.java)
-        }
+        return ReactiveSecurityContextHolder.getContext().flatMapMany {
+            val token = it.authentication.credentials as String
+            return@flatMapMany client.get().uri("$serviceURL/wallets/$walletID/transactions$query")
+                .accept(MediaType.APPLICATION_NDJSON)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer $token")
+                .retrieve()
+                .bodyToFlux<TransactionDTO>()
+        }.asFlow()
     }
 
     //RETRIEVE THE INFO OF A TRANSACTION GIVEN ITS ID
+    @GetMapping("/{walletID}/transactions/{transactionID}")
     @ResponseStatus(HttpStatus.OK)
-    suspend fun getTransaction(walletID: String, transactionID: String, token: String): Mono<TransactionDTO>? {
+    suspend fun getTransaction(@PathVariable walletID: String,
+                               @PathVariable transactionID: String): Mono<TransactionDTO>? {
         //specify an HTTP method of a request by invoking method(HttpMethod method)
         val uriSpec: WebClient.UriSpec<WebClient.RequestBodySpec> = client.method(HttpMethod.GET)
 
@@ -134,7 +109,7 @@ class WalletController {
             .acceptCharset(StandardCharsets.UTF_8)
             .ifNoneMatch("*")
             .ifModifiedSince(ZonedDateTime.now())
-            .header(HttpHeaders.AUTHORIZATION, "Bearer $token")
+            //.header(HttpHeaders.AUTHORIZATION, "Bearer $token")
             .retrieve()
 
         //Get a response
@@ -144,9 +119,9 @@ class WalletController {
     }
 
     //ADD A WALLET FOR A GIVEN CUSTOMER
+    @PostMapping("/")
     @ResponseStatus(HttpStatus.CREATED)
-    fun newWallet(customerID: String, token: String): Mono<WalletDTO> {
-        //Create a WebClient instance
+    suspend fun newWallet(@RequestBody walletDTO: WalletDTO): Mono<WalletDTO> {
 
         //specify an HTTP method of a request by invoking method(HttpMethod method)
         val uriSpec: WebClient.UriSpec<WebClient.RequestBodySpec> = client.method(HttpMethod.POST)
@@ -155,9 +130,7 @@ class WalletController {
         var bodySpec: WebClient.RequestBodySpec = uriSpec.uri("/wallets")
 
         //Preparing a Request: define the Body
-        //in this case there is no body in the Request
-        val wallet = CreateWalletDTO(customerID)
-        var headersSpec: WebClient.RequestHeadersSpec<*> = bodySpec.bodyValue(wallet)
+        var headersSpec: WebClient.RequestHeadersSpec<*> = bodySpec.bodyValue(walletDTO)
 
         //Preparing a Request: define the Headers
         val responseSpec: WebClient.ResponseSpec = headersSpec.header(
@@ -167,7 +140,7 @@ class WalletController {
             .acceptCharset(StandardCharsets.UTF_8)
             .ifNoneMatch("*")
             .ifModifiedSince(ZonedDateTime.now())
-            .header(HttpHeaders.AUTHORIZATION, "Bearer $token")
+            //.header(HttpHeaders.AUTHORIZATION, "Bearer $token")
             .retrieve()
 
         //Get a response
@@ -177,9 +150,10 @@ class WalletController {
     }
 
     //CREATE A TRANSACTION
+    @PostMapping("/{walletID}/transactions")
     @ResponseStatus(HttpStatus.CREATED)
-    fun newTransaction(walletID: String, amount: BigDecimal, description: String?,
-                       orderID: String, token: String): Mono<TransactionDTO> {
+    suspend fun newTransaction(@PathVariable walletID: String,
+                               @RequestBody transactionDTO: TransactionDTO): Mono<TransactionDTO> {
         //specify an HTTP method of a request by invoking method(HttpMethod method)
         val uriSpec: WebClient.UriSpec<WebClient.RequestBodySpec> = client.method(HttpMethod.POST)
 
@@ -188,9 +162,7 @@ class WalletController {
 
         //Preparing a Request: define the Body
         //in this case there is no body in the Request
-        val transaction = TransactionDTO(amount = amount, orderID = orderID, description = description,
-            id = null, timestamp = null, walletID = null)
-        var headersSpec: WebClient.RequestHeadersSpec<*> = bodySpec.bodyValue(transaction)
+        var headersSpec: WebClient.RequestHeadersSpec<*> = bodySpec.bodyValue(transactionDTO)
 
         //Preparing a Request: define the Headers
         val responseSpec: WebClient.ResponseSpec = headersSpec.header(
@@ -200,7 +172,7 @@ class WalletController {
             .acceptCharset(StandardCharsets.UTF_8)
             .ifNoneMatch("*")
             .ifModifiedSince(ZonedDateTime.now())
-            .header(HttpHeaders.AUTHORIZATION, "Bearer $token")
+            //.header(HttpHeaders.AUTHORIZATION, "Bearer $token")
             .retrieve()
 
         //Get a response
