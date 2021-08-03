@@ -1,8 +1,8 @@
 package it.polito.wa2.catalogservice.controllers
 
-import it.polito.wa2.catalogservice.domain.Delivery
-import it.polito.wa2.catalogservice.domain.Product
 import it.polito.wa2.catalogservice.dto.OrderDTO
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.reactive.asFlow
 import org.bson.types.ObjectId
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.http.HttpHeaders
@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.*
 import org.springframework.web.reactive.function.client.ClientResponse
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.bodyToFlux
-import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import java.nio.charset.StandardCharsets
 import java.time.ZonedDateTime
@@ -37,12 +36,7 @@ class OrderController(
     @GetMapping("", produces = [MediaType.APPLICATION_NDJSON_VALUE])
     @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("hasAuthority(\"ADMIN\") or hasAuthority(\"CUSTOMER\")")
-    suspend fun getOrders(): Flux<OrderDTO> {
-
-//        return runBlocking {
-//            return@runBlocking
-//        }
-        //specify an HTTP method of a request by invoking method(HttpMethod method)
+    suspend fun getOrders(): Flow<OrderDTO> {
 
         return ReactiveSecurityContextHolder.getContext().flatMapMany {
             val token = it.authentication.credentials as String
@@ -50,12 +44,7 @@ class OrderController(
                 .header(HttpHeaders.AUTHORIZATION, "Bearer $token")
                 .retrieve()
                 .bodyToFlux<OrderDTO>()
-        }
-        //Get a response
-        //TODO see if with this logic, if there's an exception it will be thrown
-//        return headersSpec.exchangeToFlow { response: ClientResponse ->
-//            return@exchangeToFlow response.bodyToFlow<OrderDTO>()
-//        }
+        }.asFlow()
     }
 
     //RETRIEVE AN ORDER GIVEN ITS ID

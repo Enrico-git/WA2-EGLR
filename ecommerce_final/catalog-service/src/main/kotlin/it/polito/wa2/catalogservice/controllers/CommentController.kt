@@ -6,6 +6,7 @@ import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
+import org.springframework.security.core.context.ReactiveSecurityContextHolder
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.reactive.function.client.ClientResponse
 import org.springframework.web.reactive.function.client.WebClient
@@ -124,6 +125,15 @@ class CommentController {
     @DeleteMapping("/{productID}/{commentID}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     suspend fun deleteComment(@PathVariable productID: String, @PathVariable commentID: String) {
+        //TODO see if it works
+        ReactiveSecurityContextHolder.getContext().map {
+            val token = it.authentication.credentials as String
+            return@map client.delete().uri("$serviceURL/comments/$productID/$commentID")
+                .accept(MediaType.APPLICATION_NDJSON)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer $token")
+                .retrieve()
+        }
+        /*
         //specify an HTTP method of a request by invoking method(HttpMethod method)
         val uriSpec: WebClient.UriSpec<WebClient.RequestBodySpec> = client.method(HttpMethod.DELETE)
 
@@ -146,5 +156,6 @@ class CommentController {
             .retrieve()
 
         headersSpec.retrieve()
+         */
     }
 }

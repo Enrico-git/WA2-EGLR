@@ -2,15 +2,14 @@ package it.polito.wa2.catalogservice.controllers
 
 import it.polito.wa2.catalogservice.dto.WarehouseDTO
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.reactive.asFlow
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
+import org.springframework.security.core.context.ReactiveSecurityContextHolder
 import org.springframework.web.bind.annotation.*
-import org.springframework.web.reactive.function.client.ClientResponse
-import org.springframework.web.reactive.function.client.WebClient
-import org.springframework.web.reactive.function.client.bodyToFlow
-import org.springframework.web.reactive.function.client.exchangeToFlow
+import org.springframework.web.reactive.function.client.*
 import reactor.core.publisher.Mono
 import java.nio.charset.StandardCharsets
 import java.time.ZonedDateTime
@@ -32,31 +31,14 @@ class WarehouseController {
     @GetMapping("")
     @ResponseStatus(HttpStatus.OK)
     suspend fun getWarehouses(): Flow<WarehouseDTO> {
-        //specify an HTTP method of a request by invoking method(HttpMethod method)
-        val uriSpec: WebClient.UriSpec<WebClient.RequestBodySpec> = client.method(HttpMethod.GET)
 
-        //Preparing the request: define the URL
-        var bodySpec: WebClient.RequestBodySpec = uriSpec.uri("/warehouses")
-
-        //Preparing a Request: define the Body
-        //in this case there is no body in the Request
-        var headersSpec: WebClient.RequestHeadersSpec<*> = bodySpec.bodyValue("")
-
-        //Preparing a Request: define the Headers
-        val responseSpec: WebClient.ResponseSpec = headersSpec.header(
-            HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_NDJSON_VALUE
-        )
-            .accept(MediaType.APPLICATION_NDJSON)
-            .acceptCharset(StandardCharsets.UTF_8)
-            .ifNoneMatch("*")
-            .ifModifiedSince(ZonedDateTime.now())
-            //.header(HttpHeaders.AUTHORIZATION, "Bearer $token")
-            .retrieve()
-
-        //Get a response
-        return headersSpec.exchangeToFlow { response: ClientResponse ->
-            return@exchangeToFlow response.bodyToFlow<WarehouseDTO>()
-        }
+        return ReactiveSecurityContextHolder.getContext().flatMapMany {
+            val token = it.authentication.credentials as String
+            return@flatMapMany client.get().uri("$serviceURL/warehouses").accept(MediaType.APPLICATION_NDJSON)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer $token")
+                .retrieve()
+                .bodyToFlux<WarehouseDTO>()
+        }.asFlow()
     }
 
     //RETRIEVE INFO ABOUT A WAREHOUSE GIVEN ITS ID
@@ -94,6 +76,15 @@ class WarehouseController {
     @DeleteMapping("/{warehouseID}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     suspend fun deleteWarehouse(@PathVariable warehouseID: String) {
+        //TODO see if it works
+        ReactiveSecurityContextHolder.getContext().map {
+            val token = it.authentication.credentials as String
+            return@map client.delete().uri("$serviceURL/warehouses/$warehouseID")
+                .accept(MediaType.APPLICATION_NDJSON)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer $token")
+                .retrieve()
+        }
+        /*
         //specify an HTTP method of a request by invoking method(HttpMethod method)
         val uriSpec: WebClient.UriSpec<WebClient.RequestBodySpec> = client.method(HttpMethod.DELETE)
 
@@ -117,6 +108,7 @@ class WarehouseController {
 
         //Get a response
         headersSpec.retrieve()
+         */
     }
 
     //CREATE A NEW WAREHOUSE WITH A LIST OF PRODUCTS

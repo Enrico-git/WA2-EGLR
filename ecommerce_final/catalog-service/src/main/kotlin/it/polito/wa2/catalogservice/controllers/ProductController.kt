@@ -4,17 +4,15 @@ import it.polito.wa2.catalogservice.dto.PictureDTO
 import it.polito.wa2.catalogservice.dto.ProductDTO
 import it.polito.wa2.catalogservice.dto.WarehouseDTO
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.reactive.asFlow
 import org.springframework.data.domain.Pageable
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
+import org.springframework.security.core.context.ReactiveSecurityContextHolder
 import org.springframework.web.bind.annotation.*
-import org.springframework.web.reactive.function.client.ClientResponse
-import org.springframework.web.reactive.function.client.WebClient
-import org.springframework.web.reactive.function.client.bodyToFlow
-import org.springframework.web.reactive.function.client.exchangeToFlow
-import reactor.core.publisher.Flux
+import org.springframework.web.reactive.function.client.*
 import reactor.core.publisher.Mono
 import java.nio.charset.StandardCharsets
 import java.time.ZonedDateTime
@@ -37,34 +35,15 @@ class ProductController {
     @GetMapping("", produces = [MediaType.APPLICATION_NDJSON_VALUE])
     @ResponseStatus(HttpStatus.OK)
     suspend fun getProducts(@RequestParam category: String, pageable: Pageable): Flow<ProductDTO> {
-        //specify an HTTP method of a request by invoking method(HttpMethod method)
-        val uriSpec: WebClient.UriSpec<WebClient.RequestBodySpec> = client.method(HttpMethod.GET)
-
-        //Preparing the request: define the URL
-        var url: String = ""
+        var queryParam: String = ""
         if(category!=null)
-            url += "?category=$category"
-        var bodySpec: WebClient.RequestBodySpec = uriSpec.uri("/products$url")
-
-        //Preparing a Request: define the Body
-        //in this case there is no body in the Request
-        var headersSpec: WebClient.RequestHeadersSpec<*> = bodySpec.bodyValue("")
-
-        //Preparing a Request: define the Headers
-        val responseSpec: WebClient.ResponseSpec = headersSpec.header(
-            HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_NDJSON_VALUE
-        )
-            .accept(MediaType.APPLICATION_NDJSON)
-            .acceptCharset(StandardCharsets.UTF_8)
-            .ifNoneMatch("*")
-            .ifModifiedSince(ZonedDateTime.now())
-            //.header(HttpHeaders.AUTHORIZATION, "Bearer $token")
-            .retrieve()
-
-        //Get a response
-        return headersSpec.exchangeToFlow { response: ClientResponse ->
-            return@exchangeToFlow response.bodyToFlow<ProductDTO>()
-        }
+            queryParam+="?category=$category"
+        return ReactiveSecurityContextHolder.getContext().flatMapMany {
+            return@flatMapMany client.get().uri("$serviceURL/products$queryParam")
+                .accept(MediaType.APPLICATION_NDJSON)
+                .retrieve()
+                .bodyToFlux<ProductDTO>()
+        }.asFlow()
     }
 
     //RETRIEVE INFO ABOUT A PRODUCT GIVEN ITS ID
@@ -72,6 +51,7 @@ class ProductController {
     @GetMapping("/{productID}")
     @ResponseStatus(HttpStatus.OK)
     suspend fun getProduct(@PathVariable productID: String): Mono<ProductDTO> {
+
         //specify an HTTP method of a request by invoking method(HttpMethod method)
         val uriSpec: WebClient.UriSpec<WebClient.RequestBodySpec> = client.method(HttpMethod.GET)
 
@@ -135,36 +115,30 @@ class ProductController {
     @GetMapping("/{productID}/warehouses")
     @ResponseStatus(HttpStatus.OK)
     suspend fun getProductWarehouses(@PathVariable productID: String): Flow<WarehouseDTO> {
-        //specify an HTTP method of a request by invoking method(HttpMethod method)
-        val uriSpec: WebClient.UriSpec<WebClient.RequestBodySpec> = client.method(HttpMethod.GET)
 
-        //Preparing the request: define the URL
-        var bodySpec: WebClient.RequestBodySpec = uriSpec.uri("/products/$productID/warehouses")
-
-        //Preparing a Request: define the Body
-        //in this case there is no body in the Request
-        var headersSpec: WebClient.RequestHeadersSpec<*> = bodySpec.bodyValue("")
-
-        //Preparing a Request: define the Headers
-        val responseSpec: WebClient.ResponseSpec = headersSpec.header(
-            HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_NDJSON_VALUE
-        )
-            .accept(MediaType.APPLICATION_NDJSON)
-            .acceptCharset(StandardCharsets.UTF_8)
-            .ifNoneMatch("*")
-            .ifModifiedSince(ZonedDateTime.now())
-            .retrieve()
-
-        //Get a response
-        return headersSpec.exchangeToFlow { response: ClientResponse ->
-            return@exchangeToFlow response.bodyToFlow<WarehouseDTO>()
-        }
+        return ReactiveSecurityContextHolder.getContext().flatMapMany {
+            //val token = it.authentication.credentials as String
+            return@flatMapMany client.get().uri("$serviceURL/products/$productID/warehouses")
+                .accept(MediaType.APPLICATION_NDJSON)
+                //.header(HttpHeaders.AUTHORIZATION, "Bearer $token")
+                .retrieve()
+                .bodyToFlux<WarehouseDTO>()
+        }.asFlow()
     }
 
     //DELETE A PRODUCT GIVEN ITS ID
     @DeleteMapping("/{productID}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     suspend fun deleteProduct(@PathVariable productID: String) {
+        //TODO see if it works
+        ReactiveSecurityContextHolder.getContext().map {
+            val token = it.authentication.credentials as String
+            return@map client.delete().uri("$serviceURL/products/$productID")
+                .accept(MediaType.APPLICATION_NDJSON)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer $token")
+                .retrieve()
+        }
+        /*
         //specify an HTTP method of a request by invoking method(HttpMethod method)
         val uriSpec: WebClient.UriSpec<WebClient.RequestBodySpec> = client.method(HttpMethod.DELETE)
 
@@ -187,6 +161,7 @@ class ProductController {
             .retrieve()
 
         headersSpec.retrieve()
+         */
     }
 
     //UPDATE THE PICTURE OF A PRODUCT GIVEN ITS ID AND THE NEW PICTURE
@@ -280,3 +255,34 @@ class ProductController {
         }
     }
 }
+
+/*
+* //specify an HTTP method of a request by invoking method(HttpMethod method)
+        val uriSpec: WebClient.UriSpec<WebClient.RequestBodySpec> = client.method(HttpMethod.GET)
+
+        //Preparing the request: define the URL
+        var url: String = ""
+        if(category!=null)
+            url += "?category=$category"
+        var bodySpec: WebClient.RequestBodySpec = uriSpec.uri("/products$url")
+
+        //Preparing a Request: define the Body
+        //in this case there is no body in the Request
+        var headersSpec: WebClient.RequestHeadersSpec<*> = bodySpec.bodyValue("")
+
+        //Preparing a Request: define the Headers
+        val responseSpec: WebClient.ResponseSpec = headersSpec.header(
+            HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_NDJSON_VALUE
+        )
+            .accept(MediaType.APPLICATION_NDJSON)
+            .acceptCharset(StandardCharsets.UTF_8)
+            .ifNoneMatch("*")
+            .ifModifiedSince(ZonedDateTime.now())
+            //.header(HttpHeaders.AUTHORIZATION, "Bearer $token")
+            .retrieve()
+
+        //Get a response
+        return headersSpec.exchangeToFlow { response: ClientResponse ->
+            return@exchangeToFlow response.bodyToFlow<ProductDTO>()
+        }
+ */
