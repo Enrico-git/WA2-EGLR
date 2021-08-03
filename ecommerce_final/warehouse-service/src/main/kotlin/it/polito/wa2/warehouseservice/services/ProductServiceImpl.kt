@@ -2,7 +2,6 @@ package it.polito.wa2.warehouseservice.services
 
 
 import it.polito.wa2.warehouseservice.domain.Product
-import it.polito.wa2.warehouseservice.domain.ProductInfo
 import it.polito.wa2.warehouseservice.domain.toDTO
 import it.polito.wa2.warehouseservice.dto.*
 import it.polito.wa2.warehouseservice.exceptions.*
@@ -13,7 +12,6 @@ import kotlinx.coroutines.flow.*
 import org.bson.types.ObjectId
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
-import org.springframework.transaction.ReactiveTransactionManager
 import org.springframework.transaction.annotation.Transactional
 import java.sql.Timestamp
 
@@ -22,8 +20,7 @@ import java.sql.Timestamp
 class ProductServiceImpl(
         private val productRepository: ProductRepository,
         private val commentRepository: CommentRepository,
-        private val warehouseRepository: WarehouseRepository,
-        private val warehouseService: WarehouseService
+        private val warehouseRepository: WarehouseRepository
 ): ProductService {
 
 
@@ -76,51 +73,19 @@ class ProductServiceImpl(
 
     override suspend fun deleteProduct(productID: ObjectId) {
         val product = productRepository.findById(productID) ?: throw IllegalArgumentException("Product not found")
-//        if(product.comments != null)
-//            commentRepository.deleteAllById(product.comments!!.toSet())
-        println("After delete comments")
-        val warehouses = warehouseRepository.findAll()/*.filter{    //filter only the warehouses which contain the product
-            it ->
-            println(it.products)
-            it.products!!
-                .any{
-                    it.productId == productID
+        if(product.comments != null)
+            commentRepository.deleteAllById(product.comments!!)
+        val warehouses = warehouseRepository.findWarehousesByProduct(productID)
+                .map { wh ->
+                    if(wh.products != null){
+                        wh.products = wh.products!!.filter {
+                            it.productId != productID
+                        }.toMutableSet()
+                    }
+                    wh
                 }
-        }*/
-        val newWarehouses = warehouses.toSet().filter { ot->
-            ot.products!!.any {
-                it.productId != productID
-            }
-        }.toMutableSet()
-
-        newWarehouses.forEach {
-            println(it.products)
-        }
-
-
-        /*warehouses.onEach {
-            it.products!!.filter {
-                it.productId != productID
-            }
-        }*/
-        //warehouseRepository.saveAll(warehouses)
-//        return productRepository.deleteById(productID)
-
-
-//        val warehouses = getProductWarehouses(productID)
-//        warehouses.onEach {
-//            val productInfoDTO = it.products!!.filter {
-//                it.id == productID.toString()
-//            }
-//            val products = it.products.minus(productInfoDTO)
-//            warehouseService.partialUpdateWarehouses(
-//                    ObjectId(it.id), WarehouseDTO(
-//                        id = null,
-//                        products = products
-//                    )
-//            )
-//        }
-
+        warehouseRepository.saveAll(warehouses).collect()
+        productRepository.deleteById(productID)
     }
 
     override suspend fun getProductPicture(productID: ObjectId): PictureDTO {
@@ -129,19 +94,14 @@ class ProductServiceImpl(
     }
 
     override suspend fun modifyProductPicture(pictureDTO: PictureDTO, productID: ObjectId): ProductDTO {
-        var product = productRepository.findById(productID) ?: throw NotFoundException("Product not found")
+        val product = productRepository.findById(productID) ?: throw NotFoundException("Product not found")
         product.pictureUrl = pictureDTO.pictureUrl
         return productRepository.save(product).toDTO()
     }
 
     override suspend fun getProductWarehouses(productID: ObjectId): Flow<WarehouseDTO> {
-        val product = productRepository.findById(productID) ?: throw IllegalArgumentException("Product not found")
-        return warehouseRepository.findAll().filter{    //filter only the warehouses which contain the product
-            it -> it.products!!
-                .any{
-                it.productId == productID
-            }
-        }.map { it.toDTO() }
+        productRepository.findById(productID) ?: throw IllegalArgumentException("Product not found")
+        return warehouseRepository.findWarehousesByProduct(productID).map { it.toDTO() }
     }
 
     override suspend fun getProductComments(productID: ObjectId): Flow<CommentDTO> {

@@ -48,6 +48,8 @@ class WarehouseServiceImpl(
 
     override suspend fun partialUpdateWarehouses(warehouseID: ObjectId, warehouseDTO: WarehouseDTO): WarehouseDTO {
         val warehouse = warehouseRepository.findById(warehouseID) ?: throw IllegalArgumentException("Warehouse not found")
+
+
         val products: MutableSet<ProductInfoDTO>? = warehouse.products?.map{it.toDTO()}?.toMutableSet()
         val oldProductIds = products?.map{it.id} //oldProductIds contains the ids already present in the warehouse
         val warehouseDTOIds = warehouseDTO.products?.map{it.id} // warehouseDTOIds contains the ids in the warehouseDTO (used to modify the warehouse)
@@ -62,18 +64,18 @@ class WarehouseServiceImpl(
                         alarm = it.alarm,
                         quantity = it.quantity
                 )
-                products!!.add(productInfo.toDTO())
+                products.add(productInfo.toDTO())
             }
         }
         val newProductIds = warehouseDTOIds?.subtract(oldProductIds!!.toSet()) //newProductIds are the ids of the new product to add (not already present in the warehouse)
         val newProductInfos = warehouseDTO.products?.filter { newProductIds!!.contains(it.id) } //newProductInfos are the products whose ids are newProductIds
         if(newProductInfos!!.isNotEmpty()) {
             newProductInfos.forEach{
-                products!!.add(it)
+                products.add(it)
                 println(products)
             }
         }
-        products!!.forEach {
+        products.forEach {
             if(it.quantity <= it.alarm)
                 mailService.notifyAdmin("Warehouse $warehouseID Notification", it.id)
         }

@@ -24,7 +24,7 @@ data class ProductInfo(
 
 fun Warehouse.toDTO() = WarehouseDTO(
         id = id.toString(),
-        products = products?.map{ ProductInfoDTO(it.productId.toString(), it.alarm!!, it.quantity!!) }!!.toSet()
+        products = products?.map{ ProductInfoDTO(it.productId.toString(), it.alarm!!, it.quantity!!) }!!.toMutableSet()
 )
 
 fun ProductInfo.toDTO() = ProductInfoDTO(

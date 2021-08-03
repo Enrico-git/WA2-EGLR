@@ -1,5 +1,6 @@
 package it.polito.wa2.warehouseservice.services
 
+import it.polito.wa2.warehouseservice.domain.Warehouse
 import it.polito.wa2.warehouseservice.dto.CommentDTO
 import it.polito.wa2.warehouseservice.dto.PictureDTO
 import it.polito.wa2.warehouseservice.dto.ProductDTO
