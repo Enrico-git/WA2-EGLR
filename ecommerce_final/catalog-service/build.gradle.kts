@@ -13,8 +13,6 @@ java.sourceCompatibility = JavaVersion.VERSION_11
 
 repositories {
     mavenCentral()
-    maven("https://repo.spring.io/milestone") // Spring milestones
-    maven("https://repo.spring.io/snapshot")  // Spring snapshots
 }
 
 extra["springCloudVersion"] = "2020.0.3"
@@ -31,13 +29,11 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")
     implementation("org.springframework.cloud:spring-cloud-starter-netflix-eureka-client")
     implementation("io.jsonwebtoken:jjwt-api:0.11.2")
-    implementation("org.springframework.experimental:graphql-spring-boot-starter:1.0.0-SNAPSHOT")
     runtimeOnly("io.jsonwebtoken:jjwt-impl:0.11.2")
     runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.11.2")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("io.projectreactor:reactor-test")
     testImplementation("org.springframework.security:spring-security-test")
-    //implementation("com.expediagroup", "graphql-kotlin-spring-server", "3.6.8")
 }
 
 dependencyManagement {

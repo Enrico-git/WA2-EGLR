@@ -1,29 +1,28 @@
-package it.polito.wa2.catalogservice.queries
+package it.polito.wa2.catalogservice.controllers
 
-import it.polito.wa2.catalogservice.dto.ProductDTO
-import it.polito.wa2.catalogservice.dto.WarehouseDTO
-import kotlinx.coroutines.flow.Flow
+import it.polito.wa2.catalogservice.dto.CreateWalletDTO
+import it.polito.wa2.catalogservice.dto.TransactionDTO
+import it.polito.wa2.catalogservice.dto.WalletDTO
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
-import org.springframework.stereotype.Component
+import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.ResponseStatus
+import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.reactive.function.client.ClientResponse
 import org.springframework.web.reactive.function.client.WebClient
-import org.springframework.web.reactive.function.client.bodyToFlow
-import org.springframework.web.reactive.function.client.exchangeToFlow
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
+import java.math.BigDecimal
 import java.nio.charset.StandardCharsets
 import java.time.ZonedDateTime
 import java.util.*
 
-//I DELETE SUSPEND BECAUSE IT GAVES ME AN ERROR IN OrderWiring.kt, CHECK IF IT WORKS
-@Component
-class WarehouseQuery() {
-
-    val serviceURL = "http://localhost:8200"
+@RestController
+@RequestMapping("/wallets")
+class WalletController {
+    val serviceURL = "http://localhost:8100"
     //Create a WebClient instance
     //building a client by using the DefaultWebClientBuilder class, which allows full customization
     val client: WebClient = WebClient.builder()
@@ -32,44 +31,14 @@ class WarehouseQuery() {
         .defaultUriVariables(Collections.singletonMap("url", serviceURL))
         .build()
 
-    //RETRIEVE THE LIST OF WAREHOUSES
+    //RETRIEVE INFO ABOUT A WALLET GIVEN ITS ID
     @ResponseStatus(HttpStatus.OK)
-    fun warehouses(token: String): Flux<WarehouseDTO> {
+    suspend fun getWallet(walletID: String, token: String): Mono<WalletDTO>? {
         //specify an HTTP method of a request by invoking method(HttpMethod method)
         val uriSpec: WebClient.UriSpec<WebClient.RequestBodySpec> = client.method(HttpMethod.GET)
 
         //Preparing the request: define the URL
-        var bodySpec: WebClient.RequestBodySpec = uriSpec.uri("/warehouses")
-
-        //Preparing a Request: define the Body
-        //in this case there is no body in the Request
-        var headersSpec: WebClient.RequestHeadersSpec<*> = bodySpec.bodyValue("")
-
-        //Preparing a Request: define the Headers
-        val responseSpec: WebClient.ResponseSpec = headersSpec.header(
-            HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_NDJSON_VALUE
-        )
-            .accept(MediaType.APPLICATION_NDJSON)
-            .acceptCharset(StandardCharsets.UTF_8)
-            .ifNoneMatch("*")
-            .ifModifiedSince(ZonedDateTime.now())
-            .header(HttpHeaders.AUTHORIZATION, "Bearer $token")
-            .retrieve()
-
-        //Get a response
-        return headersSpec.exchangeToFlux { response: ClientResponse ->
-            return@exchangeToFlux response.bodyToFlux(WarehouseDTO::class.java)
-        }
-    }
-
-    //RETRIEVE INFO ABOUT A WAREHOUSE GIVEN ITS ID
-    @ResponseStatus(HttpStatus.OK)
-    fun warehouse(warehouseID: String, token: String): Mono<WarehouseDTO> {
-        //specify an HTTP method of a request by invoking method(HttpMethod method)
-        val uriSpec: WebClient.UriSpec<WebClient.RequestBodySpec> = client.method(HttpMethod.GET)
-
-        //Preparing the request: define the URL
-        var bodySpec: WebClient.RequestBodySpec = uriSpec.uri("/warehouses/$warehouseID")
+        var bodySpec: WebClient.RequestBodySpec = uriSpec.uri("/wallets/$walletID")
 
         //Preparing a Request: define the Body
         //in this case there is no body in the Request
@@ -88,22 +57,40 @@ class WarehouseQuery() {
 
         //Get a response
         return headersSpec.exchangeToMono { response: ClientResponse ->
-            return@exchangeToMono response.bodyToMono(WarehouseDTO::class.java)
+            return@exchangeToMono response.bodyToMono(WalletDTO::class.java)
         }
     }
 
-    //RETRIEVE ALL THE PRODUCTS, OR ALL THE PRODUCTS OF A GIVEN CATEGORY
-    //NO NEED OF AUTHENTICATION -> NO TOKEN
+    //GET LIST OF TRANSACTION OF A GIVEN WALLET, OPTIONALLY IN A RANGE OF TIME
     @ResponseStatus(HttpStatus.OK)
-    fun products(category: String?): Flux<ProductDTO> {
+    suspend fun getTransactions(walletID: String, from: Long?, to: Long?, page: Int?, size: Int?,
+                     token: String): Flux<TransactionDTO> {
+        //Create a WebClient instance
+
         //specify an HTTP method of a request by invoking method(HttpMethod method)
         val uriSpec: WebClient.UriSpec<WebClient.RequestBodySpec> = client.method(HttpMethod.GET)
 
         //Preparing the request: define the URL
-        var url: String = ""
-        if(category!=null)
-            url += "?category=$category"
-        var bodySpec: WebClient.RequestBodySpec = uriSpec.uri("/products$url")
+        var query: String = ""
+        if(from!=null)
+            query = "?from=$from"
+        if(to!=null && query!="") {
+            query += "&to=$to"
+        } else if(to!=null && query=="") {
+            query += "?to=$to"
+        }
+        if(page!=null && query!="") {
+            query += "&page=$page"
+        } else if(page!=null && query=="") {
+            query += "?page=$page"
+        }
+        if(size!=null && query!="") {
+            query += "&size=$size"
+        } else if(size!=null && query=="") {
+            query += "?size=$size"
+        }
+        var bodySpec: WebClient.RequestBodySpec = uriSpec.uri("/wallets/$walletID/transactions$query")
+
 
         //Preparing a Request: define the Body
         //in this case there is no body in the Request
@@ -117,24 +104,23 @@ class WarehouseQuery() {
             .acceptCharset(StandardCharsets.UTF_8)
             .ifNoneMatch("*")
             .ifModifiedSince(ZonedDateTime.now())
-            //.header(HttpHeaders.AUTHORIZATION, "Bearer $token")
+            .header(HttpHeaders.AUTHORIZATION, "Bearer $token")
             .retrieve()
 
         //Get a response
         return headersSpec.exchangeToFlux { response: ClientResponse ->
-            return@exchangeToFlux response.bodyToFlux(ProductDTO::class.java)
+            return@exchangeToFlux response.bodyToFlux(TransactionDTO::class.java)
         }
     }
 
-    //RETRIEVE INFO ABOUT A PRODUCT GIVEN ITS ID
-    //NO NEED OF AUTHENTICATION -> NO TOKEN
+    //RETRIEVE THE INFO OF A TRANSACTION GIVEN ITS ID
     @ResponseStatus(HttpStatus.OK)
-    fun product(productID: String): Mono<ProductDTO> {
+    suspend fun getTransaction(walletID: String, transactionID: String, token: String): Mono<TransactionDTO>? {
         //specify an HTTP method of a request by invoking method(HttpMethod method)
         val uriSpec: WebClient.UriSpec<WebClient.RequestBodySpec> = client.method(HttpMethod.GET)
 
         //Preparing the request: define the URL
-        var bodySpec: WebClient.RequestBodySpec = uriSpec.uri("/products/$productID")
+        var bodySpec: WebClient.RequestBodySpec = uriSpec.uri("/wallets/$walletID/transactions/$transactionID")
 
         //Preparing a Request: define the Body
         //in this case there is no body in the Request
@@ -148,27 +134,30 @@ class WarehouseQuery() {
             .acceptCharset(StandardCharsets.UTF_8)
             .ifNoneMatch("*")
             .ifModifiedSince(ZonedDateTime.now())
+            .header(HttpHeaders.AUTHORIZATION, "Bearer $token")
             .retrieve()
 
         //Get a response
         return headersSpec.exchangeToMono { response: ClientResponse ->
-            return@exchangeToMono response.bodyToMono(ProductDTO::class.java)
+            return@exchangeToMono response.bodyToMono(TransactionDTO::class.java)
         }
     }
 
-    //RETRIEVE THE PICTURE URL OF A PRODUCT GIVEN ITS ID
-    //NO NEED OF AUTHENTICATION -> NO TOKEN
-    @ResponseStatus(HttpStatus.OK)
-    fun picture(productID: String): Mono<String> {
+    //ADD A WALLET FOR A GIVEN CUSTOMER
+    @ResponseStatus(HttpStatus.CREATED)
+    fun newWallet(customerID: String, token: String): Mono<WalletDTO> {
+        //Create a WebClient instance
+
         //specify an HTTP method of a request by invoking method(HttpMethod method)
-        val uriSpec: WebClient.UriSpec<WebClient.RequestBodySpec> = client.method(HttpMethod.GET)
+        val uriSpec: WebClient.UriSpec<WebClient.RequestBodySpec> = client.method(HttpMethod.POST)
 
         //Preparing the request: define the URL
-        var bodySpec: WebClient.RequestBodySpec = uriSpec.uri("/products/$productID/picture")
+        var bodySpec: WebClient.RequestBodySpec = uriSpec.uri("/wallets")
 
         //Preparing a Request: define the Body
         //in this case there is no body in the Request
-        var headersSpec: WebClient.RequestHeadersSpec<*> = bodySpec.bodyValue("")
+        val wallet = CreateWalletDTO(customerID)
+        var headersSpec: WebClient.RequestHeadersSpec<*> = bodySpec.bodyValue(wallet)
 
         //Preparing a Request: define the Headers
         val responseSpec: WebClient.ResponseSpec = headersSpec.header(
@@ -178,28 +167,30 @@ class WarehouseQuery() {
             .acceptCharset(StandardCharsets.UTF_8)
             .ifNoneMatch("*")
             .ifModifiedSince(ZonedDateTime.now())
-            //.header(HttpHeaders.AUTHORIZATION, "Bearer $token")
+            .header(HttpHeaders.AUTHORIZATION, "Bearer $token")
             .retrieve()
 
         //Get a response
         return headersSpec.exchangeToMono { response: ClientResponse ->
-            return@exchangeToMono response.bodyToMono(String::class.java)
+            return@exchangeToMono response.bodyToMono(WalletDTO::class.java)
         }
     }
 
-    //RETRIEVE THE LIST OF WAREHOUSES THAT CONTAIN A PRODUCT GIVEN ITS ID
-    //NO NEED OF AUTHENTICATION -> NO TOKEN
-    @ResponseStatus(HttpStatus.OK)
-    fun productWarehouses(productID: String): Flux<WarehouseDTO> {
+    //CREATE A TRANSACTION
+    @ResponseStatus(HttpStatus.CREATED)
+    fun newTransaction(walletID: String, amount: BigDecimal, description: String?,
+                       orderID: String, token: String): Mono<TransactionDTO> {
         //specify an HTTP method of a request by invoking method(HttpMethod method)
-        val uriSpec: WebClient.UriSpec<WebClient.RequestBodySpec> = client.method(HttpMethod.GET)
+        val uriSpec: WebClient.UriSpec<WebClient.RequestBodySpec> = client.method(HttpMethod.POST)
 
         //Preparing the request: define the URL
-        var bodySpec: WebClient.RequestBodySpec = uriSpec.uri("/products/$productID/warehouses")
+        var bodySpec: WebClient.RequestBodySpec = uriSpec.uri("/wallets/$walletID/transactions")
 
         //Preparing a Request: define the Body
         //in this case there is no body in the Request
-        var headersSpec: WebClient.RequestHeadersSpec<*> = bodySpec.bodyValue("")
+        val transaction = TransactionDTO(amount = amount, orderID = orderID, description = description,
+            id = null, timestamp = null, walletID = null)
+        var headersSpec: WebClient.RequestHeadersSpec<*> = bodySpec.bodyValue(transaction)
 
         //Preparing a Request: define the Headers
         val responseSpec: WebClient.ResponseSpec = headersSpec.header(
@@ -209,20 +200,12 @@ class WarehouseQuery() {
             .acceptCharset(StandardCharsets.UTF_8)
             .ifNoneMatch("*")
             .ifModifiedSince(ZonedDateTime.now())
+            .header(HttpHeaders.AUTHORIZATION, "Bearer $token")
             .retrieve()
 
         //Get a response
-        return headersSpec.exchangeToFlux { response: ClientResponse ->
-            return@exchangeToFlux response.bodyToFlux(WarehouseDTO::class.java)
+        return headersSpec.exchangeToMono { response: ClientResponse ->
+            return@exchangeToMono response.bodyToMono(TransactionDTO::class.java)
         }
     }
 }
-
-/*
-* if (response.statusCode() == HttpStatus.CREATED) {
-*
-* } else if (response.statusCode().is4xxClientError) {
-*   return@exchangeToMono response.bodyToMono(ProductDTO::class.java)
-  } else {
-    return@exchangeToMono response.bodyToMono(ProductDTO::class.java)
-  }*/

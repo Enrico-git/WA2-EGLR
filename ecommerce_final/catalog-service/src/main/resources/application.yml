@@ -1,10 +1,6 @@
 spring:
-  graphql:
-    websocket:
-      path: /graphql
-    graphiql:
-      enabled: true
-      path: /graphiql
+  application:
+    name: catalog
   mail:
     username: eglrgroup9@gmail.com
     password: z5i59QRJLwpAyxT
@@ -24,8 +20,6 @@ application:
     jwtExpirationMs: 1800000
     jwtHeader: Authorization
     jwtHeaderStart: Bearer
-graphql:
-  packages: it.polito.wa2.catalogservice
-#server:
-#  port: 8081
+server:
+  port: 8081
 
