@@ -6,10 +6,12 @@
 //payment_request
 orderID: String
 amount: BigDecimal
+timestamp: Timestamp
 token: String //jwt token
 
 //abort_payment_request
 orderID: String
+timestamp: Timestamp
 token: String //jwt token
 
 // Wallet Service -> Order Service
@@ -26,7 +28,48 @@ orderID: String
 orderID: String
 
 
+// Order Service -> Wallet Service
+//reserve_products_request
+orderID: String
+products: [{id: String, amount: Int}] // id of product and amount of products
+timestamp: Timestamp
+
+//abort_products_reservation
+orderID: String,
+productsWarehouseLocation: [{productID: String, warehouseID: String, amount: Long }]
+timestamp: Timestamp
+
+// Warehouse Service -> Order Service
+//products_reservation_ok (sent by debezium)
+orderID: String
+productsWarehouseLocation: [{productID: String, warehouseID: String, amount: Long }]
+
+//products_reservation_failed
+orderID: String
+
+//abort_products_reservation_ok (sent by debezium)
+orderID: String
+
+//abort_products_reservation_failed
+orderID: String
+
 ************************
 * REST/GRAPHQL payload *
 ************************
+
+///////////////////
+// ORDER SERVICE //
+///////////////////
+
+JWT -> CUSTOMER,ADMIN
+GET /orders
+GET /orders/{orderID}
+DELETE /orders/{orderID} payload: {email: String}
+POST /orders payload: {products: [id: String, amount: Int, price: BigDecimal], delivery: {shippingAddress: String}, email: String}
+
+JWT -> ADMIN
+PATCH /orders/{orderID} payload: {status: OrderStatus}
+
+
+
 
