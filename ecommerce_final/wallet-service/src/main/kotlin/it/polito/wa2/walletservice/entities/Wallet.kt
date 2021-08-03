@@ -11,15 +11,17 @@ data class Wallet (
     @Id
     val id: ObjectId?,
     var balance: BigDecimal = BigDecimal(0.0),
-    val userID: ObjectId, //TODO JWT uses User not Customer. Avoiding the use of Customer we loose name, surname, address
-    //var transactions: Set<ObjectId> = setOf(), // use specific end-point for retrieve walletTransactions!!!
-    //@Version
-    //val version: Long = 0 //TODO Where do i need lock? performTransaction?
+    val userID: ObjectId,
+    //  00
 )
 
 fun Wallet.toDTO() = WalletDTO(
     id = id!!.toHexString(),
     balance = balance,
     userID = userID.toHexString(),
-    //transactions = transactions.map { it.toHexString() }.toSet()
 )
+
+// 00
+// Please notice that the Wallet doesn't have the
+// "var transactions: Set<ObjectId>?" proprieties since we assume that
+// will be used the specific end-point for retrieve wallet Transactions!

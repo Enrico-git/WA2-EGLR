@@ -8,9 +8,9 @@ import kotlinx.coroutines.launch
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.springframework.kafka.annotation.KafkaListener
+import org.springframework.kafka.support.KafkaHeaders
+import org.springframework.messaging.handler.annotation.Header
 import org.springframework.stereotype.Component
-import org.springframework.transaction.annotation.Transactional
-import reactor.core.publisher.Mono
 
 /**
  * This class is used for listening from "payment_request"
@@ -23,22 +23,22 @@ import reactor.core.publisher.Mono
  * the relative collections.
  */
 @Component
-class PaymentListener(
+class PaymentOrAbortListener(
     private val walletService: WalletService,
     private val kafkaPaymentRequestFailedProducer: KafkaProducer<String, String>
 ) {
     @KafkaListener(
-        topics=["payment_request"],
+        topics=["payment_request", "abort_payment_request"],
         containerFactory = "paymentRequestContainerFactory"
     )
-    fun paymentRequestConsumer(paymentRequestDTO: KafkaPaymentRequestDTO){
+    fun requestConsumer(paymentOrAbortRequestDTO: KafkaPaymentRequestDTO, @Header(KafkaHeaders.RECEIVED_TOPIC) topic: String){
         CoroutineScope(Dispatchers.IO).launch {
-            val result = walletService.createPaymentTransaction(paymentRequestDTO)
+            val result = walletService.createPaymentOrRefundTransaction(topic, paymentOrAbortRequestDTO)
 
             if (result != null && result == false) {
-                println("payment_request_failed")
+                println("${topic}_failed")
                 kafkaPaymentRequestFailedProducer.send(
-                    ProducerRecord("payment_request_failed", paymentRequestDTO.orderID)
+                    ProducerRecord("${topic}_failed", paymentOrAbortRequestDTO.orderID)
                 )
             } // if the result == true, debezium will send "payment_request_ok"
         }

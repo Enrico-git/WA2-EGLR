@@ -45,9 +45,7 @@ class RouterConfiguration(
                 GET("/{walletID}/transactions/{transactionID}", walletHandler::getTransaction)
 
                 //These mocks simulate 'creteTransaction' in kafka done by order-service.
-                //use them in mutual exclusion or provide different path
-                GET("/", walletHandler::mockPaymentRequest)
-                //GET("/", walletHandler::mockAbortPaymentRequest)
+                GET("/", walletHandler::mockPaymentOrAbortRequest)
             }
         }
         /**

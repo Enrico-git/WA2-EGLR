@@ -11,7 +11,8 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.kafka.annotation.EnableKafka
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory
-import org.springframework.kafka.core.*
+import org.springframework.kafka.core.ConsumerFactory
+import org.springframework.kafka.core.DefaultKafkaConsumerFactory
 import org.springframework.kafka.support.serializer.JsonDeserializer
 import org.springframework.kafka.support.serializer.JsonSerializer
 
@@ -22,8 +23,6 @@ class KafkaConfiguration {
 
     @Value("\${spring.kafka.bootstrap-servers}")
     val bootstrapServers: String = ""
-
-    // SAGA1: payment_request (new_order)
 
     /**
      * Consumer will read from "payment_request" partition: {orderID, amount, jwt}
@@ -39,7 +38,7 @@ class KafkaConfiguration {
         )
     }
 
-    @Bean
+    @Bean //consumer: "topic + DTO"
     fun paymentRequestContainerFactory(): ConcurrentKafkaListenerContainerFactory<String, KafkaPaymentRequestDTO>{
         val factory = ConcurrentKafkaListenerContainerFactory<String, KafkaPaymentRequestDTO>()
         factory.consumerFactory = paymentRequestConsumerFactory()
@@ -56,7 +55,7 @@ class KafkaConfiguration {
         return DefaultKafkaConsumerFactory(configProps, StringDeserializer(), StringDeserializer())
     }
 
-    @Bean
+    @Bean //consumer: "topic + orderID"
     fun mockPaymentRequestOkContainerFactory(): ConcurrentKafkaListenerContainerFactory<String, String>{
         val factory = ConcurrentKafkaListenerContainerFactory<String, String>()
         factory.consumerFactory = mockPaymentRequestOkConsumerFactory()
@@ -64,12 +63,14 @@ class KafkaConfiguration {
     }
 
     /**
-     * Producer will put message {orderID} in "payment_request_failed" in case of error.
-     * If the payment is fine, the insert in transactionRepository will trigger
-     * debezium that will emit message in "payment_request_ok" partition.
+     * Producer will put message {orderID} in "payment_request_failed" or "abort_request_failed"
+     * in case of error.
+     * If the payment (or refund) is fine, the insert in transactionRepository will trigger
+     * debezium that will emit message in the "payment_request_ok" (abort_payment_request_ok)
+     * partition.
      */
-    @Bean
-    fun producerMockPaymentRequest(): KafkaProducer<String, KafkaPaymentRequestDTO> { // payment_request_failed
+    @Bean // (abort_)payment_request_failed
+    fun producerMockPaymentRequest(): KafkaProducer<String, KafkaPaymentRequestDTO> {
         val configProps = mutableMapOf<String, Any>()
         configProps[ProducerConfig.BOOTSTRAP_SERVERS_CONFIG] = bootstrapServers
         configProps[ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG] = StringSerializer::class.java
@@ -78,8 +79,8 @@ class KafkaConfiguration {
         return KafkaProducer(configProps)
     }
 
-    @Bean
-    fun producerPaymentRequestFailed(): KafkaProducer<String, String> { // payment_request_failed
+    @Bean // (abort_)payment_request_failed
+    fun producerPaymentRequestFailed(): KafkaProducer<String, String> {
         val configProps = mutableMapOf<String, Any>()
         configProps[ProducerConfig.BOOTSTRAP_SERVERS_CONFIG] = bootstrapServers
         configProps[ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG] = StringSerializer::class.java
@@ -87,7 +88,4 @@ class KafkaConfiguration {
         configProps[ProducerConfig.CLIENT_ID_CONFIG] = "wallet_service_payment_req_failed_producer"
         return KafkaProducer(configProps)
     }
-
-    //TODO SAGA2: abort_payment_request (delete_order)
-
 }

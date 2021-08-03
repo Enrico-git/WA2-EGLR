@@ -9,7 +9,7 @@ sudo docker cp debezium-scripting-1.7.0.Alpha1.jar kafka_connect:/kafka/connect/
 # This links debezium with kafka
 # *Reminder* Debezium is just a trigger: it observes the table and when an event occur it performs an action.
 curl -i -X POST -H "Accept:application/json" -H "Content-Type:application/json" localhost:8083/connectors/ -d "$(cat connector.json )"
-#curl -i -X POST -H "Accept:application/json" -H "Content-Type:application/json" localhost:8083/connectors/ -d "$(cat connectorWallet.json )"
+curl -i -X POST -H "Accept:application/json" -H "Content-Type:application/json" localhost:8083/connectors/ -d "$(cat connectorWallet.json )"
 
 #If something wrong in debezium configuration (connectors.json), you need to perform the delete
 #curl -i -X DELETE -H "Accept:application/json" -H "Content-Type:application/json" localhost:8083/connectors/

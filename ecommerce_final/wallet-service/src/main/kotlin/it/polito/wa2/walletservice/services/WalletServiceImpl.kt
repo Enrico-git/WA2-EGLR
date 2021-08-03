@@ -31,7 +31,6 @@ class WalletServiceImpl(
     private val transactionRepository: TransactionRepository,
     private val jwtUtils: JwtUtils,
     private val mockKafkaPaymentReqProducer: KafkaProducer<String, KafkaPaymentRequestDTO>,
-    private val kafkaPaymentRequestFailedProducer: KafkaProducer<String, String>
 ) : WalletService {
 
     @Value("\${spring.kafka.retryDelay}")
@@ -62,15 +61,13 @@ class WalletServiceImpl(
 //            throw UnauthorizedException("Forbidden: The user is not the owner of the wallet")
 
         transactionDTO.walletID = walletID
-        transactionDTO.timestamp = Timestamp(System.currentTimeMillis()) //TODO Why faking two hours ago?
+        transactionDTO.timestamp = Timestamp(System.currentTimeMillis())
         transactionDTO.description = TransactionDescription.RECHARGE.toString()
 
         wallet.balance += transactionDTO.amount
         walletRepository.save(wallet)
 
         return transactionRepository.save(transactionDTO.toEntity()).toDTO()
-        // I'm not inserting the new transaction in wallet since i assume,
-        // they use specific end-point for retrieve transactions
     }
 
     override suspend fun getAllTransactions(walletID: String, from: Long?,
@@ -90,7 +87,6 @@ class WalletServiceImpl(
 
         // both 'from' and 'to' not present. (no window)
         return transactionRepository.findAllByWalletID(walletIdObjectId, pageable).map{it.toDTO()}
-        // TODO in my pc timestamp printed here and in WSL2 are different of 2h. In mongodb are also 2h ago.
     }
 
     override suspend fun getTransaction(walletID: String, transactionID: String): TransactionDTO {
@@ -101,18 +97,18 @@ class WalletServiceImpl(
     }
 
     /**
-     * this is catch from kafka lister of "request_payment" and returns "request_payment_failed" or
-     * by means of the insert in the collections "request_payment_ok"
+     * this method starts when kafka lister of "request_payment" receive a new message
+     * and returns "request_payment_failed" or "request_payment_ok" (debezium)
      */
-    override suspend fun createPaymentTransaction(paymentRequestDTO: KafkaPaymentRequestDTO): Boolean? {
-        // Avoid to process order already canceled by Order-Service
+    override suspend fun createPaymentOrRefundTransaction(topic: String, paymentRequestDTO: KafkaPaymentRequestDTO): Boolean? {
+//         Avoid to process order already canceled by Order-Service
         if( Timestamp(paymentRequestDTO.timestamp.time + retryDelay) < Timestamp(System.currentTimeMillis()))
             return null
 
-        // Checks that this request has not been served yet.
-        // (Orders try 5 times, and maybe Wallet served it and then crashed)
-        // in case of "request_failed" we don't have this information in DB
-        // but order-service will handle it.
+//         Checks that this request has not been served yet.
+//         (Orders try 5 times, and maybe Wallet served it and then crashed)
+//         in case of "request_failed" we don't have this information in DB
+//         but order-service will handle it.
         val orderIDObj: ObjectId?
         try{
             orderIDObj = ObjectId(paymentRequestDTO.orderID)
@@ -125,7 +121,7 @@ class WalletServiceImpl(
         if(targetTransaction != null)
             return null
 
-        // Security Checks
+//         Security Checks
         val userDetailsDTO = jwtUtils.getDetailsFromJwtToken(paymentRequestDTO.token)
 //        if (userDetailsDTO.id == null){
 //            return false
@@ -140,8 +136,8 @@ class WalletServiceImpl(
             return false
         }
 
-        // UserID and Wallet checks
-        //TODO The catalog has to check that the userID in JWT exists!
+//         UserID and Wallet checks
+//        TODO The catalog has to check that the userID in JWT exists!
         val userIDObj: ObjectId?
         try{
             userIDObj = ObjectId("60f66fd598f6d22dc03092d4")
@@ -153,48 +149,62 @@ class WalletServiceImpl(
 
         val wallet = walletRepository.findByUserID(userIDObj) ?: return false
 
+        val description =
+            when (topic){
+                "payment_request" -> {
+                    if ( (wallet.balance - paymentRequestDTO.amount) < BigDecimal(0) ) {
+                        return false
+                    }
+
+                    wallet.balance -= paymentRequestDTO.amount
+
+                    TransactionDescription.PAYMENT
+                }
+                "abort_payment_request" -> {
+                    wallet.balance += paymentRequestDTO.amount
+                    TransactionDescription.REFUND
+                }
+                else -> return false
+            }
+
+        walletRepository.save(wallet)
+
         val transactionDTO = TransactionDTO(
             id = null,
             timestamp = Timestamp(System.currentTimeMillis()),
             walletID = wallet.id!!.toHexString(),
             amount = paymentRequestDTO.amount,
-            description = TransactionDescription.PAYMENT.toString(),
+            description = description.toString(),
             orderID = paymentRequestDTO.orderID
         )
 
-        if ( (wallet.balance - paymentRequestDTO.amount) < BigDecimal(0) ) {
-            return false
-        }
-
-        wallet.balance -= paymentRequestDTO.amount
-        walletRepository.save(wallet)
-
-        //This will trigger debezium that signals "payment_request_ok"
+//        This will trigger debezium that signals "payment_request_ok" or "abort_payment_request_ok"
         println(transactionRepository.save(transactionDTO.toEntity()))
         return true
     }
 
     /**
-     * This method is to simulate what order-service will sent by means of kafka
+     * This method simulates what order-service will sent by means of kafka "payment_request" -> new_order
+     * and simulates what order-service will sent by means of kafka "abort_payment_request" -> delete_order
      */
-    override suspend fun mockPaymentRequest(): String {
+    override suspend fun mockPaymentOrAbortRequest(): String {
         val auth = ReactiveSecurityContextHolder.getContext().awaitFirst().authentication //JWT from Catalog
         val token = auth.credentials as String
 
-        val mockPaymentRequestDTO = KafkaPaymentRequestDTO(
+        val mockPaymentOrAbortRequestDTO = KafkaPaymentRequestDTO(
             orderID = ObjectId().toHexString(),
             amount = BigDecimal(Math.random()*10%20),
             token = token,
             timestamp = Timestamp(System.currentTimeMillis())
         )
 
-        println("MOCK: $mockPaymentRequestDTO")
+        println("MOCK: $mockPaymentOrAbortRequestDTO")
 
-        mockKafkaPaymentReqProducer.send(ProducerRecord("payment_request", mockPaymentRequestDTO))
-        return "OK"
-    }
-
-    override suspend fun mockAbortPaymentRequest(): String {
+//        Use them in mutual exclusion:
+//         or PAYMENT
+//        mockKafkaPaymentReqProducer.send(ProducerRecord("payment_request", mockPaymentOrAbortRequestDTO))
+//         or REFUND
+        mockKafkaPaymentReqProducer.send(ProducerRecord("abort_payment_request", mockPaymentOrAbortRequestDTO))
         return "OK"
     }
 }
