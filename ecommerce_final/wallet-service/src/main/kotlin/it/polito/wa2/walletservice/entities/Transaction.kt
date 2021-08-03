@@ -21,8 +21,6 @@ data class Transaction (
     var amount: BigDecimal = BigDecimal(0.0),
     val description: TransactionDescription,
     val orderID: ObjectId, //also recharge reference
-    //@Version
-    //val version: Long = 0 //TODO Where do i need lock? performTransaction?
 )
 
 fun Transaction.toDTO() = TransactionDTO(

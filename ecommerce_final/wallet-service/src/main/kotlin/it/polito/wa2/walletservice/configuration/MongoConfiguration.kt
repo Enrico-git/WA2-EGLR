@@ -17,6 +17,7 @@ import org.springframework.data.mongodb.core.convert.MongoCustomConversions
 import org.springframework.data.mongodb.repository.config.EnableReactiveMongoRepositories
 import org.springframework.stereotype.Component
 import org.springframework.transaction.ReactiveTransactionManager
+import org.springframework.transaction.annotation.EnableTransactionManagement
 import org.springframework.transaction.reactive.TransactionalOperator
 import java.sql.Timestamp
 import java.util.*
@@ -28,6 +29,7 @@ import java.util.*
 @Configuration
 @Component
 @EnableReactiveMongoRepositories(value = ["it.polito.wa2.walletservice.repositories"])
+@EnableTransactionManagement
 class MongoConfiguration : AbstractReactiveMongoConfiguration() {
     @Bean
     fun mongoClient(): MongoClient {
