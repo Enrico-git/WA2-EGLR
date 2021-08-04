@@ -46,12 +46,15 @@ curl -i -v -H "Authorization: Bearer eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJyb2
   -d '{"amount": 150, "orderID": "60f66fd598f6d22dc0301234"}' \
  "172.20.208.1:8100/wallets/610a7a7315a05f3ac4875552/transactions"
 
+ #enable at in WSL2
+ sudo service atd start
+
  #Test many concurrent requests (@Version)
  echo "curl -i -v -X POST  \
   -H \"Authorization: Bearer eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJyb2xlcyI6IkFETUlOIiwic3ViIjoiNjBmNjZmZDU5OGY2ZDIyZGMwMzA5MmQ0IiwiaWF0IjoxNTE2MjM5MDIyLCJleHAiOjE4MTYyMzkwMjJ9.T9yAM3lJa0i7vYl1THWUH0_Xp7bbNt-FhqoV1Nx1M9aoGH_hlAPI2FOTKoH-MzA_BWfcLfA8JUdr0Xe_ftscvg\" \
   -H \"Content-Type: application/json\" \
   -d '{\"amount\": 150, \"orderID\": \"60f66fd598f6d22dc0301234\"}' \
- \"172.20.208.1:8100/wallets/610a7a7315a05f3ac4875552/transactions\"" | at 12.37
+ \"172.20.208.1:8100/wallets/610a7a7315a05f3ac4875552/transactions\"" | at 15:39
 
 ################################################################################
 ## GET /wallets/{walletID}/transactions -> get all transactions (pageable)

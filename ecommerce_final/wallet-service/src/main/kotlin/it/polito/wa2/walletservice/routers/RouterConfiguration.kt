@@ -6,6 +6,7 @@ import it.polito.wa2.walletservice.exceptions.UnauthorizedException
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.dao.OptimisticLockingFailureException
+import org.springframework.data.mongodb.UncategorizedMongoDbException
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.web.reactive.function.server.bodyValueAndAwait
@@ -77,7 +78,8 @@ class RouterConfiguration(
         onError<NotFoundException> { e, _ ->  status(HttpStatus.NOT_FOUND).bodyValueAndAwait(e.localizedMessage)}
         onError<ValidationException> { e, _ ->  status(HttpStatus.UNPROCESSABLE_ENTITY).bodyValueAndAwait(e.localizedMessage)}
         onError<IllegalArgumentException> {e, _ ->  status(HttpStatus.BAD_REQUEST).bodyValueAndAwait(e.localizedMessage)}
-        onError<OptimisticLockingFailureException> { e, _ ->  status(HttpStatus.INTERNAL_SERVER_ERROR).bodyValueAndAwait(e.localizedMessage)}
+        onError<OptimisticLockingFailureException> { e, _ ->  status(HttpStatus.CONFLICT).bodyValueAndAwait(e.localizedMessage)}
+        onError<UncategorizedMongoDbException>{e, _ -> status(HttpStatus.CONFLICT).bodyValueAndAwait(e.localizedMessage) }
         onError<InvalidOperationException> { e, _ ->  status(HttpStatus.CONFLICT).bodyValueAndAwait(e.localizedMessage)}
         onError<UnauthorizedException> { e, _ ->  status(HttpStatus.UNAUTHORIZED).bodyValueAndAwait(e.localizedMessage)}
         onError<Exception> {e, _ ->  status(HttpStatus.BAD_REQUEST).bodyValueAndAwait(e.localizedMessage)}

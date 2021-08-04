@@ -126,7 +126,7 @@ class WalletServiceImpl(
 
 //         Security Checks
         val userDetailsDTO = jwtUtils.getDetailsFromJwtToken(paymentRequestDTO.token)
-        //Please notice that userDatailsDTO.id is always != null
+        //Please notice that userDetailsDTO.id is always != null
 
         if ((userDetailsDTO.roles?.contains("CUSTOMER") != true) &&
             (userDetailsDTO.roles?.contains("ADMIN") != true) ) {

@@ -3,8 +3,10 @@ package it.polito.wa2.walletservice.routers
 import it.polito.wa2.walletservice.dto.TransactionDTO
 import it.polito.wa2.walletservice.dto.WalletDTO
 import it.polito.wa2.walletservice.services.WalletService
+import kotlinx.coroutines.delay
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
+import org.springframework.data.mongodb.UncategorizedMongoDbException
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.server.*
@@ -44,10 +46,19 @@ class WalletHandler(
     suspend fun createRechargeTransaction(request: ServerRequest): ServerResponse{
         val walletID = request.pathVariable("walletID")
         val transactionDTO = request.awaitBody(TransactionDTO::class)
-        return ServerResponse
-            .ok()
-            .json()
-            .bodyValueAndAwait(walletService.createRechargeTransaction(walletID, transactionDTO))
+
+        var counter = 5
+        while (counter-- > 0) {
+            try {
+                return ServerResponse
+                    .ok()
+                    .json()
+                    .bodyValueAndAwait(walletService.createRechargeTransaction(walletID, transactionDTO))
+            } catch (e: UncategorizedMongoDbException) {
+                    delay(1000)
+                }
+        }
+        throw UncategorizedMongoDbException("Error with concurrent write requests", Throwable())
     }
 
     suspend fun getAllTransactions(request: ServerRequest): ServerResponse{
