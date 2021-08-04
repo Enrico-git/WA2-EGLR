@@ -30,6 +30,7 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.context.annotation.Lazy
 import org.springframework.context.event.ContextRefreshedEvent
+import org.springframework.data.mongodb.UncategorizedMongoDbException
 import org.springframework.stereotype.Component
 import java.lang.IllegalArgumentException
 import java.sql.Timestamp
@@ -105,8 +106,7 @@ class OrchestratorActionsImpl(
     override fun onKafkaReceivedEvent(event: String, topic: String) = CoroutineScope(Dispatchers.Default).launch {
         val sagas = getListOfStateMachine()
         val sagaEvent = StateMachineEvents.valueOf(topic.uppercase())
-        val sagaID = event
-        val saga = sagas[sagaID]
+        val saga = sagas[event]
         println(saga)
         val transition = saga?.transitions?.find{it.source == saga.state && it.event == sagaEvent}
         println("${saga?.id} --- ${saga?.state} --- $sagaEvent ---- trans: $transition")
@@ -148,17 +148,23 @@ class OrchestratorActionsImpl(
                 StateMachineEvents.RESERVE_PRODUCTS
             )
         )
-        CoroutineScope(Dispatchers.IO).launch {
+        CoroutineScope(Dispatchers.IO).launch Job@{
             val order = orderRepository.findById(ObjectId(sm.id))!!
 //                    TODO hardcoded warehouse response NEED FIX
 //            TODO PUT NEXT 2 LINES IN KAFKA LISTENER
             order.delivery.productsWarehouseLocation = setOf(ProductLocation("boh", "wh1", 2))
             sm.productsWarehouseLocation = setOf(ProductLocation("boh", "wh1", 2))
-            try {
-                orderRepository.save(order)
-            } catch (e: Exception) {
-                logger.severe("Could not add products location of order ${sm.id}")
-            }
+            var counter = 5
+            while (counter-- > 0)
+                try {
+                    orderRepository.save(order)
+                    return@Job
+                } catch (e: UncategorizedMongoDbException) {
+                    delay(1000)
+                } catch (e: Exception) {
+                    logger.severe("Could not add products location of order ${sm.id}")
+                }
+            logger.severe("Could not add products location of order ${sm.id} due to Optimistic Locking Failure")
         }
         sm.nextStateAndFireEvent(StateMachineEvents.PAYMENT_REQUEST)
     }
