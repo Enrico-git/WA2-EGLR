@@ -1,20 +1,12 @@
 package it.polito.wa2.catalogservice.controllers
 
 import it.polito.wa2.catalogservice.dto.CommentDTO
-import it.polito.wa2.catalogservice.dto.ProductDTO
 import it.polito.wa2.catalogservice.services.CommentService
 import org.springframework.http.HttpHeaders
-import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
-import org.springframework.security.access.prepost.PreAuthorize
-import org.springframework.security.core.context.ReactiveSecurityContextHolder
 import org.springframework.web.bind.annotation.*
-import org.springframework.web.reactive.function.client.ClientResponse
 import org.springframework.web.reactive.function.client.WebClient
-import reactor.core.publisher.Mono
-import java.nio.charset.StandardCharsets
-import java.time.ZonedDateTime
 import java.util.*
 
 @RestController

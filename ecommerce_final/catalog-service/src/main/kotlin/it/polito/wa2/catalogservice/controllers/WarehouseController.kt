@@ -1,210 +1,57 @@
 package it.polito.wa2.catalogservice.controllers
 
 import it.polito.wa2.catalogservice.dto.WarehouseDTO
+import it.polito.wa2.catalogservice.services.WarehouseService
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.reactive.asFlow
-import org.springframework.http.HttpHeaders
-import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
-import org.springframework.http.MediaType
-import org.springframework.security.access.prepost.PreAuthorize
-import org.springframework.security.core.context.ReactiveSecurityContextHolder
 import org.springframework.web.bind.annotation.*
-import org.springframework.web.reactive.function.client.*
-import reactor.core.publisher.Mono
-import java.nio.charset.StandardCharsets
-import java.time.ZonedDateTime
-import java.util.*
 
 @RestController
 @RequestMapping("/warehouses")
-class WarehouseController {
-    val serviceURL = "http://localhost:8200"
-    //Create a WebClient instance
-    //building a client by using the DefaultWebClientBuilder class, which allows full customization
-    val client: WebClient = WebClient.builder()
-        .baseUrl(serviceURL)
-        .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_NDJSON_VALUE)
-        .defaultUriVariables(Collections.singletonMap("url", serviceURL))
-        .build()
-
+class WarehouseController(
+    private val warehouseService: WarehouseService
+) {
     //RETRIEVE THE LIST OF WAREHOUSES
     @GetMapping("")
     @ResponseStatus(HttpStatus.OK)
-    @PreAuthorize("hasAuthority(\"ADMIN\") or hasAuthority(\"CUSTOMER\")")
     suspend fun getWarehouses(): Flow<WarehouseDTO> {
-
-        return ReactiveSecurityContextHolder.getContext().flatMapMany {
-            val token = it.authentication.credentials as String
-            return@flatMapMany client.get().uri("$serviceURL/warehouses").accept(MediaType.APPLICATION_NDJSON)
-                .header(HttpHeaders.AUTHORIZATION, "Bearer $token")
-                .retrieve()
-                .bodyToFlux<WarehouseDTO>()
-        }.asFlow()
+        return warehouseService.getWarehouses()
     }
 
     //RETRIEVE INFO ABOUT A WAREHOUSE GIVEN ITS ID
     @GetMapping("/{warehouseID}")
     @ResponseStatus(HttpStatus.OK)
-    @PreAuthorize("hasAuthority(\"ADMIN\") or hasAuthority(\"CUSTOMER\")")
-    suspend fun getWarehouse(@PathVariable warehouseID: String): Mono<WarehouseDTO> {
-        //specify an HTTP method of a request by invoking method(HttpMethod method)
-        val uriSpec: WebClient.UriSpec<WebClient.RequestBodySpec> = client.method(HttpMethod.GET)
-
-        //Preparing the request: define the URL
-        var bodySpec: WebClient.RequestBodySpec = uriSpec.uri("/warehouses/$warehouseID")
-
-        //Preparing a Request: define the Body
-        //in this case there is no body in the Request
-        var headersSpec: WebClient.RequestHeadersSpec<*> = bodySpec.bodyValue("")
-
-        //Preparing a Request: define the Headers
-        val responseSpec: WebClient.ResponseSpec = headersSpec.header(
-            HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_NDJSON_VALUE
-        )
-            .accept(MediaType.APPLICATION_NDJSON)
-            .acceptCharset(StandardCharsets.UTF_8)
-            .ifNoneMatch("*")
-            .ifModifiedSince(ZonedDateTime.now())
-            //.header(HttpHeaders.AUTHORIZATION, "Bearer $token")
-            .retrieve()
-
-        //Get a response
-        return headersSpec.exchangeToMono { response: ClientResponse ->
-            return@exchangeToMono response.bodyToMono(WarehouseDTO::class.java)
-        }
+    suspend fun getWarehouse(@PathVariable warehouseID: String): WarehouseDTO {
+        return warehouseService.getWarehouse(warehouseID)
     }
 
     //DELETE A WAREHOUSE GIVEN ITS ID, IF POSSIBLE
     @DeleteMapping("/{warehouseID}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    @PreAuthorize("hasAuthority(\"ADMIN\")")
     suspend fun deleteWarehouse(@PathVariable warehouseID: String) {
-        //TODO see if it works
-        ReactiveSecurityContextHolder.getContext().map {
-            val token = it.authentication.credentials as String
-            return@map client.delete().uri("$serviceURL/warehouses/$warehouseID")
-                .accept(MediaType.APPLICATION_NDJSON)
-                .header(HttpHeaders.AUTHORIZATION, "Bearer $token")
-                .retrieve()
-        }
-        /*
-        //specify an HTTP method of a request by invoking method(HttpMethod method)
-        val uriSpec: WebClient.UriSpec<WebClient.RequestBodySpec> = client.method(HttpMethod.DELETE)
-
-        //Preparing the request: define the URL
-        var bodySpec: WebClient.RequestBodySpec = uriSpec.uri("/warehouses/$warehouseID")
-
-        //Preparing a Request: define the Body
-        //in this case there is no body in the Request
-        var headersSpec: WebClient.RequestHeadersSpec<*> = bodySpec.bodyValue("")
-
-        //Preparing a Request: define the Headers
-        val responseSpec: WebClient.ResponseSpec = headersSpec.header(
-            HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_NDJSON_VALUE
-        )
-            .accept(MediaType.APPLICATION_NDJSON)
-            .acceptCharset(StandardCharsets.UTF_8)
-            .ifNoneMatch("*")
-            .ifModifiedSince(ZonedDateTime.now())
-            //.header(HttpHeaders.AUTHORIZATION, "Bearer $token")
-            .retrieve()
-
-        //Get a response
-        headersSpec.retrieve()
-         */
+        return warehouseService.deleteWarehouse(warehouseID)
     }
 
     //CREATE A NEW WAREHOUSE WITH A LIST OF PRODUCTS
     @PostMapping("")
     @ResponseStatus(HttpStatus.CREATED)
-    @PreAuthorize("hasAuthority(\"ADMIN\")")
-    suspend fun newWarehouse(@RequestBody warehouseDTO: WarehouseDTO): Mono<WarehouseDTO> {
-        //specify an HTTP method of a request by invoking method(HttpMethod method)
-        val uriSpec: WebClient.UriSpec<WebClient.RequestBodySpec> = client.method(HttpMethod.POST)
-
-        //Preparing the request: define the URL
-        var bodySpec: WebClient.RequestBodySpec = uriSpec.uri("/warehouses")
-
-        //Preparing a Request: define the Body
-        var headersSpec: WebClient.RequestHeadersSpec<*> = bodySpec.bodyValue(warehouseDTO)
-
-        //Preparing a Request: define the Headers
-        val responseSpec: WebClient.ResponseSpec = headersSpec.header(
-            HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_NDJSON_VALUE
-        )
-            .accept(MediaType.APPLICATION_NDJSON)
-            .acceptCharset(StandardCharsets.UTF_8)
-            .ifNoneMatch("*")
-            .ifModifiedSince(ZonedDateTime.now())
-            //.header(HttpHeaders.AUTHORIZATION, "Bearer $token")
-            .retrieve()
-
-        //Get a response
-        return headersSpec.exchangeToMono { response: ClientResponse ->
-            return@exchangeToMono response.bodyToMono(WarehouseDTO::class.java)
-        }
+    suspend fun newWarehouse(@RequestBody warehouseDTO: WarehouseDTO): WarehouseDTO {
+        return warehouseService.newWarehouse(warehouseDTO)
     }
 
     //PARTIALLY UPDATE A WAREHOUSE GIVEN ITS ID
     @PatchMapping("/{warehouseID}")
     @ResponseStatus(HttpStatus.CREATED)
-    @PreAuthorize("hasAuthority(\"ADMIN\")")
-    suspend fun patchWarehouse(@PathVariable warehouseID: String, @RequestBody warehouseDTO: WarehouseDTO): Mono<WarehouseDTO> {
-        //specify an HTTP method of a request by invoking method(HttpMethod method)
-        val uriSpec: WebClient.UriSpec<WebClient.RequestBodySpec> = client.method(HttpMethod.PATCH)
-
-        //Preparing the request: define the URL
-        var bodySpec: WebClient.RequestBodySpec = uriSpec.uri("/warehouses/$warehouseID")
-
-        //Preparing a Request: define the Body
-        var headersSpec: WebClient.RequestHeadersSpec<*> = bodySpec.bodyValue(warehouseDTO)
-
-        //Preparing a Request: define the Headers
-        val responseSpec: WebClient.ResponseSpec = headersSpec.header(
-            HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_NDJSON_VALUE
-        )
-            .accept(MediaType.APPLICATION_NDJSON)
-            .acceptCharset(StandardCharsets.UTF_8)
-            .ifNoneMatch("*")
-            .ifModifiedSince(ZonedDateTime.now())
-            //.header(HttpHeaders.AUTHORIZATION, "Bearer $token")
-            .retrieve()
-
-        //Get a response
-        return headersSpec.exchangeToMono { response: ClientResponse ->
-            return@exchangeToMono response.bodyToMono(WarehouseDTO::class.java)
-        }
+    suspend fun patchWarehouse(@PathVariable warehouseID: String,
+                               @RequestBody warehouseDTO: WarehouseDTO): WarehouseDTO {
+        return warehouseService.patchWarehouse(warehouseID,warehouseDTO)
     }
 
     //UPDATE A WAREHOUSE GIVEN ITS ID, OR ADD A NEW ONE IF THE ID DOES NOT EXIST
     @PutMapping("/{warehouseID}")
     @ResponseStatus(HttpStatus.CREATED)
-    @PreAuthorize("hasAuthority(\"ADMIN\")")
-    suspend fun updateWarehouse(@PathVariable warehouseID: String, @RequestBody warehouseDTO: WarehouseDTO): Mono<WarehouseDTO> {
-        //specify an HTTP method of a request by invoking method(HttpMethod method)
-        val uriSpec: WebClient.UriSpec<WebClient.RequestBodySpec> = client.method(HttpMethod.PUT)
-
-        //Preparing the request: define the URL
-        var bodySpec: WebClient.RequestBodySpec = uriSpec.uri("/warehouses/$warehouseID")
-
-        //Preparing a Request: define the Body
-        var headersSpec: WebClient.RequestHeadersSpec<*> = bodySpec.bodyValue(warehouseDTO)
-
-        //Preparing a Request: define the Headers
-        val responseSpec: WebClient.ResponseSpec = headersSpec.header(
-            HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_NDJSON_VALUE
-        )
-            .accept(MediaType.APPLICATION_NDJSON)
-            .acceptCharset(StandardCharsets.UTF_8)
-            .ifNoneMatch("*")
-            .ifModifiedSince(ZonedDateTime.now())
-            //.header(HttpHeaders.AUTHORIZATION, "Bearer $token")
-            .retrieve()
-
-        //Get a response
-        return headersSpec.exchangeToMono { response: ClientResponse ->
-            return@exchangeToMono response.bodyToMono(WarehouseDTO::class.java)
-        }
+    suspend fun updateWarehouse(@PathVariable warehouseID: String,
+                                @RequestBody warehouseDTO: WarehouseDTO): WarehouseDTO {
+        return warehouseService.updateWarehouse(warehouseID,warehouseDTO)
     }
 }

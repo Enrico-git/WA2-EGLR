@@ -6,20 +6,11 @@ import it.polito.wa2.catalogservice.dto.ProductDTO
 import it.polito.wa2.catalogservice.dto.WarehouseDTO
 import it.polito.wa2.catalogservice.services.ProductService
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.reactive.asFlow
 import org.springframework.data.domain.Pageable
-import org.springframework.http.HttpHeaders
-import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.security.access.prepost.PreAuthorize
-import org.springframework.security.core.context.ReactiveSecurityContextHolder
 import org.springframework.web.bind.annotation.*
-import org.springframework.web.reactive.function.client.*
-import reactor.core.publisher.Mono
-import java.nio.charset.StandardCharsets
-import java.time.ZonedDateTime
-import java.util.*
 
 @RestController
 @RequestMapping("/products")
