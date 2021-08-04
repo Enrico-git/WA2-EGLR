@@ -88,7 +88,6 @@ class OrderServiceImpl(
             .onStatus(Predicate { it == HttpStatus.INTERNAL_SERVER_ERROR }) { throw RuntimeException("Something went wrong") }
             .onStatus(Predicate { it == HttpStatus.BAD_REQUEST }) { throw RuntimeException("The order does not exist") }
             .awaitBodilessEntity()
-        return
     }
 
     override suspend fun updateOrder(orderID: ObjectId, orderDTO: OrderDTO): OrderDTO {

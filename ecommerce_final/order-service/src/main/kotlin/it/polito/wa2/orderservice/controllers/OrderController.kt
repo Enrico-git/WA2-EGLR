@@ -63,7 +63,6 @@ class OrderController(
      @DeleteMapping("/{orderID}")
      @ResponseStatus(HttpStatus.NO_CONTENT)
      suspend fun deleteOrderByID(@PathVariable orderID: ObjectId, @RequestBody orderDTO: OrderDTO) {
-        println (orderDTO)
         var counter = 5
         while (counter-- > 0){
             try {
