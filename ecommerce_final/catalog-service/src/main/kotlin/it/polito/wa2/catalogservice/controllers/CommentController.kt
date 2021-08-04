@@ -2,6 +2,7 @@ package it.polito.wa2.catalogservice.controllers
 
 import it.polito.wa2.catalogservice.dto.CommentDTO
 import it.polito.wa2.catalogservice.dto.ProductDTO
+import it.polito.wa2.catalogservice.services.CommentService
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
@@ -18,7 +19,9 @@ import java.util.*
 
 @RestController
 @RequestMapping("/comments")
-class CommentController {
+class CommentController(
+    private val commentService: CommentService
+) {
     val serviceURL = "http://localhost:8200"
     //Create a WebClient instance
     //building a client by using the DefaultWebClientBuilder class, which allows full customization
@@ -31,135 +34,31 @@ class CommentController {
     //RETRIEVE INFO ABOUT A COMMENT GIVEN ITS ID
     @GetMapping("/{commentID}")
     @ResponseStatus(HttpStatus.OK)
-    @PreAuthorize("hasAuthority(\"ADMIN\") or hasAuthority(\"CUSTOMER\")")
-    suspend fun getComment(@PathVariable commentID: String): Mono<CommentDTO> {
-        //specify an HTTP method of a request by invoking method(HttpMethod method)
-        val uriSpec: WebClient.UriSpec<WebClient.RequestBodySpec> = client.method(HttpMethod.GET)
-
-        //Preparing the request: define the URL
-        var bodySpec: WebClient.RequestBodySpec = uriSpec.uri("/comments/$commentID")
-
-        //Preparing a Request: define the Body
-        //in this case there is no body in the Request
-        var headersSpec: WebClient.RequestHeadersSpec<*> = bodySpec.bodyValue("")
-
-        //Preparing a Request: define the Headers
-        val responseSpec: WebClient.ResponseSpec = headersSpec.header(
-            HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_NDJSON_VALUE
-        )
-            .accept(MediaType.APPLICATION_NDJSON)
-            .acceptCharset(StandardCharsets.UTF_8)
-            .ifNoneMatch("*")
-            .ifModifiedSince(ZonedDateTime.now())
-            //.header(HttpHeaders.AUTHORIZATION, "Bearer $token")
-            .retrieve()
-
-        //Get a response
-        return headersSpec.exchangeToMono { response: ClientResponse ->
-            return@exchangeToMono response.bodyToMono(CommentDTO::class.java)
-        }
+    suspend fun getComment(@PathVariable commentID: String): CommentDTO {
+        return commentService.getComment(commentID)
     }
 
     //CREATE A NEW COMMENT TO A PRODUCT
     @PostMapping("/{productID}")
     @ResponseStatus(HttpStatus.CREATED)
-    @PreAuthorize("hasAuthority(\"ADMIN\") or hasAuthority(\"CUSTOMER\")")
-    suspend fun addComment(@PathVariable productID: String, @RequestBody commentDTO: CommentDTO): Mono<CommentDTO> {
-        //specify an HTTP method of a request by invoking method(HttpMethod method)
-        val uriSpec: WebClient.UriSpec<WebClient.RequestBodySpec> = client.method(HttpMethod.POST)
-
-        //Preparing the request: define the URL
-        var bodySpec: WebClient.RequestBodySpec = uriSpec.uri("/comments")
-
-        //Preparing a Request: define the Body
-        var headersSpec: WebClient.RequestHeadersSpec<*> = bodySpec.bodyValue(commentDTO)
-
-        //Preparing a Request: define the Headers
-        val responseSpec: WebClient.ResponseSpec = headersSpec.header(
-            HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_NDJSON_VALUE
-        )
-            .accept(MediaType.APPLICATION_NDJSON)
-            .acceptCharset(StandardCharsets.UTF_8)
-            .ifNoneMatch("*")
-            .ifModifiedSince(ZonedDateTime.now())
-            //.header(HttpHeaders.AUTHORIZATION, "Bearer $token")
-            .retrieve()
-
-        //Get a response
-        return headersSpec.exchangeToMono { response: ClientResponse ->
-            return@exchangeToMono response.bodyToMono(CommentDTO::class.java)
-        }
+    suspend fun addComment(@PathVariable productID: String,
+                           @RequestBody commentDTO: CommentDTO): CommentDTO {
+        return commentService.addComment(productID,commentDTO)
     }
 
     //UPDATE A COMMENT GIVEN ITS ID AND THE PRODUCT ID
     @PutMapping("/{productID}/{commentID}")
     @ResponseStatus(HttpStatus.CREATED)
-    @PreAuthorize("hasAuthority(\"ADMIN\") or hasAuthority(\"CUSTOMER\")")
     suspend fun updateComment(@PathVariable productID: String,
                               @PathVariable commentID: String,
-                              @RequestBody commentDTO: CommentDTO): Mono<CommentDTO> {
-        //specify an HTTP method of a request by invoking method(HttpMethod method)
-        val uriSpec: WebClient.UriSpec<WebClient.RequestBodySpec> = client.method(HttpMethod.PUT)
-
-        //Preparing the request: define the URL
-        var bodySpec: WebClient.RequestBodySpec = uriSpec.uri("/comments/$productID/$commentID")
-
-        //Preparing a Request: define the Body
-        var headersSpec: WebClient.RequestHeadersSpec<*> = bodySpec.bodyValue(commentDTO)
-
-        //Preparing a Request: define the Headers
-        val responseSpec: WebClient.ResponseSpec = headersSpec.header(
-            HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_NDJSON_VALUE
-        )
-            .accept(MediaType.APPLICATION_NDJSON)
-            .acceptCharset(StandardCharsets.UTF_8)
-            .ifNoneMatch("*")
-            .ifModifiedSince(ZonedDateTime.now())
-            //.header(HttpHeaders.AUTHORIZATION, "Bearer $token")
-            .retrieve()
-
-        //Get a response
-        return headersSpec.exchangeToMono { response: ClientResponse ->
-            return@exchangeToMono response.bodyToMono(CommentDTO::class.java)
-        }
+                              @RequestBody commentDTO: CommentDTO): CommentDTO {
+        return commentService.updateComment(productID,commentID,commentDTO)
     }
 
     //DELETE A COMMENT GIVEN ITS ID AND THE PRODUCT ID
     @DeleteMapping("/{productID}/{commentID}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    @PreAuthorize("hasAuthority(\"ADMIN\") or hasAuthority(\"CUSTOMER\")")
     suspend fun deleteComment(@PathVariable productID: String, @PathVariable commentID: String) {
-        //TODO see if it works
-        ReactiveSecurityContextHolder.getContext().map {
-            val token = it.authentication.credentials as String
-            return@map client.delete().uri("$serviceURL/comments/$productID/$commentID")
-                .accept(MediaType.APPLICATION_NDJSON)
-                .header(HttpHeaders.AUTHORIZATION, "Bearer $token")
-                .retrieve()
-        }
-        /*
-        //specify an HTTP method of a request by invoking method(HttpMethod method)
-        val uriSpec: WebClient.UriSpec<WebClient.RequestBodySpec> = client.method(HttpMethod.DELETE)
-
-        //Preparing the request: define the URL
-        var bodySpec: WebClient.RequestBodySpec = uriSpec.uri("/products/$productID/$commentID")
-
-        //Preparing a Request: define the Body
-        //in this case there is no body in the Request
-        var headersSpec: WebClient.RequestHeadersSpec<*> = bodySpec.bodyValue("")
-
-        //Preparing a Request: define the Headers
-        val responseSpec: WebClient.ResponseSpec = headersSpec.header(
-            HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_NDJSON_VALUE
-        )
-            .accept(MediaType.APPLICATION_NDJSON)
-            .acceptCharset(StandardCharsets.UTF_8)
-            .ifNoneMatch("*")
-            .ifModifiedSince(ZonedDateTime.now())
-            //.header(HttpHeaders.AUTHORIZATION, "Bearer $token")
-            .retrieve()
-
-        headersSpec.retrieve()
-         */
+        return commentService.deleteComment(productID,commentID)
     }
 }
