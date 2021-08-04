@@ -50,6 +50,7 @@ class OrderController(
     //RETRIEVE AN ORDER GIVEN ITS ID
     @GetMapping("/{orderID}")
     @ResponseStatus(HttpStatus.OK)
+    @PreAuthorize("hasAuthority(\"ADMIN\") or hasAuthority(\"CUSTOMER\")")
     suspend fun getOrder(@PathVariable orderID: ObjectId): Mono<OrderDTO> {
         //specify an HTTP method of a request by invoking method(HttpMethod method)
         val uriSpec: WebClient.UriSpec<WebClient.RequestBodySpec> = client.method(HttpMethod.GET)
@@ -81,6 +82,7 @@ class OrderController(
     //CREATE A NEW ORDER
     @PostMapping("")
     @ResponseStatus(HttpStatus.CREATED)
+    @PreAuthorize("hasAuthority(\"ADMIN\") or hasAuthority(\"CUSTOMER\")")
     suspend fun newOrder(@RequestBody orderDTO: OrderDTO): Mono<OrderDTO> {
         //specify an HTTP method of a request by invoking method(HttpMethod method)
         val uriSpec: WebClient.UriSpec<WebClient.RequestBodySpec> = client.method(HttpMethod.POST)
@@ -118,6 +120,7 @@ class OrderController(
     //DELETE AN ORDER GIVEN ITS ID (IF POSSIBLE)
     @DeleteMapping("/{orderID}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
+    @PreAuthorize("hasAuthority(\"ADMIN\") or hasAuthority(\"CUSTOMER\")")
     suspend fun deleteOrder(@PathVariable orderID: ObjectId, @RequestBody orderDTO: OrderDTO): Mono<String> {
         //specify an HTTP method of a request by invoking method(HttpMethod method)
         val uriSpec: WebClient.UriSpec<WebClient.RequestBodySpec> = client.method(HttpMethod.DELETE)
@@ -149,6 +152,7 @@ class OrderController(
     //UPDATE AN ORDER GIVEN ITS ID
     @PatchMapping("/{orderID}")
     @ResponseStatus(HttpStatus.CREATED)
+    @PreAuthorize("hasAuthority(\"ADMIN\")")
     suspend fun updateOrder(@PathVariable orderID: ObjectId, @RequestBody orderDTO: OrderDTO): Mono<OrderDTO> {
         //specify an HTTP method of a request by invoking method(HttpMethod method)
         val uriSpec: WebClient.UriSpec<WebClient.RequestBodySpec> = client.method(HttpMethod.PATCH)

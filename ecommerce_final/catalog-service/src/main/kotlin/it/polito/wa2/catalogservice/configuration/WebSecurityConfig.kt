@@ -38,8 +38,7 @@ class WebSecurityConfig(
             .securityContextRepository(securityContextRepository)
             .authorizeExchange()
             .pathMatchers(HttpMethod.OPTIONS).permitAll()
-            .pathMatchers("/graphql").permitAll()
-            .pathMatchers("/graphiql").permitAll()
+            .pathMatchers("/auth/**").permitAll()
             .anyExchange().authenticated()
             .and().build()
     }

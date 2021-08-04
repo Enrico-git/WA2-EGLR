@@ -1,5 +1,6 @@
 package it.polito.wa2.catalogservice.controllers
 
+import it.polito.wa2.catalogservice.dto.CommentDTO
 import it.polito.wa2.catalogservice.dto.PictureDTO
 import it.polito.wa2.catalogservice.dto.ProductDTO
 import it.polito.wa2.catalogservice.dto.WarehouseDTO
@@ -10,6 +11,7 @@ import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
+import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.security.core.context.ReactiveSecurityContextHolder
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.reactive.function.client.*
@@ -34,6 +36,7 @@ class ProductController {
     //NO NEED OF AUTHENTICATION -> NO TOKEN
     @GetMapping("", produces = [MediaType.APPLICATION_NDJSON_VALUE])
     @ResponseStatus(HttpStatus.OK)
+    @PreAuthorize("hasAuthority(\"ADMIN\") or hasAuthority(\"CUSTOMER\")")
     suspend fun getProducts(@RequestParam category: String, pageable: Pageable): Flow<ProductDTO> {
         var queryParam: String = ""
         if(category!=null)
@@ -50,6 +53,7 @@ class ProductController {
     //NO NEED OF AUTHENTICATION -> NO TOKEN
     @GetMapping("/{productID}")
     @ResponseStatus(HttpStatus.OK)
+    @PreAuthorize("hasAuthority(\"ADMIN\") or hasAuthority(\"CUSTOMER\")")
     suspend fun getProduct(@PathVariable productID: String): Mono<ProductDTO> {
 
         //specify an HTTP method of a request by invoking method(HttpMethod method)
@@ -82,6 +86,7 @@ class ProductController {
     //NO NEED OF AUTHENTICATION -> NO TOKEN
     @GetMapping("/{productID}/picture")
     @ResponseStatus(HttpStatus.OK)
+    @PreAuthorize("hasAuthority(\"ADMIN\") or hasAuthority(\"CUSTOMER\")")
     suspend fun getProductPicture(@PathVariable productID: String): Mono<PictureDTO> {
         //specify an HTTP method of a request by invoking method(HttpMethod method)
         val uriSpec: WebClient.UriSpec<WebClient.RequestBodySpec> = client.method(HttpMethod.GET)
@@ -114,6 +119,7 @@ class ProductController {
     //NO NEED OF AUTHENTICATION -> NO TOKEN
     @GetMapping("/{productID}/warehouses")
     @ResponseStatus(HttpStatus.OK)
+    @PreAuthorize("hasAuthority(\"ADMIN\") or hasAuthority(\"CUSTOMER\")")
     suspend fun getProductWarehouses(@PathVariable productID: String): Flow<WarehouseDTO> {
 
         return ReactiveSecurityContextHolder.getContext().flatMapMany {
@@ -126,9 +132,27 @@ class ProductController {
         }.asFlow()
     }
 
+    //RETRIEVE THE LIST OF WAREHOUSES THAT CONTAIN A PRODUCT GIVEN ITS ID
+    //NO NEED OF AUTHENTICATION -> NO TOKEN
+    @GetMapping("/{productID}/comments")
+    @ResponseStatus(HttpStatus.OK)
+    @PreAuthorize("hasAuthority(\"ADMIN\") or hasAuthority(\"CUSTOMER\")")
+    suspend fun getProductComments(@PathVariable productID: String): Flow<CommentDTO> {
+
+        return ReactiveSecurityContextHolder.getContext().flatMapMany {
+            //val token = it.authentication.credentials as String
+            return@flatMapMany client.get().uri("$serviceURL/products/$productID/comments")
+                .accept(MediaType.APPLICATION_NDJSON)
+                //.header(HttpHeaders.AUTHORIZATION, "Bearer $token")
+                .retrieve()
+                .bodyToFlux<CommentDTO>()
+        }.asFlow()
+    }
+
     //DELETE A PRODUCT GIVEN ITS ID
     @DeleteMapping("/{productID}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
+    @PreAuthorize("hasAuthority(\"ADMIN\")")
     suspend fun deleteProduct(@PathVariable productID: String) {
         //TODO see if it works
         ReactiveSecurityContextHolder.getContext().map {
@@ -167,6 +191,7 @@ class ProductController {
     //UPDATE THE PICTURE OF A PRODUCT GIVEN ITS ID AND THE NEW PICTURE
     @PostMapping("/{productID}/picture")
     @ResponseStatus(HttpStatus.CREATED)
+    @PreAuthorize("hasAuthority(\"ADMIN\")")
     suspend fun updatePicture(@PathVariable productID: String, @RequestBody pictureDTO: PictureDTO): Mono<ProductDTO> {
         //specify an HTTP method of a request by invoking method(HttpMethod method)
         val uriSpec: WebClient.UriSpec<WebClient.RequestBodySpec> = client.method(HttpMethod.POST)
@@ -198,6 +223,7 @@ class ProductController {
     //PARTIALLY UPDATE A PRODUCT GIVEN ITS ID
     @PatchMapping("/{productID}")
     @ResponseStatus(HttpStatus.CREATED)
+    @PreAuthorize("hasAuthority(\"ADMIN\")")
     fun patchProduct(@PathVariable productID: String, @RequestBody productDTO: ProductDTO): Mono<ProductDTO> {
         //specify an HTTP method of a request by invoking method(HttpMethod method)
         val uriSpec: WebClient.UriSpec<WebClient.RequestBodySpec> = client.method(HttpMethod.PATCH)
@@ -228,6 +254,7 @@ class ProductController {
     //UPDATE A PRODUCT GIVEN ITS ID, OR ADD A NEW ONE IF THE ID DOES NOT EXIST
     @PutMapping("/{productID}")
     @ResponseStatus(HttpStatus.CREATED)
+    @PreAuthorize("hasAuthority(\"ADMIN\")")
     suspend fun updateProduct(@PathVariable productID: String, @RequestBody productDTO: ProductDTO): Mono<ProductDTO> {
         //specify an HTTP method of a request by invoking method(HttpMethod method)
         val uriSpec: WebClient.UriSpec<WebClient.RequestBodySpec> = client.method(HttpMethod.PUT)
