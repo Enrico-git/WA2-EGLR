@@ -8,11 +8,13 @@ import org.springframework.cloud.loadbalancer.core.ServiceInstanceListSupplier
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Primary
+import org.springframework.context.annotation.Scope
 import reactor.core.publisher.Flux
 
 @Configuration
 class OrderServiceLoadBalancingConfig(@Qualifier("eurekaClient") private val eurekaClient: EurekaClient) {
     @Bean
+    @Scope("prototype")
     @Primary
     fun getOrderServiceInstanceListSupplier() : ServiceInstanceListSupplier{
         return ServiceInstanceListSupplier("order-service", eurekaClient)
@@ -22,6 +24,7 @@ class OrderServiceLoadBalancingConfig(@Qualifier("eurekaClient") private val eur
 @Configuration
 class WalletServiceLoadBalancingConfig(@Qualifier("eurekaClient") private val eurekaClient: EurekaClient) {
     @Bean
+    @Scope("prototype")
     @Primary
     fun getWalletServiceInstanceListSupplier() : ServiceInstanceListSupplier{
         return ServiceInstanceListSupplier("wallet-service", eurekaClient)
@@ -31,6 +34,7 @@ class WalletServiceLoadBalancingConfig(@Qualifier("eurekaClient") private val eu
 @Configuration
 class WarehouseServiceLoadBalancingConfig(@Qualifier("eurekaClient") private val eurekaClient: EurekaClient) {
     @Bean
+    @Scope("prototype")
     @Primary
     fun getWarehouseServiceInstanceListSupplier() : ServiceInstanceListSupplier{
         return ServiceInstanceListSupplier("warehouse-service", eurekaClient)
