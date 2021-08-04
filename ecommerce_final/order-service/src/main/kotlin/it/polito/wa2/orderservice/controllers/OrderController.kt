@@ -1,5 +1,6 @@
 package it.polito.wa2.orderservice.controllers
 
+import com.mongodb.MongoCommandException
 import it.polito.wa2.orderservice.dto.OrderDTO
 import it.polito.wa2.orderservice.services.OrderService
 import kotlinx.coroutines.delay
@@ -7,6 +8,7 @@ import kotlinx.coroutines.flow.Flow
 import org.bson.types.ObjectId
 import org.springframework.dao.OptimisticLockingFailureException
 import org.springframework.data.domain.Pageable
+import org.springframework.data.mongodb.UncategorizedMongoDbException
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.*
@@ -43,11 +45,12 @@ class OrderController(
      @ResponseStatus(HttpStatus.CREATED)
      suspend fun updateOrderByID(@PathVariable orderID: ObjectId, @RequestBody orderDTO: OrderDTO) : OrderDTO {
         var counter = 5
+//        println(orderDTO)
         while (counter-- > 0){
             try {
                 return orderService.updateOrderStatus(orderID, orderDTO)
             }
-            catch(e: OptimisticLockingFailureException){
+            catch(e: UncategorizedMongoDbException){
                 delay(1000)
             }
         }
@@ -66,7 +69,7 @@ class OrderController(
             try {
                 return orderService.deleteOrder(orderID, orderDTO)
             }
-            catch(e: OptimisticLockingFailureException){
+            catch(e: UncategorizedMongoDbException){
                 delay(1000)
             }
         }
