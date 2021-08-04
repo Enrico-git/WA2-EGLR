@@ -1,6 +1,5 @@
 package it.polito.wa2.orderservice.controllers
 
-import com.mongodb.MongoCommandException
 import it.polito.wa2.orderservice.dto.OrderDTO
 import it.polito.wa2.orderservice.services.OrderService
 import kotlinx.coroutines.delay
@@ -64,6 +63,7 @@ class OrderController(
      @DeleteMapping("/{orderID}")
      @ResponseStatus(HttpStatus.NO_CONTENT)
      suspend fun deleteOrderByID(@PathVariable orderID: ObjectId, @RequestBody orderDTO: OrderDTO) {
+        println (orderDTO)
         var counter = 5
         while (counter-- > 0){
             try {
