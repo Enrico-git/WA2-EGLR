@@ -3,6 +3,7 @@ package it.polito.wa2.walletservice.entities
 import it.polito.wa2.walletservice.dto.WalletDTO
 import org.bson.types.ObjectId
 import org.springframework.data.annotation.Id
+import org.springframework.data.annotation.Version
 import org.springframework.data.mongodb.core.mapping.Document
 import java.math.BigDecimal
 
@@ -13,6 +14,8 @@ data class Wallet (
     var balance: BigDecimal = BigDecimal(0.0),
     val userID: ObjectId,
     //  00
+    @Version
+    val version: Long = 0 //needed for createTransaction cuncurrent
 )
 
 fun Wallet.toDTO() = WalletDTO(

@@ -6,6 +6,7 @@ import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
+import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.security.core.context.ReactiveSecurityContextHolder
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.reactive.function.client.ClientResponse
@@ -27,10 +28,10 @@ class CommentController {
         .defaultUriVariables(Collections.singletonMap("url", serviceURL))
         .build()
 
-    //RETRIEVE INFO ABOUT A PRODUCT GIVEN ITS ID
-    //NO NEED OF AUTHENTICATION -> NO TOKEN
+    //RETRIEVE INFO ABOUT A COMMENT GIVEN ITS ID
     @GetMapping("/{commentID}")
     @ResponseStatus(HttpStatus.OK)
+    @PreAuthorize("hasAuthority(\"ADMIN\") or hasAuthority(\"CUSTOMER\")")
     suspend fun getComment(@PathVariable commentID: String): Mono<CommentDTO> {
         //specify an HTTP method of a request by invoking method(HttpMethod method)
         val uriSpec: WebClient.UriSpec<WebClient.RequestBodySpec> = client.method(HttpMethod.GET)
@@ -59,9 +60,10 @@ class CommentController {
         }
     }
 
-    //CREATE A NEW WAREHOUSE WITH A LIST OF PRODUCTS
+    //CREATE A NEW COMMENT TO A PRODUCT
     @PostMapping("/{productID}")
     @ResponseStatus(HttpStatus.CREATED)
+    @PreAuthorize("hasAuthority(\"ADMIN\") or hasAuthority(\"CUSTOMER\")")
     suspend fun addComment(@PathVariable productID: String, @RequestBody commentDTO: CommentDTO): Mono<CommentDTO> {
         //specify an HTTP method of a request by invoking method(HttpMethod method)
         val uriSpec: WebClient.UriSpec<WebClient.RequestBodySpec> = client.method(HttpMethod.POST)
@@ -89,9 +91,10 @@ class CommentController {
         }
     }
 
-    //UPDATE A PRODUCT GIVEN ITS ID, OR ADD A NEW ONE IF THE ID DOES NOT EXIST
+    //UPDATE A COMMENT GIVEN ITS ID AND THE PRODUCT ID
     @PutMapping("/{productID}/{commentID}")
     @ResponseStatus(HttpStatus.CREATED)
+    @PreAuthorize("hasAuthority(\"ADMIN\") or hasAuthority(\"CUSTOMER\")")
     suspend fun updateComment(@PathVariable productID: String,
                               @PathVariable commentID: String,
                               @RequestBody commentDTO: CommentDTO): Mono<CommentDTO> {
@@ -121,9 +124,10 @@ class CommentController {
         }
     }
 
-    //DELETE A PRODUCT GIVEN ITS ID
+    //DELETE A COMMENT GIVEN ITS ID AND THE PRODUCT ID
     @DeleteMapping("/{productID}/{commentID}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
+    @PreAuthorize("hasAuthority(\"ADMIN\") or hasAuthority(\"CUSTOMER\")")
     suspend fun deleteComment(@PathVariable productID: String, @PathVariable commentID: String) {
         //TODO see if it works
         ReactiveSecurityContextHolder.getContext().map {

@@ -7,6 +7,7 @@ import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
+import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.security.core.context.ReactiveSecurityContextHolder
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.reactive.function.client.*
@@ -30,6 +31,7 @@ class WarehouseController {
     //RETRIEVE THE LIST OF WAREHOUSES
     @GetMapping("")
     @ResponseStatus(HttpStatus.OK)
+    @PreAuthorize("hasAuthority(\"ADMIN\") or hasAuthority(\"CUSTOMER\")")
     suspend fun getWarehouses(): Flow<WarehouseDTO> {
 
         return ReactiveSecurityContextHolder.getContext().flatMapMany {
@@ -44,6 +46,7 @@ class WarehouseController {
     //RETRIEVE INFO ABOUT A WAREHOUSE GIVEN ITS ID
     @GetMapping("/{warehouseID}")
     @ResponseStatus(HttpStatus.OK)
+    @PreAuthorize("hasAuthority(\"ADMIN\") or hasAuthority(\"CUSTOMER\")")
     suspend fun getWarehouse(@PathVariable warehouseID: String): Mono<WarehouseDTO> {
         //specify an HTTP method of a request by invoking method(HttpMethod method)
         val uriSpec: WebClient.UriSpec<WebClient.RequestBodySpec> = client.method(HttpMethod.GET)
@@ -75,6 +78,7 @@ class WarehouseController {
     //DELETE A WAREHOUSE GIVEN ITS ID, IF POSSIBLE
     @DeleteMapping("/{warehouseID}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
+    @PreAuthorize("hasAuthority(\"ADMIN\")")
     suspend fun deleteWarehouse(@PathVariable warehouseID: String) {
         //TODO see if it works
         ReactiveSecurityContextHolder.getContext().map {
@@ -114,6 +118,7 @@ class WarehouseController {
     //CREATE A NEW WAREHOUSE WITH A LIST OF PRODUCTS
     @PostMapping("")
     @ResponseStatus(HttpStatus.CREATED)
+    @PreAuthorize("hasAuthority(\"ADMIN\")")
     suspend fun newWarehouse(@RequestBody warehouseDTO: WarehouseDTO): Mono<WarehouseDTO> {
         //specify an HTTP method of a request by invoking method(HttpMethod method)
         val uriSpec: WebClient.UriSpec<WebClient.RequestBodySpec> = client.method(HttpMethod.POST)
@@ -144,6 +149,7 @@ class WarehouseController {
     //PARTIALLY UPDATE A WAREHOUSE GIVEN ITS ID
     @PatchMapping("/{warehouseID}")
     @ResponseStatus(HttpStatus.CREATED)
+    @PreAuthorize("hasAuthority(\"ADMIN\")")
     suspend fun patchWarehouse(@PathVariable warehouseID: String, @RequestBody warehouseDTO: WarehouseDTO): Mono<WarehouseDTO> {
         //specify an HTTP method of a request by invoking method(HttpMethod method)
         val uriSpec: WebClient.UriSpec<WebClient.RequestBodySpec> = client.method(HttpMethod.PATCH)
@@ -174,6 +180,7 @@ class WarehouseController {
     //UPDATE A WAREHOUSE GIVEN ITS ID, OR ADD A NEW ONE IF THE ID DOES NOT EXIST
     @PutMapping("/{warehouseID}")
     @ResponseStatus(HttpStatus.CREATED)
+    @PreAuthorize("hasAuthority(\"ADMIN\")")
     suspend fun updateWarehouse(@PathVariable warehouseID: String, @RequestBody warehouseDTO: WarehouseDTO): Mono<WarehouseDTO> {
         //specify an HTTP method of a request by invoking method(HttpMethod method)
         val uriSpec: WebClient.UriSpec<WebClient.RequestBodySpec> = client.method(HttpMethod.PUT)
