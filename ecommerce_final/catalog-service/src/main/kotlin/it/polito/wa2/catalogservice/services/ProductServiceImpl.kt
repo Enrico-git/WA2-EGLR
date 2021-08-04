@@ -8,6 +8,7 @@ import it.polito.wa2.catalogservice.exceptions.NotFoundException
 import it.polito.wa2.catalogservice.exceptions.UnauthorizedException
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.reactive.awaitSingle
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
@@ -22,12 +23,13 @@ import java.util.*
 import java.util.function.Predicate
 
 @Service
-class ProductServiceImpl: ProductService {
-    val serviceURL = "http://localhost:8200"
+class ProductServiceImpl(
+    @Qualifier("warehouse-service-client") private val loadBalancedWebClientBuilder: WebClient.Builder
+): ProductService {
+    val serviceURL = "http://warehouse-service"
     //Create a WebClient instance
     //building a client by using the DefaultWebClientBuilder class, which allows full customization
-    val client: WebClient = WebClient.builder()
-        .baseUrl(serviceURL)
+    val client: WebClient = loadBalancedWebClientBuilder
         .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_NDJSON_VALUE)
         .defaultUriVariables(Collections.singletonMap("url", serviceURL))
         .build()

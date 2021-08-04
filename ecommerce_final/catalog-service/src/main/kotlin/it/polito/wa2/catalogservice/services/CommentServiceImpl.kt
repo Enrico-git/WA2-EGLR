@@ -22,10 +22,10 @@ import java.util.function.Predicate
 class CommentServiceImpl(
     @Qualifier("warehouse-service-client") private val loadBalancedWebClientBuilder: WebClient.Builder
 ): CommentService {
-    val serviceURL = "http://localhost:8200"
+    val serviceURL = "http://warehouse-service"
     //Create a WebClient instance
     //building a client by using the DefaultWebClientBuilder class, which allows full customization
-    val client: WebClient = WebClient.builder()
+    val client: WebClient = loadBalancedWebClientBuilder
         .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_NDJSON_VALUE)
         .defaultUriVariables(Collections.singletonMap("url", serviceURL))
         .build()
