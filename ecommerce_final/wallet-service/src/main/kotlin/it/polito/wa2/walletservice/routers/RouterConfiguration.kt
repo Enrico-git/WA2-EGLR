@@ -40,7 +40,7 @@ class RouterConfiguration(
             accept(MediaType.APPLICATION_JSON).nest {
                 GET("/{walletID}", walletHandler::getWallet)
                 POST("/", contentType(MediaType.APPLICATION_JSON), walletHandler::createWallet)
-                POST("/{walletID}/transactions", walletHandler::createTransaction)
+                POST("/{walletID}/transactions", walletHandler::createRechargeTransaction)
                 GET("/{walletID}/transactions", walletHandler::getAllTransactions)
                 GET("/{walletID}/transactions/{transactionID}", walletHandler::getTransaction)
 

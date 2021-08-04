@@ -8,8 +8,8 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.core.userdetails.UserDetails
 
 data class UserDetailsDTO(
-    val id: ObjectId?,
-    private val username: String,
+    val id: ObjectId,
+    private val username: String?,
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private var password: String?,
     private val isEnabled: Boolean?,
@@ -25,11 +25,11 @@ data class UserDetailsDTO(
         return grantedAuthorities
     }
 
-    override fun getPassword(): String {
-        return password!!
+    override fun getPassword(): String? {
+        return password
     }
 
-    override fun getUsername(): String {
+    override fun getUsername(): String? {
         return username
     }
 

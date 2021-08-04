@@ -6,6 +6,7 @@ import io.jsonwebtoken.MalformedJwtException
 import io.jsonwebtoken.UnsupportedJwtException
 import io.jsonwebtoken.security.Keys
 import it.polito.wa2.walletservice.dto.UserDetailsDTO
+import org.bson.types.ObjectId
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
 import java.security.Key
@@ -20,8 +21,6 @@ class JwtUtils(
     @Value("\${application.jwt.jwtSecret}")
     private val jwtSecret: String? = null
 
-    @Value("\${application.jwt.jwtExpirationMs}")
-    private val jwtExpirationMs = 0
 
     private lateinit var secretKey: Key
 
@@ -62,8 +61,8 @@ class JwtUtils(
             .body
 //        logger.info(parsedToken)
         return UserDetailsDTO(
-            id = null,
-            username = parsedToken["sub"].toString(),
+            id = ObjectId(parsedToken["sub"].toString()),
+            username = null,
             roles = parsedToken["roles"].toString(),
             isEnabled = null,
             password = null,

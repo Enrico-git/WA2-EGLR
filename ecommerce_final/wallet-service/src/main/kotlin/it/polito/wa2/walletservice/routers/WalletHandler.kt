@@ -5,6 +5,7 @@ import it.polito.wa2.walletservice.dto.WalletDTO
 import it.polito.wa2.walletservice.services.WalletService
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
+import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.server.*
 
@@ -40,7 +41,7 @@ class WalletHandler(
      * For doing so, the admin calls this end-point.
      * For *Payment* or *Refund* (compensative transaction) it will be used Kafka instead.
      */
-    suspend fun createTransaction(request: ServerRequest): ServerResponse{
+    suspend fun createRechargeTransaction(request: ServerRequest): ServerResponse{
         val walletID = request.pathVariable("walletID")
         val transactionDTO = request.awaitBody(TransactionDTO::class)
         return ServerResponse
@@ -62,7 +63,7 @@ class WalletHandler(
 
         return ServerResponse
             .ok()
-            .json()
+            .contentType(MediaType.APPLICATION_NDJSON)
             .bodyAndAwait(walletService.getAllTransactions(walletID, from, to, pageable))
     }
 
