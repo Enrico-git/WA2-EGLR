@@ -1,5 +1,8 @@
 package it.polito.wa2.warehouseservice.services
 
+import it.polito.wa2.warehouseservice.domain.ProductInfo
+import it.polito.wa2.warehouseservice.dto.ProductInfoDTO
+import it.polito.wa2.warehouseservice.dto.ProductsReservationRequestDTO
 import it.polito.wa2.warehouseservice.dto.WarehouseDTO
 import kotlinx.coroutines.flow.Flow
 import org.bson.types.ObjectId
@@ -24,4 +27,7 @@ interface WarehouseService {
     @PreAuthorize("hasAuthority(\"ADMIN\")")
     suspend fun deleteWarehouses(warehouseID: ObjectId)
 
+    suspend fun reserveProductOrAbort(topic: String, productsReservationRequestDTO: ProductsReservationRequestDTO): Boolean? //kafka
+
+    suspend fun reserveProduct(productInfoDTO: ProductInfoDTO): Boolean?
 }

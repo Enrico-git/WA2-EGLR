@@ -1,5 +1,6 @@
 package it.polito.wa2.warehouseservice.controllers
 
+import it.polito.wa2.warehouseservice.dto.ProductsReservationRequestDTO
 import it.polito.wa2.warehouseservice.dto.WarehouseDTO
 import it.polito.wa2.warehouseservice.services.WarehouseService
 import kotlinx.coroutines.delay
@@ -103,6 +104,11 @@ class WarehouseController(
             }
         }
         throw OptimisticLockingFailureException("Warehouse")
+    }
+
+    @PostMapping("/andonio")
+    suspend fun andonio(@RequestBody productsReservationRequestDTO: ProductsReservationRequestDTO): Boolean?{
+        return warehouseService.reserveProductOrAbort("reserve_products", productsReservationRequestDTO)
     }
 
 }

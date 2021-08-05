@@ -6,7 +6,7 @@ import org.bson.types.ObjectId
 
 data class ProductInfoDTO(
         val id: String,
-        val alarm: Int,
+        val alarm: Int?,
         val quantity: Int
 )
 

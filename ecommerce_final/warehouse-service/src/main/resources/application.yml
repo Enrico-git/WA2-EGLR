@@ -17,6 +17,7 @@ spring:
       password: warehouse-service
   kafka:
     bootstrap-servers: "localhost:29092"
+    retryDelay: 25000
   mail:
     host: smtp.gmail.com
     port: 587

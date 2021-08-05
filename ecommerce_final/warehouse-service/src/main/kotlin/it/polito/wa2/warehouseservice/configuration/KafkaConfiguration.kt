@@ -1,6 +1,6 @@
 package it.polito.wa2.warehouseservice.configuration
 
-import it.polito.wa2.warehouseservice.dto.KafkaReserveProductDTO
+import it.polito.wa2.warehouseservice.dto.ProductsReservationRequestDTO
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.common.serialization.StringDeserializer
 import org.springframework.beans.factory.annotation.Value
@@ -20,18 +20,19 @@ class KafkaConfiguration {
     val bootstrapAddress: String = ""
 
     @Bean
-    fun reserveProductConsumerFactory(): ConsumerFactory<String, KafkaReserveProductDTO>{
+    fun reserveProductConsumerFactory(): ConsumerFactory<String, ProductsReservationRequestDTO>{
         val configProps = mutableMapOf<String, Any>()
         configProps[ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG]  =  bootstrapAddress
         configProps[ConsumerConfig.GROUP_ID_CONFIG] = "warehouse_service"
         configProps[ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG] = StringDeserializer::class.java
         configProps[ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG] = JsonDeserializer::class.java
-        return DefaultKafkaConsumerFactory(configProps, StringDeserializer(), JsonDeserializer(KafkaReserveProductDTO::class.java))
+        configProps[JsonDeserializer.TYPE_MAPPINGS] = "it.polito.wa2.orderservice.dto.ProductsReservationRequestDTO:it.polito.wa2.warehouseservice.dto.ProductsReservationRequestDTO"
+        return DefaultKafkaConsumerFactory(configProps, StringDeserializer(), JsonDeserializer(ProductsReservationRequestDTO::class.java))
     }
 
     @Bean
-    fun reserveProductContainerFactory(): ConcurrentKafkaListenerContainerFactory<String, KafkaReserveProductDTO>{
-        val factory = ConcurrentKafkaListenerContainerFactory<String, KafkaReserveProductDTO>()
+    fun reserveProductContainerFactory(): ConcurrentKafkaListenerContainerFactory<String, ProductsReservationRequestDTO>{
+        val factory = ConcurrentKafkaListenerContainerFactory<String, ProductsReservationRequestDTO>()
         factory.consumerFactory = reserveProductConsumerFactory()
         return factory
     }

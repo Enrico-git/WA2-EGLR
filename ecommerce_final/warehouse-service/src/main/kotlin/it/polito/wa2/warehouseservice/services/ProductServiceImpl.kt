@@ -76,7 +76,7 @@ class ProductServiceImpl(
         if(product.comments != null)
             commentRepository.deleteAllById(product.comments!!)
         val warehouses = warehouseRepository.findWarehousesByProduct(productID)
-                .map { wh ->
+                ?.map { wh ->
                     if(wh.products != null){
                         wh.products = wh.products!!.filter {
                             it.productId != productID
@@ -84,7 +84,7 @@ class ProductServiceImpl(
                     }
                     wh
                 }
-        warehouseRepository.saveAll(warehouses).collect()
+        warehouseRepository.saveAll(warehouses!!).collect()
         productRepository.deleteById(productID)
     }
 
@@ -101,7 +101,7 @@ class ProductServiceImpl(
 
     override suspend fun getProductWarehouses(productID: ObjectId): Flow<WarehouseDTO> {
         productRepository.findById(productID) ?: throw IllegalArgumentException("Product not found")
-        return warehouseRepository.findWarehousesByProduct(productID).map { it.toDTO() }
+        return warehouseRepository.findWarehousesByProduct(productID)!!.map { it.toDTO() }
     }
 
     override suspend fun getProductComments(productID: ObjectId): Flow<CommentDTO> {
