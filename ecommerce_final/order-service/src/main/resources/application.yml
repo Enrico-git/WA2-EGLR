@@ -18,7 +18,7 @@ spring:
           auth: true
           starttls:
             enable: true
-        debug: true
+        debug: false
   data:
     mongodb:
   #      change to container name when you spawn the jar

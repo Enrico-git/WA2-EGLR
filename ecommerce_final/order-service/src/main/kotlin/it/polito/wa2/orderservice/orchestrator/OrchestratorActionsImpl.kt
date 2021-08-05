@@ -32,6 +32,7 @@ import org.springframework.context.annotation.Lazy
 import org.springframework.context.event.ContextRefreshedEvent
 import org.springframework.data.mongodb.UncategorizedMongoDbException
 import org.springframework.stereotype.Component
+import org.springframework.util.ConcurrentReferenceHashMap
 import java.lang.IllegalArgumentException
 import java.sql.Timestamp
 import java.util.*
@@ -49,7 +50,7 @@ class OrchestratorActionsImpl(
     private val applicationEventPublisher: ApplicationEventPublisher,
     private val orderRepository: OrderRepository,
     @Lazy private val orderService: OrderService,
-    private val jobs: ConcurrentHashMap<String, Job>,
+    private val jobs: ConcurrentReferenceHashMap<String, Job>,
     private val logger: Logger,
     private val mailService: MailServiceImpl
 ) : OrchestratorActions{
@@ -287,27 +288,37 @@ class OrchestratorActionsImpl(
                 status = OrderStatus.ISSUED
             else if (sm.state!! == StateMachineStates.ORDER_CANCELED)
                 status = OrderStatus.CANCELED
-            try {
-                orderService.updateOrderOnSagaEnding(sm, status, sm.finalState.toString().substringAfter("_"))
-                logger.info("SAGA OF ORDER ${sm.id} ENDED SUCCESSFULLY")
-            } catch (e: IllegalArgumentException) {
-                logger.severe("Could not find order ${sm.id}")
-                return@launch
-            }
+            var counter = 5
+            while (counter-- > 0)
+                try {
+                    orderService.updateOrderOnSagaEnding(sm, status, sm.finalState.toString().substringAfter("_"))
+                    logger.info("SAGA OF ORDER ${sm.id} ENDED SUCCESSFULLY")
+                    return@launch
+                } catch (e: UncategorizedMongoDbException) {
+                    delay(1000)
+                } catch (e: IllegalArgumentException) {
+                    logger.severe("Could not find order ${sm.id}")
+                    return@launch
+                }
+            logger.severe("Could not update order ${sm.id} status to $status")
         }
     }
 
     override fun onSagaFailureEvent(sagaFailureEvent: SagaFailureEvent){
         val sm = sagaFailureEvent.source as StateMachineImpl
         CoroutineScope(Dispatchers.IO).launch {
-            if (sm.finalState == StateMachineStates.ORDER_ISSUED)
-                try{
-                    orderService.updateOrderOnSagaEnding(sm, OrderStatus.FAILED, "ISSUE_FAILED")
-                } catch (e: IllegalArgumentException) {
-                    logger.severe("Could not find order ${sm.id}")
-                    return@launch
-                }
-            else if (sm.finalState == StateMachineStates.ORDER_CANCELED){
+            if (sm.finalState == StateMachineStates.ORDER_ISSUED) {
+                var counter = 5
+                while (counter-- > 0)
+                    try {
+                        orderService.updateOrderOnSagaEnding(sm, OrderStatus.FAILED, "ISSUE_FAILED")
+                        return@launch
+                    } catch (e: IllegalArgumentException) {
+                        logger.severe("Could not find order ${sm.id}")
+                        return@launch
+                    }
+                logger.severe("Could not update order ${sm.id} status to ${OrderStatus.FAILED}")
+            } else if (sm.finalState == StateMachineStates.ORDER_CANCELED){
                 mailService.notifyCustomer(sm.customerEmail, "ORDER ${sm.id} NOTIFICATION", sm.id,  "CANCELLATION_FAILED")
                 mailService.notifyAdmin("ORDER ${sm.id} NOTIFICATION", sm.id,  "CANCELLATION_FAILED")
             }

@@ -11,6 +11,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.context.annotation.Bean
+import org.springframework.util.ConcurrentReferenceHashMap
+import java.lang.ref.WeakReference
 import java.util.concurrent.ConcurrentHashMap
 import java.util.logging.Logger
 
@@ -116,7 +118,7 @@ class OrderServiceApplication{
     }
 
     @Bean
-    fun getJobsList(): ConcurrentHashMap<String, Job> = ConcurrentHashMap()
+    fun getJobsList(): ConcurrentReferenceHashMap<String, Job> = ConcurrentReferenceHashMap(16, ConcurrentReferenceHashMap.ReferenceType.WEAK)
 
     @Bean
     fun getSagasList(): ConcurrentHashMap<String, StateMachineImpl> = ConcurrentHashMap()
