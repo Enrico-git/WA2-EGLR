@@ -24,8 +24,10 @@ class WalletController(
     @ResponseStatus(HttpStatus.OK)
     suspend fun getTransactions(@PathVariable walletID: Long,
                                 @RequestParam from: Long?,
-                                @RequestParam to: Long?): Flow<TransactionDTO> {
-        return walletService.getTransactions(walletID,from,to)
+                                @RequestParam to: Long?,
+                                @RequestParam page: Int?,
+                                @RequestParam size: Int?): Flow<TransactionDTO> {
+        return walletService.getTransactions(walletID,from,to,page,size)
     }
 
     //RETRIEVE THE INFO OF A TRANSACTION GIVEN ITS ID

@@ -21,8 +21,10 @@ class ProductController(
     //NO NEED OF AUTHENTICATION -> NO TOKEN
     @GetMapping("", produces = [MediaType.APPLICATION_NDJSON_VALUE])
     @ResponseStatus(HttpStatus.OK)
-    suspend fun getProducts(@RequestParam category: String?, pageable: Pageable): Flow<ProductDTO> {
-        return productService.getProducts(category)
+    suspend fun getProducts(@RequestParam category: String?,
+                            @RequestParam page: Int?,
+                            @RequestParam size: Int?): Flow<ProductDTO> {
+        return productService.getProducts(category,page,size)
     }
 
     //RETRIEVE INFO ABOUT A PRODUCT GIVEN ITS ID

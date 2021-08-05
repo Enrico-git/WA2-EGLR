@@ -45,24 +45,28 @@ class WalletServiceImpl(
             .awaitBody()
     }
 
-    override suspend fun getTransactions(walletID: Long, from: Long?, to: Long?): Flow<TransactionDTO> {
+    override suspend fun getTransactions(walletID: Long, from: Long?, to: Long?, page: Int?, size: Int?): Flow<TransactionDTO> {
         val token = ReactiveSecurityContextHolder.getContext().awaitSingle().authentication.credentials as String
-        var query = ""
-        if(from!=null)
-            query = "?from=$from"
-        if(to!=null && query!="") {
-            query += "&to=$to"
-        } else if(to!=null && query=="") {
-            query += "?to=$to"
-        }
+        val fromOpt = if ( from != null) Optional.of(from) else Optional.empty()
+        val toOpt = if ( to != null) Optional.of(to) else Optional.empty()
+        val pageOpt = if ( page != null) Optional.of(page) else Optional.empty()
+        val sizeOpt = if ( size != null) Optional.of(size) else Optional.empty()
         return client
             .get()
-            .uri("$serviceURL/wallets/$walletID/transactions$query")
+            .uri{
+                it.path("$serviceURL/wallets/$walletID/transactions")
+                    .queryParamIfPresent("from",fromOpt)
+                    .queryParamIfPresent("to",toOpt)
+                    .queryParamIfPresent("page", pageOpt)
+                    .queryParamIfPresent("size", sizeOpt)
+                    .build()
+            }
             .accept(MediaType.APPLICATION_NDJSON)
             .header(HttpHeaders.AUTHORIZATION, "Bearer $token")
             .retrieve()
             .onStatus(Predicate { it == HttpStatus.INTERNAL_SERVER_ERROR }) { throw RuntimeException("Something went wrong") }
             .bodyToFlow()
+
     }
 
     override suspend fun getTransaction(walletID: String, transactionID: String): TransactionDTO {

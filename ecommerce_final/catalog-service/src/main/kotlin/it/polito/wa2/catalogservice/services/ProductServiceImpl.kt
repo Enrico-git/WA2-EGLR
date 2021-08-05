@@ -34,9 +34,17 @@ class ProductServiceImpl(
         .defaultUriVariables(Collections.singletonMap("url", serviceURL))
         .build()
 
-    override suspend fun getProducts(category: String?): Flow<ProductDTO> {
+    override suspend fun getProducts(category: String?, page: Int?, size: Int?): Flow<ProductDTO> {
         val categoryOpt = if ( category != null)
             Optional.of(category)
+        else
+            Optional.empty()
+        val pageOpt = if ( page != null)
+            Optional.of(page)
+        else
+            Optional.empty()
+        val sizeOpt = if ( size != null)
+            Optional.of(size)
         else
             Optional.empty()
         return client
@@ -44,6 +52,8 @@ class ProductServiceImpl(
             .uri{
                 it.path("$serviceURL/products")
                     .queryParamIfPresent("category", categoryOpt)
+                    .queryParamIfPresent("page", pageOpt)
+                    .queryParamIfPresent("size", sizeOpt)
                     .build()
             }
             .accept(MediaType.APPLICATION_NDJSON)
