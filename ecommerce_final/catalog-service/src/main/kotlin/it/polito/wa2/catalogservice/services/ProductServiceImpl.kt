@@ -35,12 +35,17 @@ class ProductServiceImpl(
         .build()
 
     override suspend fun getProducts(category: String?): Flow<ProductDTO> {
-        var query = ""
-        if(category!=null)
-            query+="?category=$category"
+        val categoryOpt = if ( category != null)
+            Optional.of(category)
+        else
+            Optional.empty()
         return client
             .get()
-            .uri("$serviceURL/products$query")
+            .uri{
+                it.path("$serviceURL/products")
+                    .queryParamIfPresent("category", categoryOpt)
+                    .build()
+            }
             .accept(MediaType.APPLICATION_NDJSON)
             .retrieve()
             .onStatus(Predicate { it == HttpStatus.INTERNAL_SERVER_ERROR }) { throw RuntimeException("Something went wrong") }
