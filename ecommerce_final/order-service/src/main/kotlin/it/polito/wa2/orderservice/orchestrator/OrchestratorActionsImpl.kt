@@ -109,10 +109,9 @@ class OrchestratorActionsImpl(
         val sagaEvent = StateMachineEvents.valueOf(topic.uppercase())
         val saga = sagas[event]
         println(saga)
-        val transition = saga?.transitions?.find{it.source == saga.state && it.event == sagaEvent}
-        println("${saga?.id} --- ${saga?.state} --- $sagaEvent ---- trans: $transition")
-        if (saga != null && transition != null && transition.event != null)
-            saga.nextStateAndFireEvent(transition.event!!)
+//        val transition = saga?.transitions?.find{it.source == saga.state && it.event == sagaEvent}
+//        println("${saga?.id} --- ${saga?.state} --- $sagaEvent ---- trans: $transition")
+        saga?.nextStateAndFireEvent(sagaEvent)
     }
     override fun onKafkaResponseReceivedEventInResponseTo(event: KafkaResponseReceivedEventInResponseTo) = CoroutineScope(
         Dispatchers.Default).launch {
@@ -258,7 +257,8 @@ class OrchestratorActionsImpl(
                                     "abort_products_reservation",
                                     AbortProductReservationRequestDTO(
                                         sm.id,
-                                        sm.productsWarehouseLocation!!
+                                        sm.productsWarehouseLocation!!,
+                                        Timestamp(System.currentTimeMillis())
                                     )
                                 ))
                             delay(delay)
@@ -313,6 +313,8 @@ class OrchestratorActionsImpl(
                     try {
                         orderService.updateOrderOnSagaEnding(sm, OrderStatus.FAILED, "ISSUE_FAILED")
                         return@launch
+                    } catch (e: UncategorizedMongoDbException) {
+                        delay(1000)
                     } catch (e: IllegalArgumentException) {
                         logger.severe("Could not find order ${sm.id}")
                         return@launch

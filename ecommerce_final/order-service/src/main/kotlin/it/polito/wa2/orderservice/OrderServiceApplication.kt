@@ -24,7 +24,7 @@ class OrderServiceApplication{
 
     @Bean(name=["new_order_sm"])
     fun getNewOrderStateMachine(applicationEventPublisher: ApplicationEventPublisher, redisStateMachineRepository: RedisStateMachineRepository): StateMachineBuilder{
-        val builder = StateMachineBuilderImpl(applicationEventPublisher, redisStateMachineRepository)
+        val builder = StateMachineBuilderImpl(applicationEventPublisher, redisStateMachineRepository, getLogger())
 
         return builder
             .initialState(StateMachineStates.ORDER_REQ) // order creation request
@@ -80,7 +80,7 @@ class OrderServiceApplication{
 
     @Bean(name=["delete_order_sm"])
     fun getDeleteOrderStateMachine(applicationEventPublisher: ApplicationEventPublisher, redisStateMachineRepository: RedisStateMachineRepository): StateMachineBuilder{
-        val builder = StateMachineBuilderImpl(applicationEventPublisher, redisStateMachineRepository)
+        val builder = StateMachineBuilderImpl(applicationEventPublisher, redisStateMachineRepository, getLogger())
 
         return builder
             .initialState(StateMachineStates.CANCEL_ORDER_REQ) // abort order req

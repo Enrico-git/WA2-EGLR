@@ -9,11 +9,14 @@ import it.polito.wa2.orderservice.repositories.RedisStateMachineRepository
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Component
 import java.math.BigDecimal
+import java.util.logging.Logger
 
 @Component
 class StateMachineBuilderImpl(
     private val applicationEventPublisher: ApplicationEventPublisher,
-    private val redisStateMachineRepository: RedisStateMachineRepository)
+    private val redisStateMachineRepository: RedisStateMachineRepository,
+    private val logger: Logger
+    )
     : StateMachineBuilder
 {
     lateinit var initialState: StateMachineStates
@@ -130,7 +133,8 @@ class StateMachineBuilderImpl(
         productsWarehouseLocation,
         auth,
         applicationEventPublisher,
-        redisStateMachineRepository
+        redisStateMachineRepository,
+        logger
     )
 
 }

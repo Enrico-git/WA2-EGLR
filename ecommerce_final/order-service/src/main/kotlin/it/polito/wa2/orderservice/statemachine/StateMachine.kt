@@ -2,11 +2,21 @@ package it.polito.wa2.orderservice.statemachine
 
 import it.polito.wa2.orderservice.common.StateMachineEvents
 import it.polito.wa2.orderservice.domain.RedisStateMachine
+import it.polito.wa2.orderservice.domain.Transition
 import kotlinx.coroutines.Job
 import org.springframework.context.ApplicationEvent
 
 interface StateMachine {
+
     /**
+     * Get the transition based on current state and the firing event
+     * @param event the State machine event
+     * @return the transition if it exists
+     */
+    suspend fun getTransition(event: StateMachineEvents? = null): Transition?
+
+
+        /**
      * Start the state machine
      */
     suspend fun start()
@@ -35,5 +45,5 @@ interface StateMachine {
      * @param new the new state machine to insert
      * @return a coroutine job
      */
-    suspend fun backup(old: RedisStateMachine, new : RedisStateMachine): Job
+    suspend fun backup(oldSM: RedisStateMachine, newSM : RedisStateMachine): Job
 }
