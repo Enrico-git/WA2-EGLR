@@ -10,5 +10,5 @@ package it.polito.wa2.catalogservice.domain
  */
 data class Delivery(
     val shippingAddress: String,
-    val productWarehouseLocation: Set<ProductLocation>?
+    var productsWarehouseLocation: Set<ProductLocation>? = setOf()
 )

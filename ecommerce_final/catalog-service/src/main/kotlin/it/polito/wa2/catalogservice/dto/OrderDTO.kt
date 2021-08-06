@@ -6,10 +6,10 @@ import it.polito.wa2.catalogservice.domain.Product
 import org.bson.types.ObjectId
 
 data class OrderDTO(
-    val id: ObjectId?,
-    val buyer: ObjectId?,
-    val products: Set<Product>?,
-    val delivery: Delivery?,
-    val status: OrderStatus?,
+    val id: ObjectId? = null,
+    val buyer: ObjectId? = null,
+    val products: Set<Product>? = null,
+    val delivery: Delivery? = null,
+    val status: OrderStatus? = null,
     val email: String? = null
 )
