@@ -11,9 +11,8 @@ import java.util.*
 
 @Repository
 interface UserRepository : CoroutineCrudRepository<User, ObjectId> {
-    @Query("{ '_id' : ?0 }")
-    suspend fun findById(userID: String): Optional<User>
 
-    @Query("{ 'username' : ?0 }")
-    suspend fun findByUsername(username: String): Optional<User>
+    suspend fun findById(userID: String): User?
+
+    suspend fun findByUsername(username: String): User?
 }

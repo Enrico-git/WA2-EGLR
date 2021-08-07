@@ -19,5 +19,5 @@ interface UserDetailsService {
     @PreAuthorize("hasAuthority(\"ADMIN\")")
     suspend fun disableUser(username: String): UserDetailsDTO
     suspend fun verifyToken(token: String)
-    fun authAndCreateToken(loginDTO: LoginDTO): LoginDTO
+    suspend fun authAndCreateToken(loginDTO: LoginDTO): LoginDTO
 }

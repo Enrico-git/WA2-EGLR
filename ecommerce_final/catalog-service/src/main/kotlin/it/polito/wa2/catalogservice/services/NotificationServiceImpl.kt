@@ -10,8 +10,7 @@ import java.util.*
 
 @Service
 class NotificationServiceImpl(
-    private val notificationRepository: EmailVerificationTokenRepository,
-    private val userRepository: UserRepository
+    private val notificationRepository: EmailVerificationTokenRepository
 ) : NotificationService {
     override suspend fun createEmailVerificationToken(user: User): String {
         val notification = EmailVerificationToken(

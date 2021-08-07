@@ -9,9 +9,8 @@ import java.sql.Timestamp
 import java.util.*
 
 interface EmailVerificationTokenRepository : CoroutineCrudRepository<EmailVerificationToken, Long> {
-    fun findByToken(token: String): Optional<EmailVerificationToken>
+    fun findByToken(token: String): EmailVerificationToken?
 
     @Transactional
-    //@Modifying TODO set modifying because this query modifies the collection
     fun deleteAllByExpiryDateBefore(actualTime: Timestamp)
 }

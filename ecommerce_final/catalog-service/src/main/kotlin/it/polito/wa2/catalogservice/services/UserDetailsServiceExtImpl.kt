@@ -7,15 +7,15 @@ import it.polito.wa2.catalogservice.dto.RegistrationDTO
 import it.polito.wa2.catalogservice.dto.UserDetailsDTO
 import it.polito.wa2.catalogservice.repositories.UserRepository
 import it.polito.wa2.catalogservice.security.JwtUtils
+import it.polito.wa2.catalogservice.security.AuthenticationManager
 import it.polito.wa2.catalogservice.dto.toDTO
 import it.polito.wa2.catalogservice.repositories.EmailVerificationTokenRepository
-import kotlinx.coroutines.reactive.asFlow
+import kotlinx.coroutines.reactive.awaitFirst
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Lazy
-import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.Authentication
-import org.springframework.security.core.context.SecurityContextHolder
+import org.springframework.security.core.context.ReactiveSecurityContextHolder
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.security.core.userdetails.UsernameNotFoundException
 import org.springframework.security.crypto.password.PasswordEncoder
@@ -40,10 +40,7 @@ class UserDetailsServiceExtImpl(
     private val serverURL = ""
 
     override suspend fun findByUsername(username: String): UserDetails {
-        val userOpt = userRepository.findByUsername(username)
-        if (!userOpt.isPresent)
-            throw UsernameNotFoundException("User not found")
-        return userOpt.get().toDTO()
+        return userRepository.findByUsername(username)?.toDTO() ?: throw UsernameNotFoundException("User not found")
     }
 
     override suspend fun registerUser(registrationDTO: RegistrationDTO): UserDetailsDTO {
@@ -65,69 +62,47 @@ class UserDetailsServiceExtImpl(
     }
 
     override suspend fun addRole(username: String, role: String): UserDetailsDTO {
-        val userOpt = userRepository.findByUsername(username)
-        if (!userOpt.isPresent)
-            throw IllegalArgumentException("The user does not exist")
-
-        val user = userOpt.get()
+        val user = userRepository.findByUsername(username) ?: throw IllegalArgumentException("The user does not exist")
         user.addRole(Rolename.valueOf(role))
-
         return userRepository.save(user).toDTO()
     }
 
     override suspend fun removeRole(username: String, role: String): UserDetailsDTO {
-        val userOpt = userRepository.findByUsername(username)
-        if (!userOpt.isPresent)
-            throw IllegalArgumentException("The user does not exist")
-
-        val user = userOpt.get()
+        val user = userRepository.findByUsername(username) ?: throw IllegalArgumentException("The user does not exist")
         user.removeRole(Rolename.valueOf(role))
-
         return userRepository.save(user).toDTO()
 
     }
 
     override suspend fun enableUser(username: String): UserDetailsDTO {
-        val userOpt = userRepository.findByUsername(username)
-        if (!userOpt.isPresent)
-            throw IllegalArgumentException("The user does not exist")
-
-        val user = userOpt.get()
+        val user = userRepository.findByUsername(username) ?: throw IllegalArgumentException("The user does not exist")
         user.isEnabled = true
-
         return userRepository.save(user).toDTO()
 
     }
 
     override suspend fun disableUser(username: String): UserDetailsDTO {
-        val userOpt = userRepository.findByUsername(username)
-        if (!userOpt.isPresent)
-            throw IllegalArgumentException("The user does not exist")
-
-        val user = userOpt.get()
+        val user = userRepository.findByUsername(username) ?: throw IllegalArgumentException("The user does not exist")
         user.isEnabled = false
-
         return userRepository.save(user).toDTO()
     }
 
-    override suspend fun verifyToken(token: String): Unit {
-        val emailVerificationOpt = verificationRepository.findByToken(token)
-        if (!emailVerificationOpt.isPresent)
-            throw IllegalArgumentException("The token does not exist")
-        if (emailVerificationOpt.get().expiryDate <= Timestamp(System.currentTimeMillis()))
+    override suspend fun verifyToken(token: String) {
+        val emailVerification = verificationRepository.findByToken(token) ?: throw IllegalArgumentException("The token does not exist")
+        if (emailVerification.expiryDate <= Timestamp(System.currentTimeMillis()))
             throw IllegalArgumentException("Token expired")
-        enableUser(emailVerificationOpt.get().user.username)
+        enableUser(emailVerification.user.username)
     }
 
-    override fun authAndCreateToken(loginDTO: LoginDTO): LoginDTO {
+    override suspend fun authAndCreateToken(loginDTO: LoginDTO): LoginDTO {
         val authentication: Authentication = authenticationManager.authenticate(
             UsernamePasswordAuthenticationToken(loginDTO.username, loginDTO.password)
         )
-        SecurityContextHolder.getContext().authentication = authentication
+        val ctx = ReactiveSecurityContextHolder.getContext().awaitFirst()
+        ctx.authentication = authentication
         loginDTO.jwt = jwtUtils.generateJwtToken(authentication)
         loginDTO.roles =
-            SecurityContextHolder.getContext().authentication.authorities.map { it.authority }.toMutableSet()
+            ctx.authentication.authorities.map { it.authority }.toMutableSet()
         return loginDTO
     }
-
 }
