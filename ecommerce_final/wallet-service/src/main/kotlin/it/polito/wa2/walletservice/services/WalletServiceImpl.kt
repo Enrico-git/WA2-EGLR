@@ -1,6 +1,7 @@
 package it.polito.wa2.walletservice.services
 
 import it.polito.wa2.walletservice.dto.*
+import it.polito.wa2.walletservice.entities.Transaction
 import it.polito.wa2.walletservice.entities.TransactionDescription
 import it.polito.wa2.walletservice.entities.Wallet
 import it.polito.wa2.walletservice.entities.toDTO
@@ -9,6 +10,7 @@ import it.polito.wa2.walletservice.exceptions.UnauthorizedException
 import it.polito.wa2.walletservice.repositories.TransactionRepository
 import it.polito.wa2.walletservice.repositories.WalletRepository
 import it.polito.wa2.walletservice.security.JwtUtils
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.reactive.awaitFirst
@@ -17,8 +19,11 @@ import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.bson.types.ObjectId
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.context.annotation.Scope
 import org.springframework.data.domain.Pageable
+import org.springframework.data.mongodb.UncategorizedMongoDbException
 import org.springframework.security.core.context.ReactiveSecurityContextHolder
+import org.springframework.stereotype.Component
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.math.BigDecimal
@@ -173,6 +178,55 @@ class WalletServiceImpl(
         println(transactionRepository.save(transactionDTO.toEntity()))
         return true
     }
+
+//    TODO change previous function with this one or erase it
+//    suspend fun getAuthorizedUser(token: String): UserDetailsDTO?{
+//        val user = if (jwtUtils.validateJwtToken(token))
+//            jwtUtils.getDetailsFromJwtToken(token)
+//        else return null
+//
+//        if (!(user.roles?.contains("CUSTOMER") == true || user.roles?.contains("ADMIN") == true))
+//            return null
+//        return user
+//    }
+//
+//    suspend fun createPaymentOrRefundTransactionGIULIO(topic: String, paymentRequestDTO: KafkaPaymentRequestDTO): Boolean {
+//            if (Timestamp(paymentRequestDTO.timestamp.time + retryDelay) < Timestamp(System.currentTimeMillis()))
+//                return false
+//
+//            val user = getAuthorizedUser(paymentRequestDTO.token) ?: return false
+//
+//            if (transactionRepository.findByOrderID(ObjectId(paymentRequestDTO.orderID)) != null)
+//                return false
+//
+//            val wallet = walletRepository.findByUserID(user.id) ?: return false
+//
+//            val transactionDescription: TransactionDescription
+//            if (topic == "payment_request" && wallet.balance >= paymentRequestDTO.amount) {
+//                wallet.balance -= paymentRequestDTO.amount
+//                transactionDescription = TransactionDescription.PAYMENT
+//            }
+//            else if (topic == "abort_payment_request"){
+//                wallet.balance += paymentRequestDTO.amount
+//                transactionDescription = TransactionDescription.REFUND
+//            }
+//            else
+//                return false
+//
+//            walletRepository.save(wallet)
+//
+//            transactionRepository.save(
+//                Transaction(
+//                    id = null,
+//                    timestamp = Timestamp(System.currentTimeMillis()),
+//                    walletID = wallet.id!!,
+//                    amount = paymentRequestDTO.amount,
+//                    description = transactionDescription,
+//                    orderID = ObjectId(paymentRequestDTO.orderID)
+//                )
+//            )
+//            return true
+//    }
 
     /**
      * This method simulates what order-service will sent by means of kafka "payment_request" -> new_order

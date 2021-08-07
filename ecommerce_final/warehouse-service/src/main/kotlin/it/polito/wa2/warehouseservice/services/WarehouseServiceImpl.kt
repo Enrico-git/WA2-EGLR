@@ -12,6 +12,7 @@ import it.polito.wa2.warehouseservice.repositories.WarehouseRepository
 import kotlinx.coroutines.flow.*
 import org.bson.types.ObjectId
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.data.mongodb.UncategorizedMongoDbException
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.sql.Timestamp
@@ -68,6 +69,16 @@ class WarehouseServiceImpl(
 
     override suspend fun partialUpdateWarehouses(warehouseID: ObjectId, warehouseDTO: WarehouseDTO): WarehouseDTO {
         val warehouse = warehouseRepository.findById(warehouseID) ?: throw IllegalArgumentException("Warehouse not found")
+//        TODO try this instead
+//        val products = warehouseDTO.products!!.map{it.toEntity()}.toMutableSet()
+//        warehouse.products?.removeAll { existingProd -> products.any { it.productId == existingProd.productId } }
+//        warehouse.products!!.addAll(products)
+//        val warehouse = warehouseRepository.save(warehouse)
+//        warehouse.products!!.forEach {
+//            if(it.quantity <= it.alarm!!)
+//                mailService.notifyAdmin("Warehouse $warehouseID Notification", it.id)
+//        }
+//        return warehouse.toDTO()
 
 
         val products: MutableSet<ProductInfoDTO>? = warehouse.products?.map{it.toDTO()}?.toMutableSet()

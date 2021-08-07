@@ -67,24 +67,16 @@ class StateMachineImpl(val initialState: StateMachineStates,
         val oldSM = this.toRedisStateMachine()
 
         state = transition.target
+        failed = if (failed == false && transition.isRollingBack) true else failed
 
-        if ( failed == false && transition.isRollingBack)
-            failed = true
+        fireEvent(StateMachineEvent(this, event ))
 
-        when (state) {
-            finalState -> {
-                fireEvent(StateMachineEvent(this, event ))
-                fireEvent(SagaFinishedEvent(this))
-                completed = true
-            }
-            initialState -> {
-                fireEvent(StateMachineEvent(this, event ))
-                fireEvent(SagaFailureEvent(this))
-                completed = true
-            }
-            else -> {
-                fireEvent(StateMachineEvent(this, event ))
-            }
+        if (state == finalState){
+            fireEvent(SagaFinishedEvent(this))
+            completed = true
+        } else if (state == initialState){
+            fireEvent(SagaFailureEvent(this))
+            completed = true
         }
 
         backup(oldSM, this.toRedisStateMachine())
@@ -106,19 +98,16 @@ class StateMachineImpl(val initialState: StateMachineStates,
     }
 
     override suspend fun backup(oldSM: RedisStateMachine, newSM :RedisStateMachine) = CoroutineScope(Dispatchers.IO).launch{
-        var counter = 5
-        while (counter-- > 0)
-            try {
-                redisStateMachineRepository.remove(oldSM)
-                redisStateMachineRepository.add(newSM)
-                return@launch
-            } catch (e: Exception){
-                delay(1000)
-            }
-        logger.severe("Cant backup new sm $newSM over old sm $oldSM")
+        try{
+            redisStateMachineRepository.remove(oldSM)
+            redisStateMachineRepository.add(newSM)
+            return@launch
+        } catch (e: Exception) {
+            logger.severe("Cant backup new sm $newSM over old sm $oldSM")
+        }
     }
 
     override fun toString(): String {
-        return "[ID: $id, STATE: $state, INITIAL_STATE: $initialState, FINAL_STATE: $finalState, FAILED: $failed, COMPLETED: $completed"
+        return "[ID: $id, STATE: $state FAILED: $failed, COMPLETED: $completed"
     }
 }
