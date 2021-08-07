@@ -97,7 +97,7 @@ class UserDetailsServiceExtImpl(
     override suspend fun authAndCreateToken(loginDTO: LoginDTO): LoginDTO {
         val authentication: Authentication = authenticationManager.authenticate(
             UsernamePasswordAuthenticationToken(loginDTO.username, loginDTO.password)
-        )
+        ).awaitFirst()
         val ctx = ReactiveSecurityContextHolder.getContext().awaitFirst()
         ctx.authentication = authentication
         loginDTO.jwt = jwtUtils.generateJwtToken(authentication)
