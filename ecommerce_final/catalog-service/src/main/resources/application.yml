@@ -22,6 +22,7 @@ spring:
           auth: true
           starttls:
             enable: true
+application:
   jwt:
     jwtSecret: that_depends_a_good_deal_on_where_you_want_to_get_to_then_it_doesnt_much_matter_which_way_you_go
     jwtExpirationMs: 1800000
