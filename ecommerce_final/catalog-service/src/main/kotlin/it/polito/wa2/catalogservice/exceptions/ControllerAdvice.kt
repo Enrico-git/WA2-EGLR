@@ -5,6 +5,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.ControllerAdvice
+import org.springframework.web.reactive.function.client.WebClientResponseException
 import java.sql.Timestamp
 import javax.validation.ValidationException
 
@@ -17,7 +18,8 @@ class ControllerAdvice {
         OptimisticLockingFailureException::class,
         UnauthorizedException::class,
         InvalidOperationException::class,
-        RuntimeException::class
+        UnavailableServiceException::class,
+        WebClientResponseException::class
     ])
     fun genericExceptionHandler(e: Exception): ResponseEntity<ErrorDTO> {
         val errorDTO = ErrorDTO(
@@ -53,6 +55,10 @@ class ControllerAdvice {
                 status = HttpStatus.BAD_REQUEST
             }
             is UnavailableServiceException -> {
+                errorDTO.status = 500
+                status = HttpStatus.INTERNAL_SERVER_ERROR
+            }
+            is WebClientResponseException -> {
                 errorDTO.status = 500
                 status = HttpStatus.INTERNAL_SERVER_ERROR
             }

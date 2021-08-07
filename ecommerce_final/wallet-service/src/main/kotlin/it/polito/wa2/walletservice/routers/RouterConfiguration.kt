@@ -40,7 +40,7 @@ class RouterConfiguration(
         "/wallets".nest {
             accept(MediaType.APPLICATION_JSON).nest {
                 GET("/{walletID}", walletHandler::getWallet)
-                POST("/", contentType(MediaType.APPLICATION_JSON), walletHandler::createWallet)
+                POST("", contentType(MediaType.APPLICATION_JSON), walletHandler::createWallet)
                 POST("/{walletID}/transactions", walletHandler::createRechargeTransaction)
                 GET("/{walletID}/transactions", walletHandler::getAllTransactions)
                 GET("/{walletID}/transactions/{transactionID}", walletHandler::getTransaction)
@@ -82,6 +82,6 @@ class RouterConfiguration(
         onError<UncategorizedMongoDbException>{e, _ -> status(HttpStatus.CONFLICT).bodyValueAndAwait(e.localizedMessage) }
         onError<InvalidOperationException> { e, _ ->  status(HttpStatus.CONFLICT).bodyValueAndAwait(e.localizedMessage)}
         onError<UnauthorizedException> { e, _ ->  status(HttpStatus.UNAUTHORIZED).bodyValueAndAwait(e.localizedMessage)}
-        onError<Exception> {e, _ ->  status(HttpStatus.BAD_REQUEST).bodyValueAndAwait(e.localizedMessage)}
+        onError<Exception> {e, _ ->  status(HttpStatus.INTERNAL_SERVER_ERROR).bodyValueAndAwait(e.localizedMessage)}
     }
 }

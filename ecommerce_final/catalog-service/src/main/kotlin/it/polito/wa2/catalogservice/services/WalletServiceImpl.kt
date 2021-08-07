@@ -92,8 +92,9 @@ class WalletServiceImpl(
         val token = ReactiveSecurityContextHolder.getContext().awaitSingle().authentication.credentials as String
         return client
             .post()
-            .uri("$serviceURL/wallets/")
+            .uri("$serviceURL/wallets")
             .bodyValue(walletDTO)
+            .header(HttpHeaders.CONTENT_TYPE, "application/json")
             .accept(MediaType.APPLICATION_JSON)
             .header(HttpHeaders.AUTHORIZATION, "Bearer $token")
             .retrieve()
@@ -109,6 +110,7 @@ class WalletServiceImpl(
             .uri("$serviceURL/wallets/$walletID/transactions")
             .bodyValue(transactionDTO)
             .accept(MediaType.APPLICATION_JSON)
+            .header(HttpHeaders.CONTENT_TYPE, "application/json")
             .header(HttpHeaders.AUTHORIZATION, "Bearer $token")
             .retrieve()
             .onStatus(Predicate { it == HttpStatus.UNAUTHORIZED }) { throw UnauthorizedException("Nice try") }

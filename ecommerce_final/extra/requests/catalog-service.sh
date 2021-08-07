@@ -50,14 +50,14 @@ curl -i -v -H "Authorization: Bearer eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJyb2
   -H "Authorization: Bearer eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJyb2xlcyI6IkFETUlOIiwic3ViIjoiNjBmNjZmZDU5OGY2ZDIyZGMwMzA5MmQ0IiwiaWF0IjoxNTE2MjM5MDIyLCJleHAiOjE4MTYyMzkwMjJ9.T9yAM3lJa0i7vYl1THWUH0_Xp7bbNt-FhqoV1Nx1M9aoGH_hlAPI2FOTKoH-MzA_BWfcLfA8JUdr0Xe_ftscvg" \
   -H "Content-Type: application/json" \
   -d '{"userID": "60f66fd598f6d22dc03092d4"}' \
- "localhost:8081/wallets/"
+ "localhost:8081/wallets"
 
 #400 Bad request: Denied - CUSTOMER
  curl -i -v -X POST  \
   -H "Authorization: Bearer eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJyb2xlcyI6IkNVU1RPTUVSIiwic3ViIjoiNjBmNjZmZDU5OGY2ZDIyZGMwMzA5MmQ0IiwiaWF0IjoxNTE2MjM5MDIyLCJleHAiOjE4MTYyMzkwMjJ9.WoDCPnmcLXLw4_pCPll82QSnnbwSA5QBuQlaX-cz42X-ZBem3KfYLi1EjDYdyVMxhd_nUFkIodtpCP1mPHF_kw" \
   -H "Content-Type: application/json" \
   -d '{"userID": "60f66fd598f6d22dc03092d4"}' \
- localhost:8081/wallets/
+ localhost:8081/wallets
 
 ########################################################################
 ## POST /wallets/{walletID}/transactions -> CreateTransaction [ADMIN]

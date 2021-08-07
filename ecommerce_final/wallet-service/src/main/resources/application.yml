@@ -2,7 +2,7 @@ server:
   port: 8100
 spring:
   application:
-    name: wallet
+    name: wallet-service
 #  security:
 #    user:
 #      name: wallet-service
