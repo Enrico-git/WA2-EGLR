@@ -16,7 +16,8 @@ class ControllerAdvice {
         IllegalArgumentException::class,
         OptimisticLockingFailureException::class,
         UnauthorizedException::class,
-        InvalidOperationException::class
+        InvalidOperationException::class,
+        RuntimeException::class
     ])
     fun genericExceptionHandler(e: Exception): ResponseEntity<ErrorDTO> {
         val errorDTO = ErrorDTO(
@@ -50,6 +51,10 @@ class ControllerAdvice {
             }
             is IllegalArgumentException -> {
                 status = HttpStatus.BAD_REQUEST
+            }
+            is RuntimeException -> {
+                errorDTO.status = 500
+                status = HttpStatus.INTERNAL_SERVER_ERROR
             }
         }
 
