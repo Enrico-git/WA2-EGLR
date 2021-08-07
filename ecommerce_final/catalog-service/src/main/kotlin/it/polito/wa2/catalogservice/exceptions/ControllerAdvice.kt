@@ -52,7 +52,7 @@ class ControllerAdvice {
             is IllegalArgumentException -> {
                 status = HttpStatus.BAD_REQUEST
             }
-            is RuntimeException -> {
+            is UnavailableServiceException -> {
                 errorDTO.status = 500
                 status = HttpStatus.INTERNAL_SERVER_ERROR
             }

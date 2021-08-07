@@ -3,6 +3,7 @@ package it.polito.wa2.catalogservice.services
 import it.polito.wa2.catalogservice.dto.WarehouseDTO
 import it.polito.wa2.catalogservice.exceptions.NotFoundException
 import it.polito.wa2.catalogservice.exceptions.UnauthorizedException
+import it.polito.wa2.catalogservice.exceptions.UnavailableServiceException
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.reactive.awaitSingle
 import org.springframework.beans.factory.annotation.Qualifier
@@ -39,7 +40,7 @@ class WarehouseServiceImpl(
             .accept(MediaType.APPLICATION_NDJSON)
             .header(HttpHeaders.AUTHORIZATION, "Bearer $token")
             .retrieve()
-            .onStatus(Predicate { it == HttpStatus.INTERNAL_SERVER_ERROR }) { throw RuntimeException("Something went wrong") }
+            .onStatus(Predicate { it == HttpStatus.INTERNAL_SERVER_ERROR }) { throw UnavailableServiceException("Something went wrong") }
             .bodyToFlow()
     }
 
@@ -54,7 +55,7 @@ class WarehouseServiceImpl(
             .onStatus(Predicate { it == HttpStatus.NOT_FOUND }) { throw NotFoundException("Order not found") }
             .onStatus(Predicate { it == HttpStatus.FORBIDDEN }) { throw UnauthorizedException("Nice try") }
             .onStatus(Predicate { it == HttpStatus.UNAUTHORIZED }) { throw UnauthorizedException("Nice try") }
-            .onStatus(Predicate { it == HttpStatus.INTERNAL_SERVER_ERROR }) { throw RuntimeException("Something went wrong") }
+            .onStatus(Predicate { it == HttpStatus.INTERNAL_SERVER_ERROR }) { throw UnavailableServiceException("Something went wrong") }
             .awaitBody()
     }
 
@@ -67,8 +68,8 @@ class WarehouseServiceImpl(
             .retrieve()
             .onStatus(Predicate { it == HttpStatus.UNAUTHORIZED }) { throw UnauthorizedException("Nice try") }
             .onStatus(Predicate { it == HttpStatus.FORBIDDEN }) { throw UnauthorizedException("Nice try") }
-            .onStatus(Predicate { it == HttpStatus.INTERNAL_SERVER_ERROR }) { throw RuntimeException("Something went wrong") }
-            .onStatus(Predicate { it == HttpStatus.BAD_REQUEST }) { throw RuntimeException("The order does not exist") }
+            .onStatus(Predicate { it == HttpStatus.INTERNAL_SERVER_ERROR }) { throw UnavailableServiceException("Something went wrong") }
+            .onStatus(Predicate { it == HttpStatus.BAD_REQUEST }) { throw IllegalArgumentException("The order does not exist") }
             .awaitBodilessEntity()
     }
 
@@ -82,7 +83,7 @@ class WarehouseServiceImpl(
             .header(HttpHeaders.AUTHORIZATION, "Bearer $token")
             .retrieve()
             .onStatus(Predicate { it == HttpStatus.UNAUTHORIZED }) { throw UnauthorizedException("Nice try") }
-            .onStatus(Predicate { it == HttpStatus.INTERNAL_SERVER_ERROR }) { throw RuntimeException("Something went wrong") }
+            .onStatus(Predicate { it == HttpStatus.INTERNAL_SERVER_ERROR }) { throw UnavailableServiceException("Something went wrong") }
             .awaitBody()
     }
 
@@ -95,8 +96,8 @@ class WarehouseServiceImpl(
             .header(HttpHeaders.AUTHORIZATION, "Bearer $token")
             .retrieve()
             .onStatus(Predicate { it == HttpStatus.UNAUTHORIZED }) { throw UnauthorizedException("Nice try") }
-            .onStatus(Predicate { it == HttpStatus.INTERNAL_SERVER_ERROR }) { throw RuntimeException("Something went wrong") }
-            .onStatus(Predicate { it == HttpStatus.BAD_REQUEST }) { throw RuntimeException("The order does not exist") }
+            .onStatus(Predicate { it == HttpStatus.INTERNAL_SERVER_ERROR }) { throw UnavailableServiceException("Something went wrong") }
+            .onStatus(Predicate { it == HttpStatus.BAD_REQUEST }) { throw IllegalArgumentException("The order does not exist") }
             .awaitBody()
     }
 
@@ -109,8 +110,8 @@ class WarehouseServiceImpl(
             .header(HttpHeaders.AUTHORIZATION, "Bearer $token")
             .retrieve()
             .onStatus(Predicate { it == HttpStatus.UNAUTHORIZED }) { throw UnauthorizedException("Nice try") }
-            .onStatus(Predicate { it == HttpStatus.INTERNAL_SERVER_ERROR }) { throw RuntimeException("Something went wrong") }
-            .onStatus(Predicate { it == HttpStatus.BAD_REQUEST }) { throw RuntimeException("The order does not exist") }
+            .onStatus(Predicate { it == HttpStatus.INTERNAL_SERVER_ERROR }) { throw UnavailableServiceException("Something went wrong") }
+            .onStatus(Predicate { it == HttpStatus.BAD_REQUEST }) { throw IllegalArgumentException("The order does not exist") }
             .awaitBody()
     }
 }

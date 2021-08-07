@@ -9,8 +9,10 @@ import it.polito.wa2.catalogservice.repositories.UserRepository
 import it.polito.wa2.catalogservice.security.JwtUtils
 import it.polito.wa2.catalogservice.security.AuthenticationManager
 import it.polito.wa2.catalogservice.dto.toDTO
+import it.polito.wa2.catalogservice.exceptions.UnauthorizedException
 import it.polito.wa2.catalogservice.repositories.EmailVerificationTokenRepository
 import kotlinx.coroutines.reactive.awaitFirst
+import kotlinx.coroutines.reactive.awaitFirstOrNull
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Lazy
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
@@ -97,12 +99,11 @@ class UserDetailsServiceExtImpl(
     override suspend fun authAndCreateToken(loginDTO: LoginDTO): LoginDTO {
         val authentication: Authentication = authenticationManager.authenticate(
             UsernamePasswordAuthenticationToken(loginDTO.username, loginDTO.password)
-        ).awaitFirst()
-        val ctx = ReactiveSecurityContextHolder.getContext().awaitFirst()
-        ctx.authentication = authentication
+        ).awaitFirstOrNull() ?: throw UnauthorizedException("Invalid Login")
+        ReactiveSecurityContextHolder.getContext().awaitFirst().authentication = authentication
         loginDTO.jwt = jwtUtils.generateJwtToken(authentication)
         loginDTO.roles =
-            ctx.authentication.authorities.map { it.authority }.toMutableSet()
+            authentication.authorities.map { it.authority }.toMutableSet()
         return loginDTO
     }
 }

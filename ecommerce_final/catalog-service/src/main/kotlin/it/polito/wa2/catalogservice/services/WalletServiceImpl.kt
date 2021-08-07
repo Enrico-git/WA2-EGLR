@@ -4,6 +4,7 @@ import it.polito.wa2.catalogservice.dto.TransactionDTO
 import it.polito.wa2.catalogservice.dto.WalletDTO
 import it.polito.wa2.catalogservice.exceptions.NotFoundException
 import it.polito.wa2.catalogservice.exceptions.UnauthorizedException
+import it.polito.wa2.catalogservice.exceptions.UnavailableServiceException
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.reactive.awaitSingle
 import org.springframework.beans.factory.annotation.Qualifier
@@ -41,7 +42,7 @@ class WalletServiceImpl(
             .onStatus(Predicate { it == HttpStatus.NOT_FOUND }) { throw NotFoundException("Order not found") }
             .onStatus(Predicate { it == HttpStatus.FORBIDDEN }) { throw UnauthorizedException("Nice try") }
             .onStatus(Predicate { it == HttpStatus.UNAUTHORIZED }) { throw UnauthorizedException("Nice try") }
-            .onStatus(Predicate { it == HttpStatus.INTERNAL_SERVER_ERROR }) { throw RuntimeException("Something went wrong") }
+            .onStatus(Predicate { it == HttpStatus.INTERNAL_SERVER_ERROR }) { throw UnavailableServiceException("Something went wrong") }
             .awaitBody()
     }
 
@@ -64,7 +65,10 @@ class WalletServiceImpl(
             .accept(MediaType.APPLICATION_NDJSON)
             .header(HttpHeaders.AUTHORIZATION, "Bearer $token")
             .retrieve()
-            .onStatus(Predicate { it == HttpStatus.INTERNAL_SERVER_ERROR }) { throw RuntimeException("Something went wrong") }
+            .onStatus(Predicate { it == HttpStatus.NOT_FOUND }) { throw NotFoundException("Order not found") }
+            .onStatus(Predicate { it == HttpStatus.FORBIDDEN }) { throw UnauthorizedException("Nice try") }
+            .onStatus(Predicate { it == HttpStatus.UNAUTHORIZED }) { throw UnauthorizedException("Nice try") }
+            .onStatus(Predicate { it == HttpStatus.INTERNAL_SERVER_ERROR }) { throw UnavailableServiceException("Something went wrong") }
             .bodyToFlow()
 
     }
@@ -80,7 +84,7 @@ class WalletServiceImpl(
             .onStatus(Predicate { it == HttpStatus.NOT_FOUND }) { throw NotFoundException("Order not found") }
             .onStatus(Predicate { it == HttpStatus.FORBIDDEN }) { throw UnauthorizedException("Nice try") }
             .onStatus(Predicate { it == HttpStatus.UNAUTHORIZED }) { throw UnauthorizedException("Nice try") }
-            .onStatus(Predicate { it == HttpStatus.INTERNAL_SERVER_ERROR }) { throw RuntimeException("Something went wrong") }
+            .onStatus(Predicate { it == HttpStatus.INTERNAL_SERVER_ERROR }) { throw UnavailableServiceException("Something went wrong") }
             .awaitBody()
     }
 
@@ -94,7 +98,7 @@ class WalletServiceImpl(
             .header(HttpHeaders.AUTHORIZATION, "Bearer $token")
             .retrieve()
             .onStatus(Predicate { it == HttpStatus.UNAUTHORIZED }) { throw UnauthorizedException("Nice try") }
-            .onStatus(Predicate { it == HttpStatus.INTERNAL_SERVER_ERROR }) { throw RuntimeException("Something went wrong") }
+            .onStatus(Predicate { it == HttpStatus.INTERNAL_SERVER_ERROR }) { throw UnavailableServiceException("Something went wrong") }
             .awaitBody()
     }
 
@@ -108,7 +112,7 @@ class WalletServiceImpl(
             .header(HttpHeaders.AUTHORIZATION, "Bearer $token")
             .retrieve()
             .onStatus(Predicate { it == HttpStatus.UNAUTHORIZED }) { throw UnauthorizedException("Nice try") }
-            .onStatus(Predicate { it == HttpStatus.INTERNAL_SERVER_ERROR }) { throw RuntimeException("Something went wrong") }
+            .onStatus(Predicate { it == HttpStatus.INTERNAL_SERVER_ERROR }) { throw UnavailableServiceException("Something went wrong") }
             .awaitBody()
     }
 }
