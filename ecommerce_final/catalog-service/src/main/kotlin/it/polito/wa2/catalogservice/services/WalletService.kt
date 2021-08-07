@@ -5,7 +5,6 @@ import it.polito.wa2.catalogservice.dto.WalletDTO
 import kotlinx.coroutines.flow.Flow
 import org.springframework.security.access.prepost.PreAuthorize
 
-//TODO which filter on newTransaction?
 interface WalletService {
     @PreAuthorize("hasAuthority(\"ADMIN\") or hasAuthority(\"CUSTOMER\")")
     suspend fun getWallet(walletID: String): WalletDTO
@@ -15,5 +14,6 @@ interface WalletService {
     suspend fun getTransaction(walletID: String, transactionID: String): TransactionDTO
     @PreAuthorize("hasAuthority(\"ADMIN\")")
     suspend fun newWallet(walletDTO: WalletDTO): WalletDTO
+    @PreAuthorize("hasAuthority(\"ADMIN\") or hasAuthority(\"CUSTOMER\")")
     suspend fun newTransaction(walletID: String, transactionDTO: TransactionDTO): TransactionDTO
 }
