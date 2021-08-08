@@ -39,7 +39,7 @@ class CommentServiceImpl(
             .accept(MediaType.APPLICATION_JSON)
             .header(HttpHeaders.AUTHORIZATION, "Bearer $token")
             .retrieve()
-            .onStatus(Predicate { it == HttpStatus.NOT_FOUND }) { throw NotFoundException("Order not found") }
+            .onStatus(Predicate { it == HttpStatus.NOT_FOUND }) { throw NotFoundException("Comment not found") }
             .onStatus(Predicate { it == HttpStatus.FORBIDDEN }) { throw UnauthorizedException("Nice try") }
             .onStatus(Predicate { it == HttpStatus.UNAUTHORIZED }) { throw UnauthorizedException("Nice try") }
             .onStatus(Predicate { it == HttpStatus.INTERNAL_SERVER_ERROR }) { throw RuntimeException("Something went wrong") }
@@ -70,7 +70,7 @@ class CommentServiceImpl(
             .retrieve()
             .onStatus(Predicate { it == HttpStatus.UNAUTHORIZED }) { throw UnauthorizedException("Nice try") }
             .onStatus(Predicate { it == HttpStatus.INTERNAL_SERVER_ERROR }) { throw RuntimeException("Something went wrong") }
-            .onStatus(Predicate { it == HttpStatus.BAD_REQUEST }) { throw RuntimeException("The order does not exist") }
+            .onStatus(Predicate { it == HttpStatus.BAD_REQUEST }) { throw RuntimeException("The comment does not exist") }
             .awaitBody()
     }
 
@@ -84,7 +84,7 @@ class CommentServiceImpl(
             .onStatus(Predicate { it == HttpStatus.UNAUTHORIZED }) { throw UnauthorizedException("Nice try") }
             .onStatus(Predicate { it == HttpStatus.FORBIDDEN }) { throw UnauthorizedException("Nice try") }
             .onStatus(Predicate { it == HttpStatus.INTERNAL_SERVER_ERROR }) { throw RuntimeException("Something went wrong") }
-            .onStatus(Predicate { it == HttpStatus.BAD_REQUEST }) { throw RuntimeException("The order does not exist") }
+            .onStatus(Predicate { it == HttpStatus.BAD_REQUEST }) { throw RuntimeException("The comment does not exist") }
             .awaitBodilessEntity()
     }
 }

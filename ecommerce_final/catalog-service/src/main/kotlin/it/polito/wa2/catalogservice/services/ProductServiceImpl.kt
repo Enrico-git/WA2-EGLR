@@ -36,18 +36,9 @@ class ProductServiceImpl(
         .build()
 
     override suspend fun getProducts(category: String?, page: Int?, size: Int?): Flow<ProductDTO> {
-        val categoryOpt = if ( category != null)
-            Optional.of(category)
-        else
-            Optional.empty()
-        val pageOpt = if ( page != null)
-            Optional.of(page)
-        else
-            Optional.empty()
-        val sizeOpt = if ( size != null)
-            Optional.of(size)
-        else
-            Optional.empty()
+        val categoryOpt = if ( category != null) Optional.of(category) else Optional.empty()
+        val pageOpt = if ( page != null) Optional.of(page) else Optional.empty()
+        val sizeOpt = if ( size != null) Optional.of(size) else Optional.empty()
         return client
             .get()
             .uri{
@@ -69,7 +60,7 @@ class ProductServiceImpl(
             .uri("$serviceURL/products/$productID")
             .accept(MediaType.APPLICATION_JSON)
             .retrieve()
-            .onStatus(Predicate { it == HttpStatus.NOT_FOUND }) { throw NotFoundException("Order not found") }
+            .onStatus(Predicate { it == HttpStatus.NOT_FOUND }) { throw NotFoundException("Product not found") }
             .onStatus(Predicate { it == HttpStatus.FORBIDDEN }) { throw UnauthorizedException("Nice try") }
             .onStatus(Predicate { it == HttpStatus.UNAUTHORIZED }) { throw UnauthorizedException("Nice try") }
             .onStatus(Predicate { it == HttpStatus.INTERNAL_SERVER_ERROR }) { throw UnavailableServiceException("Something went wrong") }
@@ -84,7 +75,7 @@ class ProductServiceImpl(
             .accept(MediaType.APPLICATION_JSON)
             .header(HttpHeaders.AUTHORIZATION, "Bearer $token")
             .retrieve()
-            .onStatus(Predicate { it == HttpStatus.NOT_FOUND }) { throw NotFoundException("Order not found") }
+            .onStatus(Predicate { it == HttpStatus.NOT_FOUND }) { throw NotFoundException("Product not found") }
             .onStatus(Predicate { it == HttpStatus.FORBIDDEN }) { throw UnauthorizedException("Nice try") }
             .onStatus(Predicate { it == HttpStatus.UNAUTHORIZED }) { throw UnauthorizedException("Nice try") }
             .onStatus(Predicate { it == HttpStatus.INTERNAL_SERVER_ERROR }) { throw UnavailableServiceException("Something went wrong") }
@@ -125,7 +116,7 @@ class ProductServiceImpl(
             .onStatus(Predicate { it == HttpStatus.UNAUTHORIZED }) { throw UnauthorizedException("Nice try") }
             .onStatus(Predicate { it == HttpStatus.FORBIDDEN }) { throw UnauthorizedException("Nice try") }
             .onStatus(Predicate { it == HttpStatus.INTERNAL_SERVER_ERROR }) { throw UnavailableServiceException("Something went wrong") }
-            .onStatus(Predicate { it == HttpStatus.BAD_REQUEST }) { throw IllegalArgumentException("The order does not exist") }
+            .onStatus(Predicate { it == HttpStatus.BAD_REQUEST }) { throw IllegalArgumentException("The product does not exist") }
             .awaitBodilessEntity()
     }
 
@@ -139,7 +130,7 @@ class ProductServiceImpl(
             .retrieve()
             .onStatus(Predicate { it == HttpStatus.UNAUTHORIZED }) { throw UnauthorizedException("Nice try") }
             .onStatus(Predicate { it == HttpStatus.INTERNAL_SERVER_ERROR }) { throw UnavailableServiceException("Something went wrong") }
-            .onStatus(Predicate { it == HttpStatus.BAD_REQUEST }) { throw IllegalArgumentException("The order does not exist") }
+            .onStatus(Predicate { it == HttpStatus.BAD_REQUEST }) { throw IllegalArgumentException("The product does not exist") }
             .awaitBody()
     }
 
@@ -153,7 +144,7 @@ class ProductServiceImpl(
             .retrieve()
             .onStatus(Predicate { it == HttpStatus.UNAUTHORIZED }) { throw UnauthorizedException("Nice try") }
             .onStatus(Predicate { it == HttpStatus.INTERNAL_SERVER_ERROR }) { throw UnavailableServiceException("Something went wrong") }
-            .onStatus(Predicate { it == HttpStatus.BAD_REQUEST }) { throw IllegalArgumentException("The order does not exist") }
+            .onStatus(Predicate { it == HttpStatus.BAD_REQUEST }) { throw IllegalArgumentException("The product does not exist") }
             .awaitBody()
     }
 
@@ -167,7 +158,7 @@ class ProductServiceImpl(
             .retrieve()
             .onStatus(Predicate { it == HttpStatus.UNAUTHORIZED }) { throw UnauthorizedException("Nice try") }
             .onStatus(Predicate { it == HttpStatus.INTERNAL_SERVER_ERROR }) { throw UnavailableServiceException("Something went wrong") }
-            .onStatus(Predicate { it == HttpStatus.BAD_REQUEST }) { throw IllegalArgumentException("The order does not exist") }
+            .onStatus(Predicate { it == HttpStatus.BAD_REQUEST }) { throw IllegalArgumentException("The product does not exist") }
             .awaitBody()
     }
 }
