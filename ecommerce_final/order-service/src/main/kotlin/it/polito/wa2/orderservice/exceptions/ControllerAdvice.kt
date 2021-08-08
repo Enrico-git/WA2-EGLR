@@ -5,6 +5,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.ControllerAdvice
+import org.springframework.web.bind.support.WebExchangeBindException
 import java.sql.Timestamp
 import javax.validation.ValidationException
 
@@ -16,7 +17,8 @@ class ControllerAdvice {
         IllegalArgumentException::class,
         OptimisticLockingFailureException::class,
         UnauthorizedException::class,
-        InvalidOperationException::class
+        InvalidOperationException::class,
+        WebExchangeBindException::class
     ])
     fun genericExceptionHandler(e: Exception): ResponseEntity<ErrorDTO> {
         val errorDTO = ErrorDTO(
@@ -50,6 +52,9 @@ class ControllerAdvice {
             }
             is IllegalArgumentException -> {
                 status = HttpStatus.BAD_REQUEST
+            }
+            is WebExchangeBindException -> {
+                errorDTO.error = e.fieldErrors.map { it.defaultMessage.toString() }.reduce{acc, elem -> "$acc, $elem" }
             }
         }
 

@@ -22,6 +22,7 @@ class OrchestratorImpl(
     override suspend fun createSaga(sagaDTO: SagaDTO) = orchestratorActions.createSaga(sagaDTO)
 
     @KafkaListener(topics = [
+//        TODO make custom listener for reserve_products_ok
         "reserve_products_ok",
         "reserve_products_failed",
         "payment_request_failed",

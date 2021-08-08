@@ -1,5 +1,8 @@
 package it.polito.wa2.orderservice.controllers
 
+import it.polito.wa2.orderservice.constraintGroups.CreateOrder
+import it.polito.wa2.orderservice.constraintGroups.DeleteOrder
+import it.polito.wa2.orderservice.constraintGroups.UpdateOrder
 import it.polito.wa2.orderservice.dto.OrderDTO
 import it.polito.wa2.orderservice.services.OrderService
 import kotlinx.coroutines.delay
@@ -10,6 +13,7 @@ import org.springframework.data.domain.Pageable
 import org.springframework.data.mongodb.UncategorizedMongoDbException
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
+import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
 
 @RestController
@@ -42,9 +46,8 @@ class OrderController(
      */
      @PatchMapping("/{orderID}")
      @ResponseStatus(HttpStatus.CREATED)
-     suspend fun updateOrderByID(@PathVariable orderID: ObjectId, @RequestBody orderDTO: OrderDTO) : OrderDTO {
+     suspend fun updateOrderByID(@PathVariable orderID: ObjectId, @RequestBody @Validated(UpdateOrder::class) orderDTO: OrderDTO) : OrderDTO {
         var counter = 5
-//        println(orderDTO)
         while (counter-- > 0){
             try {
                 return orderService.updateOrderStatus(orderID, orderDTO)
@@ -62,7 +65,7 @@ class OrderController(
      */
      @DeleteMapping("/{orderID}")
      @ResponseStatus(HttpStatus.NO_CONTENT)
-     suspend fun deleteOrderByID(@PathVariable orderID: ObjectId, @RequestBody orderDTO: OrderDTO) {
+     suspend fun deleteOrderByID(@PathVariable orderID: ObjectId, @RequestBody @Validated(DeleteOrder::class) orderDTO: OrderDTO) {
         var counter = 5
         while (counter-- > 0){
             try {
@@ -82,7 +85,7 @@ class OrderController(
      */
      @PostMapping("")
      @ResponseStatus(HttpStatus.CREATED)
-     suspend fun createOrder(@RequestBody orderDTO: OrderDTO): OrderDTO {
+     suspend fun createOrder(@RequestBody @Validated(CreateOrder::class) orderDTO: OrderDTO): OrderDTO {
         return orderService.createOrder(orderDTO)
     }
 }
