@@ -4,29 +4,13 @@ import it.polito.wa2.catalogservice.constraintGroups.CreateOrder
 import it.polito.wa2.catalogservice.constraintGroups.DeleteOrder
 import it.polito.wa2.catalogservice.constraintGroups.UpdateOrder
 import it.polito.wa2.catalogservice.dto.OrderDTO
-import it.polito.wa2.catalogservice.dto.UserDetailsDTO
 import it.polito.wa2.catalogservice.services.OrderService
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.reactive.asFlow
-import kotlinx.coroutines.reactive.awaitSingle
 import org.bson.types.ObjectId
-import org.springframework.beans.factory.annotation.Qualifier
-import org.springframework.http.HttpHeaders
-import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
-import org.springframework.security.access.prepost.PreAuthorize
-import org.springframework.security.core.context.ReactiveSecurityContextHolder
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
-import org.springframework.web.reactive.function.client.ClientResponse
-import org.springframework.web.reactive.function.client.WebClient
-import org.springframework.web.reactive.function.client.bodyToFlow
-import org.springframework.web.reactive.function.client.bodyToFlux
-import reactor.core.publisher.Mono
-import java.nio.charset.StandardCharsets
-import java.time.ZonedDateTime
-import java.util.*
 
 @RestController
 @RequestMapping("/orders")

@@ -5,6 +5,7 @@ import it.polito.wa2.catalogservice.dto.WalletDTO
 import it.polito.wa2.catalogservice.services.WalletService
 import kotlinx.coroutines.flow.Flow
 import org.springframework.http.HttpStatus
+import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
 
 @RestController
@@ -41,7 +42,7 @@ class WalletController(
     //ADD A WALLET FOR A GIVEN CUSTOMER
     @PostMapping("/")
     @ResponseStatus(HttpStatus.CREATED)
-    suspend fun newWallet(@RequestBody walletDTO: WalletDTO): WalletDTO {
+    suspend fun newWallet(@RequestBody @Validated walletDTO: WalletDTO): WalletDTO {
         return walletService.newWallet(walletDTO)
     }
 
@@ -49,7 +50,7 @@ class WalletController(
     @PostMapping("/{walletID}/transactions")
     @ResponseStatus(HttpStatus.CREATED)
     suspend fun newTransaction(@PathVariable walletID: String,
-                               @RequestBody transactionDTO: TransactionDTO): TransactionDTO {
+                               @RequestBody @Validated transactionDTO: TransactionDTO): TransactionDTO {
         return walletService.newTransaction(walletID,transactionDTO)
     }
 }
