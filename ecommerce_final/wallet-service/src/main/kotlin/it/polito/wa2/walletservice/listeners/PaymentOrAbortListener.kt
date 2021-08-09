@@ -4,9 +4,11 @@ import it.polito.wa2.walletservice.dto.KafkaPaymentRequestDTO
 import it.polito.wa2.walletservice.services.WalletService
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerRecord
+import org.springframework.data.mongodb.UncategorizedMongoDbException
 import org.springframework.kafka.annotation.KafkaListener
 import org.springframework.kafka.support.KafkaHeaders
 import org.springframework.messaging.handler.annotation.Header
@@ -33,9 +35,16 @@ class PaymentOrAbortListener(
     )
     fun requestConsumer(paymentOrAbortRequestDTO: KafkaPaymentRequestDTO, @Header(KafkaHeaders.RECEIVED_TOPIC) topic: String){
         CoroutineScope(Dispatchers.IO).launch {
-            val result = walletService.createPaymentOrRefundTransaction(topic, paymentOrAbortRequestDTO)
-
-            if (result != null && result == false) {
+            var counter = 5
+            var result : Boolean? = false
+            while (counter-- > 0)
+                try {
+                    result = walletService.createPaymentOrRefundTransaction(topic, paymentOrAbortRequestDTO)
+                    break
+                } catch (e: UncategorizedMongoDbException){
+                    delay(1000)
+                }
+            if (result==false) {
                 println("${topic}_failed")
                 kafkaPaymentRequestFailedProducer.send(
                     ProducerRecord("${topic}_failed", paymentOrAbortRequestDTO.orderID)
