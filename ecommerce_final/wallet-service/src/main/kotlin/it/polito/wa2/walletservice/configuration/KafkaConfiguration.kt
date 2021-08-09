@@ -34,8 +34,8 @@ class KafkaConfiguration {
         configProps[ConsumerConfig.GROUP_ID_CONFIG] = "wallet_service"
         configProps[ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG] = StringDeserializer::class.java
         configProps[ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG] = JsonDeserializer::class.java
-        return DefaultKafkaConsumerFactory(configProps, StringDeserializer(), JsonDeserializer(KafkaPaymentRequestDTO::class.java)
-        )
+        configProps[JsonDeserializer.TYPE_MAPPINGS] = "it.polito.wa2.orderservice.dto.PaymentRequestDTO:it.polito.wa2.walletservice.dto.KafkaPaymentRequestDTO"
+        return DefaultKafkaConsumerFactory(configProps)
     }
 
     @Bean //consumer: "topic + DTO"

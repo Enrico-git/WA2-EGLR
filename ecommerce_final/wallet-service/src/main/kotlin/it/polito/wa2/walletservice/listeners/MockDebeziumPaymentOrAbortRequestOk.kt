@@ -1,4 +1,4 @@
-package it.polito.wa2.walletservice.kafka
+package it.polito.wa2.walletservice.listeners
 
 import org.springframework.kafka.annotation.KafkaListener
 import org.springframework.kafka.support.KafkaHeaders

@@ -115,118 +115,118 @@ class WalletServiceImpl(
      * this method starts when kafka lister of "request_payment" receive a new message
      * and returns "request_payment_failed" or "request_payment_ok" (debezium)
      */
-    override suspend fun createPaymentOrRefundTransaction(topic: String, paymentRequestDTO: KafkaPaymentRequestDTO): Boolean? {
-//         Avoid to process order already canceled by Order-Service
-        if( Timestamp(paymentRequestDTO.timestamp.time + retryDelay) < Timestamp(System.currentTimeMillis()))
-            return null
-
-//         Checks that this request has not been served yet.
-//         (Orders try 5 times, and maybe Wallet served it and then crashed)
-//         in case of "request_failed" we don't have this information in DB
-//         but order-service will handle it.
-        val orderIDObj = ObjectId(paymentRequestDTO.orderID)
-        val targetTransaction = transactionRepository.findByOrderID(orderIDObj)
-        if(targetTransaction != null)
-            return null
-
-//         Security Checks
-        val userDetailsDTO = jwtUtils.getDetailsFromJwtToken(paymentRequestDTO.token)
-        //Please notice that userDetailsDTO.id is always != null
-
-        if ((userDetailsDTO.roles?.contains("CUSTOMER") != true) &&
-            (userDetailsDTO.roles?.contains("ADMIN") != true) ) {
-                return false
-            }
-//         UserID and Wallet checks
-//        val userIDObj = ObjectId("60f66fd598f6d22dc03092d4")
-        val wallet = walletRepository.findByUserID(userDetailsDTO.id) ?: return false
-        if (!userDetailsDTO.roles.contains("ADMIN") &&
-            (wallet.userID != userDetailsDTO.id) ) {
-            return false
-        }
-
-        val description =
-            when (topic){
-                "payment_request" -> {
-                    if ( (wallet.balance - paymentRequestDTO.amount) < BigDecimal(0) ) {
-                        return false
-                    }
-
-                    wallet.balance -= paymentRequestDTO.amount
-
-                    TransactionDescription.PAYMENT
-                }
-                "abort_payment_request" -> {
-                    wallet.balance += paymentRequestDTO.amount
-                    TransactionDescription.REFUND
-                }
-                else -> return false
-            }
-
-        walletRepository.save(wallet)
-
-        val transactionDTO = TransactionDTO(
-            id = null,
-            timestamp = Timestamp(System.currentTimeMillis()),
-            walletID = wallet.id!!.toHexString(),
-            amount = paymentRequestDTO.amount,
-            description = description.toString(),
-            orderID = paymentRequestDTO.orderID
-        )
-
-//        This will trigger debezium that signals "payment_request_ok" or "abort_payment_request_ok"
-        println(transactionRepository.save(transactionDTO.toEntity()))
-        return true
-    }
+//    override suspend fun createPaymentOrRefundTransaction(topic: String, paymentRequestDTO: KafkaPaymentRequestDTO): Boolean? {
+////         Avoid to process order already canceled by Order-Service
+//        if( Timestamp(paymentRequestDTO.timestamp.time + retryDelay) < Timestamp(System.currentTimeMillis()))
+//            return null
+//
+////         Checks that this request has not been served yet.
+////         (Orders try 5 times, and maybe Wallet served it and then crashed)
+////         in case of "request_failed" we don't have this information in DB
+////         but order-service will handle it.
+//        val orderIDObj = ObjectId(paymentRequestDTO.orderID)
+//        val targetTransaction = transactionRepository.findByOrderID(orderIDObj)
+//        if(targetTransaction != null)
+//            return null
+//
+////         Security Checks
+//        val userDetailsDTO = jwtUtils.getDetailsFromJwtToken(paymentRequestDTO.token)
+//        //Please notice that userDetailsDTO.id is always != null
+//
+//        if ((userDetailsDTO.roles?.contains("CUSTOMER") != true) &&
+//            (userDetailsDTO.roles?.contains("ADMIN") != true) ) {
+//                return false
+//            }
+////         UserID and Wallet checks
+////        val userIDObj = ObjectId("60f66fd598f6d22dc03092d4")
+//        val wallet = walletRepository.findByUserID(userDetailsDTO.id) ?: return false
+//        if (!userDetailsDTO.roles.contains("ADMIN") &&
+//            (wallet.userID != userDetailsDTO.id) ) {
+//            return false
+//        }
+//
+//        val description =
+//            when (topic){
+//                "payment_request" -> {
+//                    if ( (wallet.balance - paymentRequestDTO.amount) < BigDecimal(0) ) {
+//                        return false
+//                    }
+//
+//                    wallet.balance -= paymentRequestDTO.amount
+//
+//                    TransactionDescription.PAYMENT
+//                }
+//                "abort_payment_request" -> {
+//                    wallet.balance += paymentRequestDTO.amount
+//                    TransactionDescription.REFUND
+//                }
+//                else -> return false
+//            }
+//
+//        walletRepository.save(wallet)
+//
+//        val transactionDTO = TransactionDTO(
+//            id = null,
+//            timestamp = Timestamp(System.currentTimeMillis()),
+//            walletID = wallet.id!!.toHexString(),
+//            amount = paymentRequestDTO.amount,
+//            description = description.toString(),
+//            orderID = paymentRequestDTO.orderID
+//        )
+//
+////        This will trigger debezium that signals "payment_request_ok" or "abort_payment_request_ok"
+//        println(transactionRepository.save(transactionDTO.toEntity()))
+//        return true
+//    }
 
 //    TODO change previous function with this one or erase it
-//    suspend fun getAuthorizedUser(token: String): UserDetailsDTO?{
-//        val user = if (jwtUtils.validateJwtToken(token))
-//            jwtUtils.getDetailsFromJwtToken(token)
-//        else return null
-//
-//        if (!(user.roles?.contains("CUSTOMER") == true || user.roles?.contains("ADMIN") == true))
-//            return null
-//        return user
-//    }
-//
-//    suspend fun createPaymentOrRefundTransactionGIULIO(topic: String, paymentRequestDTO: KafkaPaymentRequestDTO): Boolean {
-//            if (Timestamp(paymentRequestDTO.timestamp.time + retryDelay) < Timestamp(System.currentTimeMillis()))
-//                return false
-//
-//            val user = getAuthorizedUser(paymentRequestDTO.token) ?: return false
-//
-//            if (transactionRepository.findByOrderID(ObjectId(paymentRequestDTO.orderID)) != null)
-//                return false
-//
-//            val wallet = walletRepository.findByUserID(user.id) ?: return false
-//
-//            val transactionDescription: TransactionDescription
-//            if (topic == "payment_request" && wallet.balance >= paymentRequestDTO.amount) {
-//                wallet.balance -= paymentRequestDTO.amount
-//                transactionDescription = TransactionDescription.PAYMENT
-//            }
-//            else if (topic == "abort_payment_request"){
-//                wallet.balance += paymentRequestDTO.amount
-//                transactionDescription = TransactionDescription.REFUND
-//            }
-//            else
-//                return false
-//
-//            walletRepository.save(wallet)
-//
-//            transactionRepository.save(
-//                Transaction(
-//                    id = null,
-//                    timestamp = Timestamp(System.currentTimeMillis()),
-//                    walletID = wallet.id!!,
-//                    amount = paymentRequestDTO.amount,
-//                    description = transactionDescription,
-//                    orderID = ObjectId(paymentRequestDTO.orderID)
-//                )
-//            )
-//            return true
-//    }
+    suspend fun getAuthorizedUser(token: String): UserDetailsDTO?{
+        val user = if (jwtUtils.validateJwtToken(token))
+            jwtUtils.getDetailsFromJwtToken(token)
+        else return null
+
+        if (!(user.roles?.contains("CUSTOMER") == true || user.roles?.contains("ADMIN") == true))
+            return null
+        return user
+    }
+
+    override suspend fun createPaymentOrRefundTransaction(topic: String, paymentRequestDTO: KafkaPaymentRequestDTO): Boolean {
+            if (Timestamp(paymentRequestDTO.timestamp.time + retryDelay) < Timestamp(System.currentTimeMillis()))
+                return false
+
+            val user = getAuthorizedUser(paymentRequestDTO.token) ?: return false
+
+            if (transactionRepository.findByOrderID(ObjectId(paymentRequestDTO.orderID)) != null)
+                return false
+
+            val wallet = walletRepository.findByUserID(user.id) ?: return false
+
+            val transactionDescription: TransactionDescription
+            if (topic == "payment_request" && wallet.balance >= paymentRequestDTO.amount) {
+                wallet.balance -= paymentRequestDTO.amount
+                transactionDescription = TransactionDescription.PAYMENT
+            }
+            else if (topic == "abort_payment_request"){
+                wallet.balance += paymentRequestDTO.amount
+                transactionDescription = TransactionDescription.REFUND
+            }
+            else
+                return false
+
+            walletRepository.save(wallet)
+
+            transactionRepository.save(
+                Transaction(
+                    id = null,
+                    timestamp = Timestamp(System.currentTimeMillis()),
+                    walletID = wallet.id!!,
+                    amount = paymentRequestDTO.amount,
+                    description = transactionDescription,
+                    orderID = ObjectId(paymentRequestDTO.orderID)
+                )
+            )
+            return true
+    }
 
     /**
      * This method simulates what order-service will sent by means of kafka "payment_request" -> new_order

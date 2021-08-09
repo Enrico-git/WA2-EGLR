@@ -27,7 +27,7 @@ class KafkaConfiguration {
         configProps[ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG] = StringDeserializer::class.java
         configProps[ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG] = JsonDeserializer::class.java
         configProps[JsonDeserializer.TYPE_MAPPINGS] = "it.polito.wa2.orderservice.dto.ProductsReservationRequestDTO:it.polito.wa2.warehouseservice.dto.ProductsReservationRequestDTO"
-        return DefaultKafkaConsumerFactory(configProps, StringDeserializer(), JsonDeserializer(ProductsReservationRequestDTO::class.java))
+        return DefaultKafkaConsumerFactory(configProps)
     }
 
     @Bean

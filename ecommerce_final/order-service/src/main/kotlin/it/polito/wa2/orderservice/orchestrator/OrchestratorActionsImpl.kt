@@ -109,8 +109,6 @@ class OrchestratorActionsImpl(
         val sagaEvent = StateMachineEvents.valueOf(topic.uppercase())
         val saga = sagas[event]
         println(saga)
-//        val transition = saga?.transitions?.find{it.source == saga.state && it.event == sagaEvent}
-//        println("${saga?.id} --- ${saga?.state} --- $sagaEvent ---- trans: $transition")
         saga?.nextStateAndFireEvent(sagaEvent)
     }
     override fun onKafkaResponseReceivedEventInResponseTo(event: KafkaResponseReceivedEventInResponseTo) = CoroutineScope(

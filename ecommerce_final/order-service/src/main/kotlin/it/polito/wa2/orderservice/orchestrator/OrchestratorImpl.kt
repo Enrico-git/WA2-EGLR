@@ -32,7 +32,7 @@ class OrchestratorImpl(
         "abort_payment_request_ok",
         "abort_payment_request_failed"
     ])
-    override fun onKafkaEvent(event: String, @Header(KafkaHeaders.RECEIVED_TOPIC) topic: String) = orchestratorActions.onKafkaReceivedEvent(event, topic)
+    override fun onKafkaEvent(event: String, @Header(KafkaHeaders.RECEIVED_TOPIC) topic: String) = orchestratorActions.onKafkaReceivedEvent(event.removeSurrounding("\""), topic)
 
     @EventListener
     override fun onStateMachineEvent(event: StateMachineEvent) {

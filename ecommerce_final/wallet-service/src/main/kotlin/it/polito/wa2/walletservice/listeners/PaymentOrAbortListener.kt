@@ -1,4 +1,4 @@
-package it.polito.wa2.walletservice.kafka
+package it.polito.wa2.walletservice.listeners
 
 import it.polito.wa2.walletservice.dto.KafkaPaymentRequestDTO
 import it.polito.wa2.walletservice.services.WalletService
