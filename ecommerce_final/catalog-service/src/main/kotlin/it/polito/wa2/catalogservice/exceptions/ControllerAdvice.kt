@@ -20,7 +20,7 @@ class ControllerAdvice {
         UnauthorizedException::class,
         InvalidOperationException::class,
         UnavailableServiceException::class,
-        WebClientResponseException::class,
+        WebClientBadRequestException::class,
         WebExchangeBindException::class
     ])
     fun genericExceptionHandler(e: Exception): ResponseEntity<ErrorDTO> {
@@ -60,9 +60,10 @@ class ControllerAdvice {
                 errorDTO.status = 500
                 status = HttpStatus.INTERNAL_SERVER_ERROR
             }
-            is WebClientResponseException -> {
-                errorDTO.status = 500
-                status = HttpStatus.INTERNAL_SERVER_ERROR
+            is WebClientBadRequestException -> {
+                errorDTO.status = e.status
+                status = HttpStatus.BAD_REQUEST
+                errorDTO.error = e.message
             }
             is WebExchangeBindException -> {
                 errorDTO.error = e.fieldErrors.map { it.defaultMessage.toString() }.reduce{acc, elem -> "$acc, $elem" }

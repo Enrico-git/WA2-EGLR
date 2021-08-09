@@ -28,6 +28,7 @@ class ControllerAdvice {
 
         var status = HttpStatus.BAD_REQUEST
 
+        println(e)
         when (e) {
             is ValidationException -> {
                 errorDTO.status = 422

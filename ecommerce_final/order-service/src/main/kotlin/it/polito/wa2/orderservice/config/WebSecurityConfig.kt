@@ -24,13 +24,13 @@ import reactor.core.publisher.Mono
 
 @Configuration
 @EnableWebFluxSecurity
-@EnableReactiveMethodSecurity
+@EnableReactiveMethodSecurity(order = 100)
 class WebSecurityConfig(
     private val authenticationManager: AuthenticationManager,
     private val securityContextRepository : SecurityContextRepository
 ) {
     @Bean
-    fun securitygWebFilterChain(http: ServerHttpSecurity): SecurityWebFilterChain {
+    fun securityWebFilterChain(http: ServerHttpSecurity): SecurityWebFilterChain {
         return http
             .exceptionHandling()
             .authenticationEntryPoint { swe: ServerWebExchange, e: AuthenticationException? ->

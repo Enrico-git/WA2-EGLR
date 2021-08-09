@@ -1,12 +1,9 @@
 package it.polito.wa2.catalogservice.services
 
 import it.polito.wa2.catalogservice.dto.OrderDTO
-import it.polito.wa2.catalogservice.exceptions.NotFoundException
-import it.polito.wa2.catalogservice.exceptions.UnauthorizedException
-import it.polito.wa2.catalogservice.exceptions.UnavailableServiceException
+import it.polito.wa2.catalogservice.exceptions.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.reactive.awaitSingle
-import org.bson.json.JsonObject
 import org.bson.types.ObjectId
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.http.HttpHeaders
@@ -15,11 +12,8 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.security.core.context.ReactiveSecurityContextHolder
 import org.springframework.stereotype.Service
-import org.springframework.web.reactive.function.BodyInserters
 import org.springframework.web.reactive.function.client.*
-import reactor.core.publisher.Mono
 import java.util.*
-import java.util.function.IntPredicate
 import java.util.function.Predicate
 
 @Service
@@ -41,6 +35,7 @@ class OrderServiceImpl(
             .accept(MediaType.APPLICATION_NDJSON)
             .header(HttpHeaders.AUTHORIZATION, "Bearer $token")
             .retrieve()
+            .onStatus(Predicate { it == HttpStatus.UNAUTHORIZED }) { throw UnauthorizedException("Nice try") }
             .onStatus(Predicate { it == HttpStatus.INTERNAL_SERVER_ERROR }) { throw UnavailableServiceException("Something went wrong") }
             .bodyToFlow()
     }
@@ -69,6 +64,7 @@ class OrderServiceImpl(
             .accept(MediaType.APPLICATION_JSON)
             .header(HttpHeaders.AUTHORIZATION, "Bearer $token")
             .retrieve()
+            .onStatus(Predicate { it == HttpStatus.BAD_REQUEST }) { it.bodyToMono(WebClientBadRequestException::class.java)}
             .onStatus(Predicate { it == HttpStatus.UNAUTHORIZED }) { throw UnauthorizedException("Nice try") }
             .onStatus(Predicate { it == HttpStatus.INTERNAL_SERVER_ERROR }) { throw UnavailableServiceException("Something went wrong") }
             .awaitBody()
@@ -84,10 +80,11 @@ class OrderServiceImpl(
             )
             .header(HttpHeaders.AUTHORIZATION, "Bearer $token")
             .retrieve()
+
             .onStatus(Predicate { it == HttpStatus.UNAUTHORIZED }) { throw UnauthorizedException("Nice try") }
             .onStatus(Predicate { it == HttpStatus.FORBIDDEN }) { throw UnauthorizedException("Nice try") }
+            .onStatus(Predicate { it == HttpStatus.BAD_REQUEST }) { it.bodyToMono(WebClientBadRequestException::class.java)}
             .onStatus(Predicate { it == HttpStatus.INTERNAL_SERVER_ERROR }) { throw UnavailableServiceException("Something went wrong") }
-            .onStatus(Predicate { it == HttpStatus.BAD_REQUEST }) { throw IllegalArgumentException("The order does not exist") }
             .awaitBodilessEntity()
     }
 
@@ -100,8 +97,9 @@ class OrderServiceImpl(
             .header(HttpHeaders.AUTHORIZATION, "Bearer $token")
             .retrieve()
             .onStatus(Predicate { it == HttpStatus.UNAUTHORIZED }) { throw UnauthorizedException("Nice try") }
-            .onStatus(Predicate { it == HttpStatus.INTERNAL_SERVER_ERROR }) { throw UnavailableServiceException("Something went wrong") }
-            .onStatus(Predicate { it == HttpStatus.BAD_REQUEST }) { throw IllegalArgumentException("The order does not exist") }
+            .onStatus(Predicate { it == HttpStatus.FORBIDDEN }) { throw UnauthorizedException("Nice try") }
+            .onStatus(Predicate { it == HttpStatus.INTERNAL_SERVER_ERROR }) { throw UnavailableServiceException("Error in service") }
+            .onStatus(Predicate { it == HttpStatus.BAD_REQUEST }) { it.bodyToMono(WebClientBadRequestException::class.java)}
             .awaitBody()
     }
 }

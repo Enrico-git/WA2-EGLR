@@ -21,7 +21,7 @@ import reactor.core.publisher.Mono
  */
 @Configuration
 @EnableWebFluxSecurity
-@EnableReactiveMethodSecurity
+@EnableReactiveMethodSecurity(order = 100)
 class WebSecurityConfig(
         private val authenticationManager: AuthenticationManager,
         private val securityContextRepository: SecurityContextRepository

@@ -23,8 +23,8 @@ data class OrderDTO(
     val delivery: Delivery? = null,
     @field:NotNull(message = "Order status must not be null", groups = [UpdateOrder::class])
     val status: OrderStatus? = null,
-    @field:Email(message = "Invalid email format", groups = [UpdateOrder::class, DeleteOrder::class, CreateOrder::class])
     @field:NotNull(message = "Customer email must not be null", groups = [UpdateOrder::class, DeleteOrder::class, CreateOrder::class])
+    @field:Email(message = "Invalid email format", groups = [UpdateOrder::class, DeleteOrder::class, CreateOrder::class])
     val email: String? = null
 )
 
