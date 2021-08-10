@@ -10,7 +10,7 @@ spring:
       password: warehouseservice
       authentication-database: admin
   application:
-    name: warehouse
+    name: warehouse-service
   security:
     user:
       name: warehouse-service

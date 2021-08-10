@@ -47,6 +47,7 @@ class CommentServiceImpl(
                 creationDate = null,
                 comments = comments
         )
+//        TODO this won't work because of security. User is Customer this method is only for admin
         productService.partialUpdateProduct(productDTO, productID)
         return newComment.toDTO()
     }

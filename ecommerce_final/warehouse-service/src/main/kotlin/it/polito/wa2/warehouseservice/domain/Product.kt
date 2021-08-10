@@ -18,8 +18,8 @@ data class Product (
         var category: String,
         var price: BigDecimal,
         var avgRating: Double = 0.0,
-        val creationDate: Timestamp,
-        var comments: Set<ObjectId>?,
+        var creationDate: Timestamp,
+        var comments: Set<ObjectId> = emptySet(),
         @Version
         val version: Long? = null
 )

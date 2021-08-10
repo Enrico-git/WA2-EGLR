@@ -13,5 +13,5 @@ interface WarehouseRepository: CoroutineCrudRepository<Warehouse, ObjectId> {
     //val template: ReactiveMongoTemplate
 
     @Query(value = "{'products.productId': ?0}")
-    fun findWarehousesByProduct(productID: ObjectId): Flow<Warehouse>?
+    fun findWarehousesByProduct(productID: ObjectId): Flow<Warehouse>
 }

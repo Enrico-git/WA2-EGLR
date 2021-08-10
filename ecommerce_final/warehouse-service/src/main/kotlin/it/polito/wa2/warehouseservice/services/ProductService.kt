@@ -11,15 +11,15 @@ import org.springframework.data.domain.Pageable
 import org.springframework.security.access.prepost.PreAuthorize
 
 interface ProductService {
-    suspend fun getProductsByCategory(category: String, pageable: Pageable): Flow<ProductDTO>
+    suspend fun getProductsByCategory(category: String?, pageable: Pageable): Flow<ProductDTO>
 
     suspend fun getProductById(productID: ObjectId): ProductDTO
 
     @PreAuthorize("hasAuthority(\"ADMIN\")")
-    suspend fun partialUpdateProduct(productDTO: ProductDTO, productID: ObjectId): ProductDTO
+    suspend fun addProduct(productDTO: ProductDTO): ProductDTO
 
     @PreAuthorize("hasAuthority(\"ADMIN\")")
-    suspend fun addProduct(productDTO: ProductDTO): ProductDTO
+    suspend fun partialUpdateProduct(productDTO: ProductDTO, productID: ObjectId): ProductDTO
 
     @PreAuthorize("hasAuthority(\"ADMIN\")")
     suspend fun modifyProduct(productDTO: ProductDTO, productID: ObjectId): ProductDTO

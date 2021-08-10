@@ -20,6 +20,8 @@ data class Transaction (
     val walletID: ObjectId,
     var amount: BigDecimal = BigDecimal(0.0),
     val description: TransactionDescription,
+//    TODO change this name to reason (it can bne order ID or recharge reference)
+//    as it is now it is confusing
     val orderID: ObjectId, //also recharge reference
 )
 

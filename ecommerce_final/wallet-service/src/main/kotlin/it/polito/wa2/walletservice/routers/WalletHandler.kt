@@ -4,9 +4,9 @@ import it.polito.wa2.walletservice.dto.TransactionDTO
 import it.polito.wa2.walletservice.dto.WalletDTO
 import it.polito.wa2.walletservice.services.WalletService
 import kotlinx.coroutines.delay
+import org.springframework.dao.OptimisticLockingFailureException
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
-import org.springframework.data.mongodb.UncategorizedMongoDbException
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.server.*
@@ -54,11 +54,11 @@ class WalletHandler(
                     .ok()
                     .json()
                     .bodyValueAndAwait(walletService.createRechargeTransaction(walletID, transactionDTO))
-            } catch (e: UncategorizedMongoDbException) {
+            } catch (e: OptimisticLockingFailureException) {
                     delay(1000)
                 }
         }
-        throw UncategorizedMongoDbException("Error with concurrent write requests", Throwable())
+        throw OptimisticLockingFailureException("Error with concurrent write requests")
     }
 
     suspend fun getAllTransactions(request: ServerRequest): ServerResponse{

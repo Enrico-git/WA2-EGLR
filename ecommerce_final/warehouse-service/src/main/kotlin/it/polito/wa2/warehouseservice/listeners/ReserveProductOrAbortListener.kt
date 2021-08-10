@@ -14,8 +14,8 @@ import org.springframework.stereotype.Component
 class ReserveProductOrAbortListener(
         private val warehouseService: WarehouseService
 ) {
-    @KafkaListener(topics = ["reserve_products"],
-    containerFactory = "reserveProductContainerFactory")
+//    @KafkaListener(topics = ["reserve_products"],
+//    containerFactory = "reserveProductContainerFactory")
     fun reserveRequestConsumer(productsReservationRequestDTO: ProductsReservationRequestDTO, @Header(KafkaHeaders.RECEIVED_TOPIC) topic: String){
         CoroutineScope(Dispatchers.IO).launch {
             val result = warehouseService.reserveProductOrAbort(topic, productsReservationRequestDTO)

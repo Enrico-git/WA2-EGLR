@@ -54,8 +54,8 @@ class JwtUtils {
                 .parseClaimsJws(authToken)
                 .body
         val user = UserDetailsDTO(
-                id = null,
-                username = parsedToken["sub"].toString(),
+                id = ObjectId(parsedToken["sub"].toString()),
+                username = null,
                 roles = parsedToken["roles"].toString(),
                 isEnabled = null,
                 password = null,

@@ -10,7 +10,6 @@ import kotlinx.coroutines.flow.Flow
 import org.bson.types.ObjectId
 import org.springframework.dao.OptimisticLockingFailureException
 import org.springframework.data.domain.Pageable
-import org.springframework.data.mongodb.UncategorizedMongoDbException
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.validation.annotation.Validated
@@ -52,7 +51,7 @@ class OrderController(
             try {
                 return orderService.updateOrderStatus(orderID, orderDTO)
             }
-            catch(e: UncategorizedMongoDbException){
+            catch(e: OptimisticLockingFailureException){
                 delay(1000)
             }
         }
@@ -71,7 +70,7 @@ class OrderController(
             try {
                 return orderService.deleteOrder(orderID, orderDTO)
             }
-            catch(e: UncategorizedMongoDbException){
+            catch(e: OptimisticLockingFailureException){
                 delay(1000)
             }
         }

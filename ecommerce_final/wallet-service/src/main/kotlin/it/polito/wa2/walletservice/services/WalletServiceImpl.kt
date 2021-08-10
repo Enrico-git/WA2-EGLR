@@ -186,6 +186,7 @@ class WalletServiceImpl(
         return user
     }
 
+//    TODO test concurrency with this one
     override suspend fun createPaymentOrRefundTransaction(topic: String, paymentRequestDTO: KafkaPaymentRequestDTO): Boolean? {
         if (Timestamp(paymentRequestDTO.timestamp.time + retryDelay) < Timestamp(System.currentTimeMillis()))
             return false

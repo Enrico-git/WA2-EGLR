@@ -1,5 +1,7 @@
 package it.polito.wa2.warehouseservice.controllers
 
+import it.polito.wa2.warehouseservice.constraintGroups.CreateOrReplaceProduct
+import it.polito.wa2.warehouseservice.constraintGroups.CreateProduct
 import it.polito.wa2.warehouseservice.dto.CommentDTO
 import it.polito.wa2.warehouseservice.dto.PictureDTO
 import it.polito.wa2.warehouseservice.dto.ProductDTO
@@ -12,6 +14,7 @@ import org.springframework.dao.OptimisticLockingFailureException
 import org.springframework.data.domain.Pageable
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
+import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
 
 @RestController
@@ -22,10 +25,10 @@ class ProductController(
     /**
      * API endpoint to retrieve a list of products by their category
      * @param category which is the category to search
-     * @returnt the flow of the products
+     * @return the flow of the products
      */
     @GetMapping("", produces = [MediaType.APPLICATION_NDJSON_VALUE])
-    suspend fun getProductByCategory(@RequestParam category: String, pageable: Pageable): Flow<ProductDTO> {
+    suspend fun getProductByCategory(@RequestParam category: String?, pageable: Pageable): Flow<ProductDTO> {
         return productService.getProductsByCategory(category, pageable)
     }
     /**
@@ -34,9 +37,10 @@ class ProductController(
      * @return the product object
      */
     @GetMapping("/{productID}")
-    suspend fun getProduct(@PathVariable productID: String): ProductDTO{
-        return productService.getProductById(ObjectId(productID))
+    suspend fun getProduct(@PathVariable productID: ObjectId): ProductDTO{
+        return productService.getProductById(productID)
     }
+
     /**
      * API endpoint to insert a product
      * @param productDTO
@@ -44,7 +48,7 @@ class ProductController(
      */
     @PostMapping("")
     @ResponseStatus(HttpStatus.CREATED)
-    suspend fun addProduct(@RequestBody productDTO: ProductDTO): ProductDTO{
+    suspend fun addProduct(@RequestBody @Validated(CreateProduct::class) productDTO: ProductDTO): ProductDTO{
         return productService.addProduct(productDTO)
     }
     /**
@@ -55,7 +59,7 @@ class ProductController(
      */
     @PutMapping("/{productID}")
     @ResponseStatus(HttpStatus.CREATED)
-    suspend fun modifyOrInsertProduct(@PathVariable productID: String, @RequestBody productDTO: ProductDTO): ProductDTO{
+    suspend fun modifyOrInsertProduct(@PathVariable productID: String, @RequestBody @Validated(CreateOrReplaceProduct::class) productDTO: ProductDTO): ProductDTO{
         var counter = 5
         while(counter-- > 0){
             try{
@@ -76,7 +80,14 @@ class ProductController(
     @PatchMapping("/{productID}")
     @ResponseStatus(HttpStatus.CREATED)
     suspend fun partialUpdateProduct(@PathVariable productID: String, @RequestBody productDTO: ProductDTO): ProductDTO{
-        return productService.partialUpdateProduct(productDTO, ObjectId(productID))
+        var counter = 5
+        while (counter-- > 0)
+            try {
+                return productService.partialUpdateProduct(productDTO, ObjectId(productID))
+            } catch (e : OptimisticLockingFailureException){
+                delay(1000)
+            }
+        throw OptimisticLockingFailureException("Product")
     }
     /**
      * API endpoint to delete a product
@@ -85,11 +96,11 @@ class ProductController(
      */
     @DeleteMapping("/{productID}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    suspend fun deleteProduct(@PathVariable productID: String){
+    suspend fun deleteProduct(@PathVariable productID: ObjectId){
         var counter = 5
         while(counter-- > 0){
             try{
-                return productService.deleteProduct(ObjectId(productID))
+                return productService.deleteProduct(productID)
             }
             catch(e: OptimisticLockingFailureException){
                 delay(1000)
@@ -104,8 +115,8 @@ class ProductController(
      * @return the string of the picture
      */
     @GetMapping("/{productID}/picture")
-    suspend fun getProductPicture(@PathVariable productID: String): PictureDTO{
-        return productService.getProductPicture(ObjectId(productID))
+    suspend fun getProductPicture(@PathVariable productID: ObjectId): PictureDTO{
+        return productService.getProductPicture(productID)
     }
 
     /**
@@ -134,8 +145,8 @@ class ProductController(
      * @return flow of CommentDTO
      */
     @GetMapping("/{productID}/comments")
-    suspend fun getProductComments(@PathVariable productID: String): Flow<CommentDTO>{
-        return productService.getProductComments(ObjectId(productID))
+    suspend fun getProductComments(@PathVariable productID: ObjectId): Flow<CommentDTO>{
+        return productService.getProductComments(productID)
     }
 
     /**
@@ -144,8 +155,8 @@ class ProductController(
      * @return flow of WarehouseDTO
      */
     @GetMapping("/{productID}/warehouses")
-    suspend fun getProductWarehouses(@PathVariable productID: String): Flow<WarehouseDTO>{
-        return productService.getProductWarehouses(ObjectId(productID))
+    suspend fun getProductWarehouses(@PathVariable productID: ObjectId): Flow<WarehouseDTO>{
+        return productService.getProductWarehouses(productID)
     }
 
 }
