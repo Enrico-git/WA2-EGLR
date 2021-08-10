@@ -1,5 +1,6 @@
 package it.polito.wa2.catalogservice.controllers
 
+import it.polito.wa2.catalogservice.constraintGroups.CreateOrReplaceProduct
 import it.polito.wa2.catalogservice.dto.CommentDTO
 import it.polito.wa2.catalogservice.dto.PictureDTO
 import it.polito.wa2.catalogservice.dto.ProductDTO
@@ -10,6 +11,7 @@ import org.springframework.data.domain.Pageable
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.security.access.prepost.PreAuthorize
+import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
 
 @RestController
@@ -87,7 +89,7 @@ class ProductController(
     @PutMapping("/{productID}")
     @ResponseStatus(HttpStatus.CREATED)
     suspend fun updateProduct(@PathVariable productID: String,
-                              @RequestBody productDTO: ProductDTO): ProductDTO {
+                              @RequestBody @Validated(CreateOrReplaceProduct::class) productDTO: ProductDTO): ProductDTO {
         return productService.updateProduct(productID,productDTO)
     }
 }

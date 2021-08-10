@@ -5,12 +5,13 @@ import it.polito.wa2.catalogservice.services.CommentService
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
+import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.reactive.function.client.WebClient
 import java.util.*
 
 @RestController
-@RequestMapping("/comments")
+@RequestMapping("/products/{productID}/comments")
 class CommentController(
     private val commentService: CommentService
 ) {
@@ -34,7 +35,7 @@ class CommentController(
     @PostMapping("/{productID}")
     @ResponseStatus(HttpStatus.CREATED)
     suspend fun addComment(@PathVariable productID: String,
-                           @RequestBody commentDTO: CommentDTO): CommentDTO {
+                           @RequestBody @Validated commentDTO: CommentDTO): CommentDTO {
         return commentService.addComment(productID,commentDTO)
     }
 
@@ -43,7 +44,7 @@ class CommentController(
     @ResponseStatus(HttpStatus.CREATED)
     suspend fun updateComment(@PathVariable productID: String,
                               @PathVariable commentID: String,
-                              @RequestBody commentDTO: CommentDTO): CommentDTO {
+                              @RequestBody @Validated commentDTO: CommentDTO): CommentDTO {
         return commentService.updateComment(productID,commentID,commentDTO)
     }
 
