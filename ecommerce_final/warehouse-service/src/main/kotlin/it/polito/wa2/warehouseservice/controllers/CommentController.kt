@@ -6,10 +6,11 @@ import kotlinx.coroutines.delay
 import org.bson.types.ObjectId
 import org.springframework.dao.OptimisticLockingFailureException
 import org.springframework.http.HttpStatus
+import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
 
 @RestController
-@RequestMapping("/comments")
+@RequestMapping("/products/{productID}/comments")
 class CommentController(
         private val commentService: CommentService
 ) {
@@ -18,9 +19,9 @@ class CommentController(
      * @param productID the ID of the product, the body is the comment
      * @return the comment object
      */
-    @PostMapping("/{productID}")
+    @PostMapping("")
     @ResponseStatus(HttpStatus.CREATED)
-    suspend fun addComment(@PathVariable productID: String, @RequestBody commentDTO: CommentDTO): CommentDTO {
+    suspend fun addComment(@PathVariable productID: String, @RequestBody @Validated commentDTO: CommentDTO): CommentDTO {
         return commentService.addComment(ObjectId(productID), commentDTO)
     }
 
@@ -30,9 +31,9 @@ class CommentController(
      * @requestBody CommentDTO
      * @return the comment object
      */
-    @PutMapping("/{productID}/{commentID}")
+    @PutMapping("/{commentID}")
     @ResponseStatus(HttpStatus.CREATED)
-    suspend fun updateComment(@PathVariable productID: String, @PathVariable commentID: String, @RequestBody commentDTO: CommentDTO): CommentDTO {
+    suspend fun updateComment(@PathVariable productID: String, @PathVariable commentID: String, @Validated @RequestBody commentDTO: CommentDTO): CommentDTO {
         var counter = 5
         while(counter-- > 0){
             try{
@@ -51,7 +52,7 @@ class CommentController(
      * @param commentID the id of the comment
      * @return
      */
-    @DeleteMapping("/{productID}/{commentID}")
+    @DeleteMapping("/{commentID}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     suspend fun deleteComment(@PathVariable productID: String, @PathVariable commentID: String) {
         var counter = 5

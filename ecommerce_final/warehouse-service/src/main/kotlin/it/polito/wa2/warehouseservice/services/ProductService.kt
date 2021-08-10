@@ -6,6 +6,7 @@ import it.polito.wa2.warehouseservice.dto.PictureDTO
 import it.polito.wa2.warehouseservice.dto.ProductDTO
 import it.polito.wa2.warehouseservice.dto.WarehouseDTO
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.toSet
 import org.bson.types.ObjectId
 import org.springframework.data.domain.Pageable
 import org.springframework.security.access.prepost.PreAuthorize
@@ -39,4 +40,6 @@ interface ProductService {
     @PreAuthorize("hasAuthority(\"ADMIN\") or hasAuthority(\"CUSTOMER\")")
     suspend fun getProductComments(productID: ObjectId): Flow<CommentDTO>
 
+    @PreAuthorize("hasAuthority(\"ADMIN\") or hasAuthority(\"CUSTOMER\")")
+    suspend fun calculateRating(commentsIDs: Set<ObjectId>): Double
 }

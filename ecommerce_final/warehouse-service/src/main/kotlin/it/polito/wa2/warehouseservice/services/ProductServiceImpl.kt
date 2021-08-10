@@ -127,7 +127,7 @@ class ProductServiceImpl(
         return commentRepository.findAllById(commentsIds.asIterable()).map{ it.toDTO() }
     }
 
-    suspend fun calculateRating(commentsIDs: Set<ObjectId>): Double {
+    override suspend fun calculateRating(commentsIDs: Set<ObjectId>): Double {
         return if (commentsIDs.isEmpty())
             0.0
         else {
@@ -138,3 +138,4 @@ class ProductServiceImpl(
         }
     }
 }
+
