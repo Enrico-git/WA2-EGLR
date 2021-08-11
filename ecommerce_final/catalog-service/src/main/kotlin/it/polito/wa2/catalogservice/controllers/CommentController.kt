@@ -16,15 +16,6 @@ import java.util.*
 class CommentController(
     private val commentService: CommentService
 ) {
-    val serviceURL = "http://localhost:8200"
-    //Create a WebClient instance
-    //building a client by using the DefaultWebClientBuilder class, which allows full customization
-    val client: WebClient = WebClient.builder()
-        .baseUrl(serviceURL)
-        .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_NDJSON_VALUE)
-        .defaultUriVariables(Collections.singletonMap("url", serviceURL))
-        .build()
-
     //RETRIEVE INFO ABOUT A COMMENT GIVEN ITS ID
     @GetMapping("/{commentID}")
     @ResponseStatus(HttpStatus.OK)

@@ -11,11 +11,10 @@ import org.springframework.security.access.prepost.PreAuthorize
 interface ProductService {
     suspend fun getProducts(category: String?, page: Int?, size: Int?): Flow<ProductDTO>
     suspend fun getProduct(productID: ObjectId): ProductDTO
-    @PreAuthorize("hasAuthority(\"ADMIN\") or hasAuthority(\"CUSTOMER\")")
     suspend fun getProductPicture(productID: ObjectId): PictureDTO
+    //TODO needs auth or not?
     @PreAuthorize("hasAuthority(\"ADMIN\") or hasAuthority(\"CUSTOMER\")")
     suspend fun getProductWarehouses(productID: ObjectId): Flow<WarehouseDTO>
-    @PreAuthorize("hasAuthority(\"ADMIN\") or hasAuthority(\"CUSTOMER\")")
     suspend fun getProductComments(productID: ObjectId): Flow<CommentDTO>
     @PreAuthorize("hasAuthority(\"ADMIN\")")
     suspend fun addProduct(productDTO: ProductDTO): ProductDTO
