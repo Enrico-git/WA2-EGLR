@@ -1,15 +1,16 @@
 package it.polito.wa2.catalogservice.services
 
 import it.polito.wa2.catalogservice.dto.CommentDTO
+import org.bson.types.ObjectId
 import org.springframework.security.access.prepost.PreAuthorize
 
 interface CommentService {
     @PreAuthorize("hasAuthority(\"ADMIN\") or hasAuthority(\"CUSTOMER\")")
-    suspend fun getComment(commentID: String): CommentDTO
+    suspend fun getComment(commentID: ObjectId): CommentDTO
     @PreAuthorize("hasAuthority(\"ADMIN\") or hasAuthority(\"CUSTOMER\")")
-    suspend fun addComment(productID: String, commentDTO: CommentDTO): CommentDTO
+    suspend fun addComment(productID: ObjectId, commentDTO: CommentDTO): CommentDTO
     @PreAuthorize("hasAuthority(\"ADMIN\") or hasAuthority(\"CUSTOMER\")")
-    suspend fun updateComment(productID: String,commentID: String,commentDTO: CommentDTO): CommentDTO
+    suspend fun updateComment(productID: ObjectId, commentID: ObjectId, commentDTO: CommentDTO): CommentDTO
     @PreAuthorize("hasAuthority(\"ADMIN\") or hasAuthority(\"CUSTOMER\")")
-    suspend fun deleteComment(productID: String, commentID: String)
+    suspend fun deleteComment(productID: ObjectId, commentID: ObjectId)
 }

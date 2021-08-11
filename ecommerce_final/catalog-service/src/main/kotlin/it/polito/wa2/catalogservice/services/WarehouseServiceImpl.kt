@@ -6,6 +6,7 @@ import it.polito.wa2.catalogservice.exceptions.UnauthorizedException
 import it.polito.wa2.catalogservice.exceptions.UnavailableServiceException
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.reactive.awaitSingle
+import org.bson.types.ObjectId
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
@@ -44,7 +45,7 @@ class WarehouseServiceImpl(
             .bodyToFlow()
     }
 
-    override suspend fun getWarehouse(warehouseID: String): WarehouseDTO {
+    override suspend fun getWarehouse(warehouseID: ObjectId): WarehouseDTO {
         val token = ReactiveSecurityContextHolder.getContext().awaitSingle().authentication.credentials as String
         return client
             .get()
@@ -59,7 +60,7 @@ class WarehouseServiceImpl(
             .awaitBody()
     }
 
-    override suspend fun deleteWarehouse(warehouseID: String) {
+    override suspend fun deleteWarehouse(warehouseID: ObjectId) {
         val token = ReactiveSecurityContextHolder.getContext().awaitSingle().authentication.credentials as String
         client
             .method(HttpMethod.DELETE)
@@ -87,7 +88,7 @@ class WarehouseServiceImpl(
             .awaitBody()
     }
 
-    override suspend fun patchWarehouse(warehouseID: String, warehouseDTO: WarehouseDTO): WarehouseDTO {
+    override suspend fun patchWarehouse(warehouseID: ObjectId, warehouseDTO: WarehouseDTO): WarehouseDTO {
         val token = ReactiveSecurityContextHolder.getContext().awaitSingle().authentication.credentials as String
         return client
             .patch()
@@ -101,7 +102,7 @@ class WarehouseServiceImpl(
             .awaitBody()
     }
 
-    override suspend fun updateWarehouse(warehouseID: String, warehouseDTO: WarehouseDTO): WarehouseDTO {
+    override suspend fun updateWarehouse(warehouseID: ObjectId, warehouseDTO: WarehouseDTO): WarehouseDTO {
         val token = ReactiveSecurityContextHolder.getContext().awaitSingle().authentication.credentials as String
         return client
             .put()

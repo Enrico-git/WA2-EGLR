@@ -8,6 +8,7 @@ import it.polito.wa2.catalogservice.dto.ProductDTO
 import it.polito.wa2.catalogservice.dto.WarehouseDTO
 import it.polito.wa2.catalogservice.services.ProductService
 import kotlinx.coroutines.flow.Flow
+import org.bson.types.ObjectId
 import org.springframework.data.domain.Pageable
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
@@ -34,7 +35,7 @@ class ProductController(
     //NO NEED OF AUTHENTICATION -> NO TOKEN
     @GetMapping("/{productID}")
     @ResponseStatus(HttpStatus.OK)
-    suspend fun getProduct(@PathVariable productID: String): ProductDTO {
+    suspend fun getProduct(@PathVariable productID: ObjectId): ProductDTO {
         return productService.getProduct(productID)
     }
 
@@ -42,7 +43,7 @@ class ProductController(
     //NO NEED OF AUTHENTICATION -> NO TOKEN
     @GetMapping("/{productID}/picture")
     @ResponseStatus(HttpStatus.OK)
-    suspend fun getProductPicture(@PathVariable productID: String): PictureDTO {
+    suspend fun getProductPicture(@PathVariable productID: ObjectId): PictureDTO {
        return productService.getProductPicture(productID)
     }
 
@@ -50,7 +51,7 @@ class ProductController(
     //NO NEED OF AUTHENTICATION -> NO TOKEN
     @GetMapping("/{productID}/warehouses")
     @ResponseStatus(HttpStatus.OK)
-    suspend fun getProductWarehouses(@PathVariable productID: String): Flow<WarehouseDTO> {
+    suspend fun getProductWarehouses(@PathVariable productID: ObjectId): Flow<WarehouseDTO> {
         return productService.getProductWarehouses(productID)
     }
 
@@ -58,7 +59,7 @@ class ProductController(
     //NO NEED OF AUTHENTICATION -> NO TOKEN
     @GetMapping("/{productID}/comments")
     @ResponseStatus(HttpStatus.OK)
-    suspend fun getProductComments(@PathVariable productID: String): Flow<CommentDTO> {
+    suspend fun getProductComments(@PathVariable productID: ObjectId): Flow<CommentDTO> {
         return productService.getProductComments(productID)
     }
 
@@ -66,14 +67,14 @@ class ProductController(
     @DeleteMapping("/{productID}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @PreAuthorize("hasAuthority(\"ADMIN\")")
-    suspend fun deleteProduct(@PathVariable productID: String) {
+    suspend fun deleteProduct(@PathVariable productID: ObjectId) {
         return productService.deleteProduct(productID)
     }
 
     //UPDATE THE PICTURE OF A PRODUCT GIVEN ITS ID AND THE NEW PICTURE
     @PostMapping("/{productID}/picture")
     @ResponseStatus(HttpStatus.CREATED)
-    suspend fun updatePicture(@PathVariable productID: String,
+    suspend fun updatePicture(@PathVariable productID: ObjectId,
                               @RequestBody pictureDTO: PictureDTO): ProductDTO {
         return productService.updatePicture(productID,pictureDTO)
     }
@@ -88,7 +89,7 @@ class ProductController(
     //PARTIALLY UPDATE A PRODUCT GIVEN ITS ID
     @PatchMapping("/{productID}")
     @ResponseStatus(HttpStatus.CREATED)
-    suspend fun patchProduct(@PathVariable productID: String,
+    suspend fun patchProduct(@PathVariable productID: ObjectId,
                              @RequestBody productDTO: ProductDTO): ProductDTO {
         return productService.patchProduct(productID,productDTO)
     }
@@ -96,7 +97,7 @@ class ProductController(
     //UPDATE A PRODUCT GIVEN ITS ID, OR ADD A NEW ONE IF THE ID DOES NOT EXIST
     @PutMapping("/{productID}")
     @ResponseStatus(HttpStatus.CREATED)
-    suspend fun updateProduct(@PathVariable productID: String,
+    suspend fun updateProduct(@PathVariable productID: ObjectId,
                               @RequestBody @Validated(CreateOrReplaceProduct::class) productDTO: ProductDTO): ProductDTO {
         return productService.updateProduct(productID,productDTO)
     }

@@ -27,7 +27,7 @@ class AuthController(
 
     @GetMapping("/registrationConfirm")
     @ResponseStatus(HttpStatus.OK)
-    suspend fun registrationConfirm(@RequestParam token: String): Unit {
+    suspend fun registrationConfirm(@RequestParam token: String) {
         return userService.verifyToken(token)
     }
 }

@@ -10,6 +10,7 @@ import it.polito.wa2.catalogservice.exceptions.UnavailableServiceException
 import it.polito.wa2.catalogservice.exceptions.WebClientBadRequestException
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.reactive.awaitSingle
+import org.bson.types.ObjectId
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
@@ -55,7 +56,7 @@ class ProductServiceImpl(
             .bodyToFlow()
     }
 
-    override suspend fun getProduct(productID: String): ProductDTO {
+    override suspend fun getProduct(productID: ObjectId): ProductDTO {
         return client
             .get()
             .uri("$serviceURL/products/$productID")
@@ -68,7 +69,7 @@ class ProductServiceImpl(
             .awaitBody()
     }
 
-    override suspend fun getProductPicture(productID: String): PictureDTO {
+    override suspend fun getProductPicture(productID: ObjectId): PictureDTO {
         val token = ReactiveSecurityContextHolder.getContext().awaitSingle().authentication.credentials as String
         return client
             .get()
@@ -83,7 +84,7 @@ class ProductServiceImpl(
             .awaitBody()
     }
 
-    override suspend fun getProductWarehouses(productID: String): Flow<WarehouseDTO> {
+    override suspend fun getProductWarehouses(productID: ObjectId): Flow<WarehouseDTO> {
         val token = ReactiveSecurityContextHolder.getContext().awaitSingle().authentication.credentials as String
         return client
             .get()
@@ -95,7 +96,7 @@ class ProductServiceImpl(
             .bodyToFlow()
     }
 
-    override suspend fun getProductComments(productID: String): Flow<CommentDTO> {
+    override suspend fun getProductComments(productID: ObjectId): Flow<CommentDTO> {
         val token = ReactiveSecurityContextHolder.getContext().awaitSingle().authentication.credentials as String
         return client
             .get()
@@ -122,7 +123,7 @@ class ProductServiceImpl(
             .awaitBody()
     }
 
-    override suspend fun deleteProduct(productID: String) {
+    override suspend fun deleteProduct(productID: ObjectId) {
         val token = ReactiveSecurityContextHolder.getContext().awaitSingle().authentication.credentials as String
         client
             .method(HttpMethod.DELETE)
@@ -136,7 +137,7 @@ class ProductServiceImpl(
             .awaitBodilessEntity()
     }
 
-    override suspend fun updatePicture(productID: String, pictureDTO: PictureDTO): ProductDTO {
+    override suspend fun updatePicture(productID: ObjectId, pictureDTO: PictureDTO): ProductDTO {
         val token = ReactiveSecurityContextHolder.getContext().awaitSingle().authentication.credentials as String
         return client
             .post()
@@ -150,7 +151,7 @@ class ProductServiceImpl(
             .awaitBody()
     }
 
-    override suspend fun patchProduct(productID: String, productDTO: ProductDTO): ProductDTO {
+    override suspend fun patchProduct(productID: ObjectId, productDTO: ProductDTO): ProductDTO {
         val token = ReactiveSecurityContextHolder.getContext().awaitSingle().authentication.credentials as String
         return client
             .patch()
@@ -164,7 +165,7 @@ class ProductServiceImpl(
             .awaitBody()
     }
 
-    override suspend fun updateProduct(productID: String, productDTO: ProductDTO): ProductDTO {
+    override suspend fun updateProduct(productID: ObjectId, productDTO: ProductDTO): ProductDTO {
         val token = ReactiveSecurityContextHolder.getContext().awaitSingle().authentication.credentials as String
         return client
             .put()

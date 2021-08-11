@@ -2,6 +2,7 @@ package it.polito.wa2.catalogservice.controllers
 
 import it.polito.wa2.catalogservice.dto.CommentDTO
 import it.polito.wa2.catalogservice.services.CommentService
+import org.bson.types.ObjectId
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
@@ -27,14 +28,14 @@ class CommentController(
     //RETRIEVE INFO ABOUT A COMMENT GIVEN ITS ID
     @GetMapping("/{commentID}")
     @ResponseStatus(HttpStatus.OK)
-    suspend fun getComment(@PathVariable commentID: String): CommentDTO {
+    suspend fun getComment(@PathVariable commentID: ObjectId): CommentDTO {
         return commentService.getComment(commentID)
     }
 
     //CREATE A NEW COMMENT TO A PRODUCT
     @PostMapping("")
     @ResponseStatus(HttpStatus.CREATED)
-    suspend fun addComment(@PathVariable productID: String,
+    suspend fun addComment(@PathVariable productID: ObjectId,
                            @RequestBody @Validated commentDTO: CommentDTO): CommentDTO {
         return commentService.addComment(productID,commentDTO)
     }
@@ -42,8 +43,8 @@ class CommentController(
     //UPDATE A COMMENT GIVEN ITS ID AND THE PRODUCT ID
     @PutMapping("/{commentID}")
     @ResponseStatus(HttpStatus.CREATED)
-    suspend fun updateComment(@PathVariable productID: String,
-                              @PathVariable commentID: String,
+    suspend fun updateComment(@PathVariable productID: ObjectId,
+                              @PathVariable commentID: ObjectId,
                               @RequestBody @Validated commentDTO: CommentDTO): CommentDTO {
         return commentService.updateComment(productID,commentID,commentDTO)
     }
@@ -51,7 +52,7 @@ class CommentController(
     //DELETE A COMMENT GIVEN ITS ID AND THE PRODUCT ID
     @DeleteMapping("/{commentID}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    suspend fun deleteComment(@PathVariable productID: String, @PathVariable commentID: String) {
+    suspend fun deleteComment(@PathVariable productID: ObjectId, @PathVariable commentID: ObjectId) {
         return commentService.deleteComment(productID,commentID)
     }
 }

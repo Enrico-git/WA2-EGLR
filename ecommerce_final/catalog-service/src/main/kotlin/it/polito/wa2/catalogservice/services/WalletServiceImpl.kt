@@ -7,6 +7,7 @@ import it.polito.wa2.catalogservice.exceptions.UnauthorizedException
 import it.polito.wa2.catalogservice.exceptions.UnavailableServiceException
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.reactive.awaitSingle
+import org.bson.types.ObjectId
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
@@ -31,7 +32,7 @@ class WalletServiceImpl(
         .defaultUriVariables(Collections.singletonMap("url", serviceURL))
         .build()
 
-    override suspend fun getWallet(walletID: String): WalletDTO {
+    override suspend fun getWallet(walletID: ObjectId): WalletDTO {
         val token = ReactiveSecurityContextHolder.getContext().awaitSingle().authentication.credentials as String
         return client
             .get()
@@ -46,7 +47,7 @@ class WalletServiceImpl(
             .awaitBody()
     }
 
-    override suspend fun getTransactions(walletID: Long, from: Long?, to: Long?, page: Int?, size: Int?): Flow<TransactionDTO> {
+    override suspend fun getTransactions(walletID: ObjectId, from: Long?, to: Long?, page: Int?, size: Int?): Flow<TransactionDTO> {
         val token = ReactiveSecurityContextHolder.getContext().awaitSingle().authentication.credentials as String
         val fromOpt = if ( from != null) Optional.of(from) else Optional.empty()
         val toOpt = if ( to != null) Optional.of(to) else Optional.empty()
@@ -73,7 +74,7 @@ class WalletServiceImpl(
 
     }
 
-    override suspend fun getTransaction(walletID: String, transactionID: String): TransactionDTO {
+    override suspend fun getTransaction(walletID: ObjectId, transactionID: ObjectId): TransactionDTO {
         val token = ReactiveSecurityContextHolder.getContext().awaitSingle().authentication.credentials as String
         return client
             .get()
@@ -103,7 +104,7 @@ class WalletServiceImpl(
             .awaitBody()
     }
 
-    override suspend fun newTransaction(walletID: String, transactionDTO: TransactionDTO): TransactionDTO {
+    override suspend fun newTransaction(walletID: ObjectId, transactionDTO: TransactionDTO): TransactionDTO {
         val token = ReactiveSecurityContextHolder.getContext().awaitSingle().authentication.credentials as String
         return client
             .post()

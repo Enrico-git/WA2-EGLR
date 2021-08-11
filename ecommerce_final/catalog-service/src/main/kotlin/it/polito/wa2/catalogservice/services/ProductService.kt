@@ -5,25 +5,26 @@ import it.polito.wa2.catalogservice.dto.PictureDTO
 import it.polito.wa2.catalogservice.dto.ProductDTO
 import it.polito.wa2.catalogservice.dto.WarehouseDTO
 import kotlinx.coroutines.flow.Flow
+import org.bson.types.ObjectId
 import org.springframework.security.access.prepost.PreAuthorize
 
 interface ProductService {
     suspend fun getProducts(category: String?, page: Int?, size: Int?): Flow<ProductDTO>
-    suspend fun getProduct(productID: String): ProductDTO
+    suspend fun getProduct(productID: ObjectId): ProductDTO
     @PreAuthorize("hasAuthority(\"ADMIN\") or hasAuthority(\"CUSTOMER\")")
-    suspend fun getProductPicture(productID: String): PictureDTO
+    suspend fun getProductPicture(productID: ObjectId): PictureDTO
     @PreAuthorize("hasAuthority(\"ADMIN\") or hasAuthority(\"CUSTOMER\")")
-    suspend fun getProductWarehouses(productID: String): Flow<WarehouseDTO>
+    suspend fun getProductWarehouses(productID: ObjectId): Flow<WarehouseDTO>
     @PreAuthorize("hasAuthority(\"ADMIN\") or hasAuthority(\"CUSTOMER\")")
-    suspend fun getProductComments(productID: String): Flow<CommentDTO>
+    suspend fun getProductComments(productID: ObjectId): Flow<CommentDTO>
     @PreAuthorize("hasAuthority(\"ADMIN\")")
     suspend fun addProduct(productDTO: ProductDTO): ProductDTO
     @PreAuthorize("hasAuthority(\"ADMIN\")")
-    suspend fun deleteProduct(productID: String)
+    suspend fun deleteProduct(productID: ObjectId)
     @PreAuthorize("hasAuthority(\"ADMIN\")")
-    suspend fun updatePicture(productID: String, pictureDTO: PictureDTO): ProductDTO
+    suspend fun updatePicture(productID: ObjectId, pictureDTO: PictureDTO): ProductDTO
     @PreAuthorize("hasAuthority(\"ADMIN\")")
-    suspend fun patchProduct(productID: String, productDTO: ProductDTO): ProductDTO
+    suspend fun patchProduct(productID: ObjectId, productDTO: ProductDTO): ProductDTO
     @PreAuthorize("hasAuthority(\"ADMIN\")")
-    suspend fun updateProduct(productID: String, productDTO: ProductDTO): ProductDTO
+    suspend fun updateProduct(productID: ObjectId, productDTO: ProductDTO): ProductDTO
 }

@@ -4,6 +4,7 @@ import it.polito.wa2.catalogservice.dto.CommentDTO
 import it.polito.wa2.catalogservice.exceptions.NotFoundException
 import it.polito.wa2.catalogservice.exceptions.UnauthorizedException
 import kotlinx.coroutines.reactive.awaitSingle
+import org.bson.types.ObjectId
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
@@ -31,7 +32,7 @@ class CommentServiceImpl(
         .build()
 
     //RETRIEVE INFO ABOUT A COMMENT GIVEN ITS ID
-    override suspend fun getComment(@PathVariable commentID: String): CommentDTO {
+    override suspend fun getComment(@PathVariable commentID: ObjectId): CommentDTO {
         val token = ReactiveSecurityContextHolder.getContext().awaitSingle().authentication.credentials as String
         return client
             .get()
@@ -46,7 +47,7 @@ class CommentServiceImpl(
             .awaitBody()
     }
 
-    override suspend fun addComment(productID: String, commentDTO: CommentDTO): CommentDTO {
+    override suspend fun addComment(productID: ObjectId, commentDTO: CommentDTO): CommentDTO {
         val token = ReactiveSecurityContextHolder.getContext().awaitSingle().authentication.credentials as String
         return client
             .post()
@@ -60,7 +61,7 @@ class CommentServiceImpl(
             .awaitBody()
     }
 
-    override suspend fun updateComment(productID: String, commentID: String, commentDTO: CommentDTO): CommentDTO {
+    override suspend fun updateComment(productID: ObjectId, commentID: ObjectId, commentDTO: CommentDTO): CommentDTO {
         val token = ReactiveSecurityContextHolder.getContext().awaitSingle().authentication.credentials as String
         return client
             .put()
@@ -74,7 +75,7 @@ class CommentServiceImpl(
             .awaitBody()
     }
 
-    override suspend fun deleteComment(productID: String, commentID: String) {
+    override suspend fun deleteComment(productID: ObjectId, commentID: ObjectId) {
         val token = ReactiveSecurityContextHolder.getContext().awaitSingle().authentication.credentials as String
         client
             .method(HttpMethod.DELETE)
