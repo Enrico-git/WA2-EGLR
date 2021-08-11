@@ -70,11 +70,6 @@ class RouterConfiguration(
          * The onError is applied to all previous route also.
          * It's similar to @ExceptionHandler and @ControllerAdvice
          */
-
-        /**
-         * The onError is applied to all previous route also.
-         * It's similar to @ExceptionHandler and @ControllerAdvice
-         */
         onError<NotFoundException> { e, _ ->  status(HttpStatus.NOT_FOUND).bodyValueAndAwait(e.localizedMessage)}
         onError<ValidationException> { e, _ ->  status(HttpStatus.UNPROCESSABLE_ENTITY).bodyValueAndAwait(e.localizedMessage)}
         onError<IllegalArgumentException> {e, _ ->  status(HttpStatus.BAD_REQUEST).bodyValueAndAwait(e.localizedMessage)}

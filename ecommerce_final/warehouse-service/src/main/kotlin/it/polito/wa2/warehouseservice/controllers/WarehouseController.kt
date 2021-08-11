@@ -20,7 +20,6 @@ class WarehouseController(
 ) {
     /**
      * API endpoint to get all the warehouses
-     * @param nothing
      * @return the flow of the warehouses
      */
     @GetMapping("")
@@ -72,7 +71,8 @@ class WarehouseController(
 
     /**
      * API endpoint to partial update a warehouse
-     * @param WarehouseId, @param WarehouseDTO
+     * @param warehouseDTO
+     * @param warehouseDTO
      * @return the warehouse object
      */
     @PatchMapping("/{warehouseID}")
@@ -92,7 +92,7 @@ class WarehouseController(
 
     /**
      * API endpoint to remove a warehouse
-     * @param WarehouseId
+     * @param warehouseID
      * @return nothing
      */
     @DeleteMapping("/{warehouseID}")

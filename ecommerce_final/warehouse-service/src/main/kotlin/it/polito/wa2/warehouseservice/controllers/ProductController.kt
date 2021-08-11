@@ -25,6 +25,7 @@ class ProductController(
     /**
      * API endpoint to retrieve a list of products by their category
      * @param category which is the category to search
+     * @param pageable the pagination details
      * @return the flow of the products
      */
     @GetMapping("", produces = [MediaType.APPLICATION_NDJSON_VALUE])
