@@ -32,7 +32,7 @@ class CommentController(
     }
 
     //CREATE A NEW COMMENT TO A PRODUCT
-    @PostMapping("/{productID}")
+    @PostMapping("")
     @ResponseStatus(HttpStatus.CREATED)
     suspend fun addComment(@PathVariable productID: String,
                            @RequestBody @Validated commentDTO: CommentDTO): CommentDTO {
@@ -40,7 +40,7 @@ class CommentController(
     }
 
     //UPDATE A COMMENT GIVEN ITS ID AND THE PRODUCT ID
-    @PutMapping("/{productID}/{commentID}")
+    @PutMapping("/{commentID}")
     @ResponseStatus(HttpStatus.CREATED)
     suspend fun updateComment(@PathVariable productID: String,
                               @PathVariable commentID: String,
@@ -49,7 +49,7 @@ class CommentController(
     }
 
     //DELETE A COMMENT GIVEN ITS ID AND THE PRODUCT ID
-    @DeleteMapping("/{productID}/{commentID}")
+    @DeleteMapping("/{commentID}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     suspend fun deleteComment(@PathVariable productID: String, @PathVariable commentID: String) {
         return commentService.deleteComment(productID,commentID)

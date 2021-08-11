@@ -1,6 +1,7 @@
 package it.polito.wa2.catalogservice.controllers
 
 import it.polito.wa2.catalogservice.constraintGroups.CreateOrReplaceProduct
+import it.polito.wa2.catalogservice.constraintGroups.CreateProduct
 import it.polito.wa2.catalogservice.dto.CommentDTO
 import it.polito.wa2.catalogservice.dto.PictureDTO
 import it.polito.wa2.catalogservice.dto.ProductDTO
@@ -75,6 +76,13 @@ class ProductController(
     suspend fun updatePicture(@PathVariable productID: String,
                               @RequestBody pictureDTO: PictureDTO): ProductDTO {
         return productService.updatePicture(productID,pictureDTO)
+    }
+
+    //ADD A PRODUCT
+    @PostMapping("")
+    @ResponseStatus(HttpStatus.CREATED)
+    suspend fun addProduct(@RequestBody @Validated(CreateProduct::class) productDTO: ProductDTO): ProductDTO {
+        return productService.addProduct(productDTO)
     }
 
     //PARTIALLY UPDATE A PRODUCT GIVEN ITS ID

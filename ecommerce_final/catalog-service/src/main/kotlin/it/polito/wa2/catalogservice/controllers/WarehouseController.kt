@@ -1,9 +1,12 @@
 package it.polito.wa2.catalogservice.controllers
 
+import it.polito.wa2.catalogservice.constraintGroups.CreateOrReplaceWarehouse
+import it.polito.wa2.catalogservice.constraintGroups.PartialCreateOrUpdateWarehouse
 import it.polito.wa2.catalogservice.dto.WarehouseDTO
 import it.polito.wa2.catalogservice.services.WarehouseService
 import kotlinx.coroutines.flow.Flow
 import org.springframework.http.HttpStatus
+import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
 
 @RestController
@@ -35,7 +38,7 @@ class WarehouseController(
     //CREATE A NEW WAREHOUSE WITH A LIST OF PRODUCTS
     @PostMapping("")
     @ResponseStatus(HttpStatus.CREATED)
-    suspend fun newWarehouse(@RequestBody warehouseDTO: WarehouseDTO): WarehouseDTO {
+    suspend fun newWarehouse(@RequestBody(required = false) @Validated(PartialCreateOrUpdateWarehouse::class) warehouseDTO: WarehouseDTO): WarehouseDTO {
         return warehouseService.newWarehouse(warehouseDTO)
     }
 
@@ -43,7 +46,7 @@ class WarehouseController(
     @PatchMapping("/{warehouseID}")
     @ResponseStatus(HttpStatus.CREATED)
     suspend fun patchWarehouse(@PathVariable warehouseID: String,
-                               @RequestBody warehouseDTO: WarehouseDTO): WarehouseDTO {
+                               @RequestBody @Validated(PartialCreateOrUpdateWarehouse::class) warehouseDTO: WarehouseDTO): WarehouseDTO {
         return warehouseService.patchWarehouse(warehouseID,warehouseDTO)
     }
 
@@ -51,7 +54,7 @@ class WarehouseController(
     @PutMapping("/{warehouseID}")
     @ResponseStatus(HttpStatus.CREATED)
     suspend fun updateWarehouse(@PathVariable warehouseID: String,
-                                @RequestBody warehouseDTO: WarehouseDTO): WarehouseDTO {
+                                @RequestBody @Validated(CreateOrReplaceWarehouse::class) warehouseDTO: WarehouseDTO): WarehouseDTO {
         return warehouseService.updateWarehouse(warehouseID,warehouseDTO)
     }
 }

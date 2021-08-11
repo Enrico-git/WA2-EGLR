@@ -7,6 +7,7 @@ import it.polito.wa2.catalogservice.dto.WarehouseDTO
 import it.polito.wa2.catalogservice.exceptions.NotFoundException
 import it.polito.wa2.catalogservice.exceptions.UnauthorizedException
 import it.polito.wa2.catalogservice.exceptions.UnavailableServiceException
+import it.polito.wa2.catalogservice.exceptions.WebClientBadRequestException
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.reactive.awaitSingle
 import org.springframework.beans.factory.annotation.Qualifier
@@ -104,6 +105,21 @@ class ProductServiceImpl(
             .retrieve()
             .onStatus(Predicate { it == HttpStatus.INTERNAL_SERVER_ERROR }) { throw UnavailableServiceException("Something went wrong") }
             .bodyToFlow()
+    }
+
+    override suspend fun addProduct(productDTO: ProductDTO): ProductDTO {
+        val token = ReactiveSecurityContextHolder.getContext().awaitSingle().authentication.credentials as String
+        return client
+            .post()
+            .uri("$serviceURL/products")
+            .bodyValue(productDTO)
+            .accept(MediaType.APPLICATION_JSON)
+            .header(HttpHeaders.AUTHORIZATION, "Bearer $token")
+            .retrieve()
+            .onStatus(Predicate { it == HttpStatus.BAD_REQUEST }) { it.bodyToMono(WebClientBadRequestException::class.java)}
+            .onStatus(Predicate { it == HttpStatus.UNAUTHORIZED }) { throw UnauthorizedException("Nice try") }
+            .onStatus(Predicate { it == HttpStatus.INTERNAL_SERVER_ERROR }) { throw UnavailableServiceException("Something went wrong") }
+            .awaitBody()
     }
 
     override suspend fun deleteProduct(productID: String) {

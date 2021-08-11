@@ -8,9 +8,7 @@ import kotlinx.coroutines.flow.Flow
 import org.springframework.security.access.prepost.PreAuthorize
 
 interface ProductService {
-    @PreAuthorize("hasAuthority(\"ADMIN\") or hasAuthority(\"CUSTOMER\")")
     suspend fun getProducts(category: String?, page: Int?, size: Int?): Flow<ProductDTO>
-    @PreAuthorize("hasAuthority(\"ADMIN\") or hasAuthority(\"CUSTOMER\")")
     suspend fun getProduct(productID: String): ProductDTO
     @PreAuthorize("hasAuthority(\"ADMIN\") or hasAuthority(\"CUSTOMER\")")
     suspend fun getProductPicture(productID: String): PictureDTO
@@ -18,6 +16,8 @@ interface ProductService {
     suspend fun getProductWarehouses(productID: String): Flow<WarehouseDTO>
     @PreAuthorize("hasAuthority(\"ADMIN\") or hasAuthority(\"CUSTOMER\")")
     suspend fun getProductComments(productID: String): Flow<CommentDTO>
+    @PreAuthorize("hasAuthority(\"ADMIN\")")
+    suspend fun addProduct(productDTO: ProductDTO): ProductDTO
     @PreAuthorize("hasAuthority(\"ADMIN\")")
     suspend fun deleteProduct(productID: String)
     @PreAuthorize("hasAuthority(\"ADMIN\")")
