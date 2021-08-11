@@ -22,7 +22,7 @@ class MailServiceImpl(
     }
 
     override suspend fun notifyAdmin(subject: String, productID: String) {
-        val body = "The product $productID has overcomes the alarm threshold. Recharge it!"
+        val body = "The product $productID has overcome the alarm threshold. Recharge it!"
         sendMessage(adminEmail, subject, body)
     }
 }

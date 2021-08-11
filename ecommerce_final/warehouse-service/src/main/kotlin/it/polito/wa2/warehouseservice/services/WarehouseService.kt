@@ -9,6 +9,7 @@ import org.bson.types.ObjectId
 import org.springframework.security.access.prepost.PreAuthorize
 
 interface WarehouseService {
+//    TODO why customer can see warehouses?
     @PreAuthorize("hasAuthority(\"ADMIN\") or hasAuthority(\"CUSTOMER\")")
     suspend fun getWarehouses(): Flow<WarehouseDTO>
 
@@ -16,7 +17,7 @@ interface WarehouseService {
     suspend fun getWarehouse(warehouseID: ObjectId): WarehouseDTO
 
     @PreAuthorize("hasAuthority(\"ADMIN\")")
-    suspend fun addWarehouse(warehouseDTO: WarehouseDTO): WarehouseDTO
+    suspend fun addWarehouse(warehouseDTO: WarehouseDTO?): WarehouseDTO
 
     @PreAuthorize("hasAuthority(\"ADMIN\")")
     suspend fun updateWarehouses(warehouseID: ObjectId, warehouseDTO: WarehouseDTO): WarehouseDTO

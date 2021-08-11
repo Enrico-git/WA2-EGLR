@@ -96,9 +96,7 @@ class ProductServiceImpl(
             commentRepository.deleteAllById(product.comments)
         val warehouses = warehouseRepository.findWarehousesByProduct(productID).map {
                 wh ->
-                        wh.products = wh.products!!.filter {
-                            it.productId != productID
-                        }.toMutableSet()
+                    wh.products!!.removeIf { it.productId == productID }
                     wh
                 }
         warehouseRepository.saveAll(warehouses).collect()

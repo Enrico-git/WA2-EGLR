@@ -30,6 +30,7 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.context.annotation.Lazy
 import org.springframework.context.event.ContextRefreshedEvent
+import org.springframework.dao.OptimisticLockingFailureException
 import org.springframework.data.mongodb.UncategorizedMongoDbException
 import org.springframework.stereotype.Component
 import org.springframework.util.ConcurrentReferenceHashMap
@@ -158,6 +159,8 @@ class OrchestratorActionsImpl(
                     orderRepository.save(order)
                     return@Job
                 } catch (e: UncategorizedMongoDbException) {
+                    delay(1000)
+                } catch (e: OptimisticLockingFailureException){
                     delay(1000)
                 } catch (e: Exception) {
                     logger.severe("Could not add products location of order ${sm.id}")
@@ -294,6 +297,8 @@ class OrchestratorActionsImpl(
                     return@launch
                 } catch (e: UncategorizedMongoDbException) {
                     delay(1000)
+                } catch( e: OptimisticLockingFailureException) {
+                    delay(1000)
                 } catch (e: IllegalArgumentException) {
                     logger.severe("Could not find order ${sm.id}")
                     return@launch
@@ -312,6 +317,8 @@ class OrchestratorActionsImpl(
                         orderService.updateOrderOnSagaEnding(sm, OrderStatus.FAILED, "ISSUE_FAILED")
                         return@launch
                     } catch (e: UncategorizedMongoDbException) {
+                        delay(1000)
+                    } catch (e: OptimisticLockingFailureException) {
                         delay(1000)
                     } catch (e: IllegalArgumentException) {
                         logger.severe("Could not find order ${sm.id}")
