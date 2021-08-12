@@ -12,7 +12,7 @@ data class ProductInfoDTO(
         @field:Min(0, message = "Alarm trigger quantity must be higher than 0", groups = [CreateOrReplaceWarehouse::class, PartialCreateOrUpdateWarehouse::class])
         val alarm: Int,
         @field:Min(0, message = "Product quantity must be higher than 0", groups = [CreateOrReplaceWarehouse::class, PartialCreateOrUpdateWarehouse::class])
-        val quantity: Int
+        var quantity: Int
 )
 
 fun ProductInfoDTO.toEntity() = ProductInfo(

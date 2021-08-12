@@ -1,12 +1,12 @@
 package it.polito.wa2.warehouseservice.services
 
+import it.polito.wa2.warehouseservice.domain.Delivery
+import it.polito.wa2.warehouseservice.domain.ProductLocation
 import it.polito.wa2.warehouseservice.domain.Warehouse
 import it.polito.wa2.warehouseservice.domain.toDTO
-import it.polito.wa2.warehouseservice.dto.ProductInfoDTO
-import it.polito.wa2.warehouseservice.dto.ProductsReservationRequestDTO
-import it.polito.wa2.warehouseservice.dto.WarehouseDTO
-import it.polito.wa2.warehouseservice.dto.toEntity
+import it.polito.wa2.warehouseservice.dto.*
 import it.polito.wa2.warehouseservice.exceptions.*
+import it.polito.wa2.warehouseservice.repositories.DeliveryRepository
 import it.polito.wa2.warehouseservice.repositories.ProductRepository
 import it.polito.wa2.warehouseservice.repositories.WarehouseRepository
 import kotlinx.coroutines.flow.*
@@ -14,15 +14,16 @@ import org.bson.types.ObjectId
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import org.springframework.validation.annotation.Validated
 import java.sql.Timestamp
+import kotlin.math.absoluteValue
 
 @Service
 @Transactional
 class WarehouseServiceImpl(
         private val warehouseRepository: WarehouseRepository,
         private val productRepository: ProductRepository,
-        private val mailService: MailService
+        private val mailService: MailService,
+        private val deliveryRepository: DeliveryRepository
 ): WarehouseService {
 
     @Value("\${spring.kafka.retryDelay}")
@@ -30,16 +31,14 @@ class WarehouseServiceImpl(
 
     class WarehouseComparator(val productId: ObjectId): Comparator<Warehouse>{
         override fun compare(p0: Warehouse, p1: Warehouse): Int {
-            val product1 = p0.products!!.find { it.productId == productId }
-            val product2 = p1.products!!.find { it.productId == productId }
+            val product1 = p0.products.find { it.productId == productId }
+            val product2 = p1.products.find { it.productId == productId }
 
-            return if(product1!!.quantity!! >= product2!!.quantity!!)
+            return if(product1!!.quantity >= product2!!.quantity)
                 1
             else
                 -1
-
         }
-
     }
 
     override suspend fun getWarehouses(): Flow<WarehouseDTO> {
@@ -124,14 +123,55 @@ class WarehouseServiceImpl(
         return warehouseRepository.deleteById(warehouseID)
     }
 
-    override suspend fun reserveProduct(productInfoDTO: ProductInfoDTO): Boolean? {
-        println("reserveProduct")
-        var warehouse = warehouseRepository.findWarehousesByProduct(ObjectId(productInfoDTO.id))?.toList()
-        warehouse?.forEach{ println(it.products)}
-        warehouse = warehouse?.sortedWith(WarehouseComparator(ObjectId(productInfoDTO.id)))
-        warehouse?.forEach{ println(it.products)}
+    override suspend fun reserveProduct(reserveProductDTO: ReserveProductDTO): ProductLocation? {
+        val warehouses = warehouseRepository.findWarehousesByProduct(ObjectId(reserveProductDTO.id)).toList().sortedWith(WarehouseComparator(ObjectId(reserveProductDTO.id)))
+//        warehouse.forEach{ println(it.products)}
+//        warehouse = warehouse.sortedWith(WarehouseComparator(ObjectId(productInfoDTO.id)))
+//        warehouse.forEach{ println(it.products)}
+        var qty = reserveProductDTO.amount
+        if (warehouses.fold(0) { acc, warehouse ->  acc + warehouse.products.find { it.productId == ObjectId(reserveProductDTO.id) }!!.quantity} < reserveProductDTO.amount)
+            return null
+        val productLocation = ProductLocation(
+                productID = reserveProductDTO.id,
+                amount = reserveProductDTO.amount,
+                warehouseID = mutableSetOf()
+        )
+        warehouses.map { wh ->
+            if(qty > 0){
+                val warehouseProductInfo: ProductInfoDTO = wh.products.find { it.productId == ObjectId(reserveProductDTO.id) }!!.toDTO()
+                warehouseProductInfo.quantity -= qty
+                productLocation.warehouseID.plus(wh.id.toString())
+                //delivery.products.plus(ProductLocation(reserveProductDTO.id, wh.id.toString(), warehouseProductInfo.quantity))
+                if(warehouseProductInfo.quantity < 0){
+                    qty -=  warehouseProductInfo.quantity.absoluteValue
+                    warehouseProductInfo.quantity = 0
+                }
+                wh.products.find { it.productId == ObjectId(reserveProductDTO.id) }!!.quantity = warehouseProductInfo.quantity
+            }
+        }
+        warehouseRepository.saveAll(warehouses)
+        return productLocation
 
-        return false
+//            wh.products.find { it.productId == ObjectId(reserveProductDTO.id) }!!.quantity -= qty
+//            if(wh.products.find { it. })
+//        }
+//        while(qty > 0){
+//            val warehouseProductInfo = warehouses.first().products.find{ it.productId == ObjectId(reserveProductDTO.id)}
+//            warehouseProductInfo!!.quantity -= qty
+//            if(warehouseProductInfo!!.quantity < 0){
+//                qty -= warehouseProductInfo.quantity.absoluteValue
+//                warehouseProductInfo.quantity = 0
+//                delivery.products.plus(ProductLocation(reserveProductDTO.id, warehouses.first().id.toString(), reserveProductDTO.amount))
+//            }else
+//                break
+//        }
+
+//            
+//
+//        }
+//        warehouses.forEach{ it ->
+//            it.products.find{it.productId == ObjectId(reserveProductDTO.id)}!!.quantity
+//        }
 //        val whs = warehouse?.map{ wh->
 //            wh.products?.filter { it ->
 //                it.productId == ObjectId(productInfoDTO.id)
@@ -149,6 +189,21 @@ class WarehouseServiceImpl(
 //        return true
     }
 
+
+    override suspend fun abortReserveProduct(reserveProductDTO: ReserveProductDTO, orderId: String): Boolean {
+        val delivery = deliveryRepository.findByOrderId(ObjectId(orderId)) ?: return false
+        delivery.products.forEach{ ot ->
+            ot.warehouseID.forEach{
+                val wh = warehouseRepository.findById(ObjectId(it)) ?: return false
+                wh.products.find{ iit ->
+                    iit.productId == ObjectId(reserveProductDTO.id)
+                }!!.quantity += ot.amount
+                warehouseRepository.save(wh)
+            }
+        }
+        return true
+    }
+
     /**
      * wh = {id:1,  products = [{productId: 2, alarm = 3, qty: 10}, {productId:3, alarm:5, qty = 8}]}
      * productInfoDTO = {productId: 2, alarm = 3, qty: 10}
@@ -160,7 +215,20 @@ class WarehouseServiceImpl(
         println("ReserveProductOrAbort")
         when(topic){
             "reserve_products" -> {
-
+                val delivery = DeliveryDTO(
+                        id = null,
+                        orderId = productsReservationRequestDTO.orderID,
+                        timestamp = productsReservationRequestDTO.timestamp,
+                        products = mutableSetOf()
+                )
+                productsReservationRequestDTO.products.forEach {
+                    val productLocation = reserveProduct(it)
+                    if (productLocation != null)
+                        delivery.products.plus(productLocation)
+                    else
+                        return false
+                }
+                return true
 //                productsReservationRequestDTO.products.forEach{
 //                    println(it.id)
 //                    val productInfoDTO = ProductInfoDTO(
@@ -172,9 +240,16 @@ class WarehouseServiceImpl(
 //                }
             }
             "abort_products_reservation" -> {
-
+                productsReservationRequestDTO.products.forEach {
+                    val result = abortReserveProduct(it, productsReservationRequestDTO.orderID)
+                    if(!result)
+                        return false
+                }
+                return true
             }
+            else ->
+                return false
          }
-        TODO()
+
     }
 }
