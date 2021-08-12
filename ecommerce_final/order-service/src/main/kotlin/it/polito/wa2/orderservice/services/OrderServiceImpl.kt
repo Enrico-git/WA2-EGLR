@@ -71,7 +71,6 @@ class OrderServiceImpl(
                 customerEmail = orderDTO.email!!,
                 amount = order.products.map{ BigDecimal(it.amount).multiply(it.price) }
                     .reduce{acc, elem -> acc+elem },
-                productsWarehouseLocation = order.delivery.productsWarehouseLocation,
                 auth = token
             ))
         }
@@ -86,7 +85,7 @@ class OrderServiceImpl(
             buyer = user.id!!,
             products = orderDTO.products!!,
             status = OrderStatus.PENDING,
-            delivery = orderDTO.delivery!!
+            deliveryAddress = orderDTO.deliveryAddress!!
         )
 
         val storedOrder = orderRepository.save(order)
@@ -95,6 +94,7 @@ class OrderServiceImpl(
                 id = storedOrder.id.toString(),
                 type = "new_order",
                 customerEmail = orderDTO.email!!,
+                shippingAddress = orderDTO.deliveryAddress,
                 amount = order.products.map{ BigDecimal(it.amount)
                     .multiply(it.price)}
                     .reduce{acc, elem -> acc+elem },

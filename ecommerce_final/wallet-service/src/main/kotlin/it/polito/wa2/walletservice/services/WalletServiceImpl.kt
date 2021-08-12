@@ -192,35 +192,40 @@ class WalletServiceImpl(
             return false
 
         val user = getAuthorizedUser(paymentRequestDTO.token) ?: return false
-        if (transactionRepository.findByOrderID(ObjectId(paymentRequestDTO.orderID)) != null)
-            return null
+
+        val transactionDescription = if (topic == "payment_request")
+            TransactionDescription.PAYMENT
+        else
+            TransactionDescription.REFUND
+
+        if (transactionRepository.findByOrderIDAndDescription(ObjectId(paymentRequestDTO.orderID), transactionDescription) != null)
+                return null
+
 
         val wallet = walletRepository.findByUserID(user.id) ?: return false
 
-        val transactionDescription: TransactionDescription
-        if (topic == "payment_request" && wallet.balance >= paymentRequestDTO.amount) {
-            wallet.balance -= paymentRequestDTO.amount
-            transactionDescription = TransactionDescription.PAYMENT
-        }
-        else if (topic == "abort_payment_request"){
-            wallet.balance += paymentRequestDTO.amount
-            transactionDescription = TransactionDescription.REFUND
-        }
-        else
-            return false
+            if (topic == "payment_request" && wallet.balance >= paymentRequestDTO.amount) {
+                wallet.balance -= paymentRequestDTO.amount
+            }
+            else if (topic == "abort_payment_request"){
+                wallet.balance += paymentRequestDTO.amount
+            }
+            else
+                return false
 
-        walletRepository.save(wallet)
+            walletRepository.save(wallet)
 
-        transactionRepository.save(
-            Transaction(
-                id = null,
-                timestamp = Timestamp(System.currentTimeMillis()),
-                walletID = wallet.id!!,
-                amount = paymentRequestDTO.amount,
-                description = transactionDescription,
-                orderID = ObjectId(paymentRequestDTO.orderID)
+            transactionRepository.save(
+                Transaction(
+                    id = null,
+                    timestamp = Timestamp(System.currentTimeMillis()),
+                    walletID = wallet.id!!,
+                    amount = paymentRequestDTO.amount,
+                    description = transactionDescription,
+                    orderID = ObjectId(paymentRequestDTO.orderID)
+                )
             )
-        )
+
 
         return true
     }

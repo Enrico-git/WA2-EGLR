@@ -23,6 +23,7 @@ class OrchestratorImpl(
     override suspend fun createSaga(sagaDTO: SagaDTO) = orchestratorActions.createSaga(sagaDTO)
 
     @KafkaListener(topics = [
+        "reserve_products_ok",
         "reserve_products_failed",
         "payment_request_failed",
         "payment_request_ok",
@@ -33,8 +34,9 @@ class OrchestratorImpl(
     ])
     override fun onKafkaStringEvent(event: String, @Header(KafkaHeaders.RECEIVED_TOPIC) topic: String) = orchestratorActions.onKafkaReceivedStringEvent(event.removeSurrounding("\""), topic)
 
-    @KafkaListener(topics = ["reserve_products_ok"])
-    override fun onKafkaProductsReservationOKEvent(event: ProductsReservationResponseDTO, topic: String): Job = orchestratorActions.onKafkaReceivedProductsReservationOKEvent(event)
+//    TODO delete this we dont need it
+//    @KafkaListener(topics = ["reserve_products_ok"])
+//    override fun onKafkaProductsReservationOKEvent(event: ProductsReservationResponseDTO, topic: String): Job = orchestratorActions.onKafkaReceivedProductsReservationOKEvent(event)
 
     @EventListener
     override fun onStateMachineEvent(event: StateMachineEvent) {

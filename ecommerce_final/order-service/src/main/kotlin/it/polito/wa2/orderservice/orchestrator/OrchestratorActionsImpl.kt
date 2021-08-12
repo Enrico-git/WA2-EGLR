@@ -9,7 +9,6 @@ import it.polito.wa2.orderservice.dto.*
 import it.polito.wa2.orderservice.events.KafkaResponseReceivedEventInResponseTo
 import it.polito.wa2.orderservice.events.SagaFailureEvent
 import it.polito.wa2.orderservice.events.SagaFinishedEvent
-import it.polito.wa2.orderservice.repositories.OrderRepository
 import it.polito.wa2.orderservice.repositories.RedisStateMachineRepository
 import it.polito.wa2.orderservice.services.MailServiceImpl
 import it.polito.wa2.orderservice.services.OrderService
@@ -20,7 +19,6 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.onEach
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerRecord
-import org.bson.types.ObjectId
 import org.springframework.beans.factory.annotation.Lookup
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
@@ -45,7 +43,6 @@ class OrchestratorActionsImpl(
     private val kafkaProdResReqProducer: KafkaProducer<String, ProductsReservationRequestDTO>,
     private val kafkaAbortProdResReqProducer: KafkaProducer<String, AbortProductReservationRequestDTO>,
     private val applicationEventPublisher: ApplicationEventPublisher,
-    private val orderRepository: OrderRepository,
     @Lazy private val orderService: OrderService,
     private val jobs: ConcurrentReferenceHashMap<String, Job>,
     private val logger: Logger,
@@ -86,12 +83,12 @@ class OrchestratorActionsImpl(
                 .products(sagaDTO.products!!)
                 .auth(sagaDTO.auth)
                 .customerEmail(sagaDTO.customerEmail)
+                .shippingAddress(sagaDTO.shippingAddress!!)
                 .build()
         else
             deleteOrderStateMachineBuilder
                 .id(sagaDTO.id)
                 .amount(sagaDTO.amount)
-                .productsWarehouseLocation(sagaDTO.productsWarehouseLocation!!)
                 .auth(sagaDTO.auth)
                 .customerEmail(sagaDTO.customerEmail)
                 .build()
@@ -109,13 +106,14 @@ class OrchestratorActionsImpl(
         saga?.nextStateAndFireEvent(sagaEvent)
     }
 
-    override fun onKafkaReceivedProductsReservationOKEvent(event: ProductsReservationResponseDTO): Job = CoroutineScope(Dispatchers.Default).launch {
-        val sagas = getListOfStateMachine()
-        val sagaEvent = StateMachineEvents.RESERVE_PRODUCTS_OK
-        val saga = sagas[event.orderID]
-        println(saga)
-        saga?.nextStateAndFireEvent(sagaEvent, event.productsWarehouseLocation)
-    }
+//    TODO delete this we dont need it
+//    override fun onKafkaReceivedProductsReservationOKEvent(event: ProductsReservationResponseDTO): Job = CoroutineScope(Dispatchers.Default).launch {
+//        val sagas = getListOfStateMachine()
+//        val sagaEvent = StateMachineEvents.RESERVE_PRODUCTS_OK
+//        val saga = sagas[event.orderID]
+//        println(saga)
+//        saga?.nextStateAndFireEvent(sagaEvent)
+//    }
 
     override fun onKafkaResponseReceivedEventInResponseTo(event: KafkaResponseReceivedEventInResponseTo) = CoroutineScope(
         Dispatchers.Default).launch {
@@ -133,6 +131,7 @@ class OrchestratorActionsImpl(
                                 "reserve_products", ProductsReservationRequestDTO(
                                     orderID = sm.id,
                                     products = sm.products!!,
+                                    shippingAddress = sm.shippingAddress!!,
                                     timestamp = Timestamp(System.currentTimeMillis())
                                 )
                             )
@@ -153,23 +152,6 @@ class OrchestratorActionsImpl(
                 StateMachineEvents.RESERVE_PRODUCTS
             )
         )
-        CoroutineScope(Dispatchers.IO).launch Job@{
-            val order = orderRepository.findById(ObjectId(sm.id))!!
-            order.delivery.productsWarehouseLocation = sm.productsWarehouseLocation
-            var counter = 5
-            while (counter-- > 0)
-                try {
-                    orderRepository.save(order)
-                    return@Job
-                } catch (e: UncategorizedMongoDbException) {
-                    delay(1000)
-                } catch (e: OptimisticLockingFailureException){
-                    delay(1000)
-                } catch (e: Exception) {
-                    logger.severe("Could not add products location of order ${sm.id}")
-                }
-            logger.severe("Could not add products location of order ${sm.id} due to Optimistic Locking Failure")
-        }
         sm.nextStateAndFireEvent(StateMachineEvents.PAYMENT_REQUEST)
     }
 
@@ -246,24 +228,6 @@ class OrchestratorActionsImpl(
                 StateMachineEvents.ABORT_PAYMENT_REQUEST
             )
         )
-        CoroutineScope(Dispatchers.IO).launch Job@{
-            val order = orderRepository.findById(ObjectId(sm.id))!!
-            order.delivery.productsWarehouseLocation = setOf()
-            var counter = 5
-            while (counter-- > 0)
-                try {
-                    orderRepository.save(order)
-                    return@Job
-                } catch (e: UncategorizedMongoDbException) {
-                    delay(1000)
-                } catch (e: OptimisticLockingFailureException){
-                    delay(1000)
-                } catch (e: Exception) {
-                    logger.severe("Could not remove products location of order ${sm.id}")
-                }
-            logger.severe("Could not remove products location of order ${sm.id} due to Optimistic Locking Failure")
-            mailService.notifyAdmin("ORDER ${sm.id} NOTIFICATION", sm.id,  EmailType.UPDATE_PRODUCTS_ERROR)
-        }
         sm.nextStateAndFireEvent(StateMachineEvents.ABORT_PRODUCTS_RESERVATION)
     }
 
@@ -287,7 +251,6 @@ class OrchestratorActionsImpl(
                                     "abort_products_reservation",
                                     AbortProductReservationRequestDTO(
                                         sm.id,
-                                        sm.productsWarehouseLocation!!,
                                         Timestamp(System.currentTimeMillis())
                                     )
                                 ))

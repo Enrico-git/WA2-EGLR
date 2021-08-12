@@ -14,7 +14,7 @@ data class Order (
     val buyer: ObjectId,
     val products: Set<Product>,
     var status: OrderStatus,
-    val delivery: Delivery,
+    val deliveryAddress: String,
     @Version
     val version: Long? = null
 )
@@ -24,5 +24,5 @@ fun Order.toDTO() = OrderDTO(
     buyer = buyer,
     products = products,
     status = status,
-    delivery = delivery
+    deliveryAddress = deliveryAddress
 )

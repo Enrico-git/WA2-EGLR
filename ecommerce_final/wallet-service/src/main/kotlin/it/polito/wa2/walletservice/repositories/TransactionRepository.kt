@@ -1,6 +1,7 @@
 package it.polito.wa2.walletservice.repositories
 
 import it.polito.wa2.walletservice.entities.Transaction
+import it.polito.wa2.walletservice.entities.TransactionDescription
 import kotlinx.coroutines.flow.Flow
 import org.bson.types.ObjectId
 import org.springframework.data.domain.Pageable
@@ -15,5 +16,5 @@ interface TransactionRepository : CoroutineCrudRepository<Transaction, ObjectId>
 
     fun findAllByWalletID(walletID: ObjectId, pageable: Pageable): Flow<Transaction>
 
-    suspend fun findByOrderID(orderID: ObjectId): Transaction?
+    suspend fun findByOrderIDAndDescription(orderID: ObjectId, description: TransactionDescription): Transaction?
 }

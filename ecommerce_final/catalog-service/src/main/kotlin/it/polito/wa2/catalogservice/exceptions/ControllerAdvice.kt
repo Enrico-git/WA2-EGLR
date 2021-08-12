@@ -21,7 +21,8 @@ class ControllerAdvice {
         InvalidOperationException::class,
         UnavailableServiceException::class,
         WebClientBadRequestException::class,
-        WebExchangeBindException::class
+        WebExchangeBindException::class,
+        WebClientResponseException::class
     ])
     fun genericExceptionHandler(e: Exception): ResponseEntity<ErrorDTO> {
         val errorDTO = ErrorDTO(
@@ -64,6 +65,11 @@ class ControllerAdvice {
                 errorDTO.status = e.status
                 status = HttpStatus.BAD_REQUEST
                 errorDTO.error = e.message
+            }
+            is WebClientResponseException -> {
+                errorDTO.status = 500
+                status = HttpStatus.INTERNAL_SERVER_ERROR
+                errorDTO.error = "Could not reach service"
             }
             is WebExchangeBindException -> {
                 errorDTO.error = e.fieldErrors.map { it.defaultMessage.toString() }.reduce{acc, elem -> "$acc, $elem" }

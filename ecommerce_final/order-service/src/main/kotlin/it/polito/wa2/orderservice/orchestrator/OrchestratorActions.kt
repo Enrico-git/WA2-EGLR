@@ -35,13 +35,14 @@ interface OrchestratorActions {
      */
     fun onKafkaReceivedStringEvent(event: String, topic: String): Job
 
-    /**
-     * Perform the next step of the state machine when a
-     * ProductReservationResponseDTO message is received from kafka
-     * @param event
-     * @return a coroutine job
-     */
-    fun onKafkaReceivedProductsReservationOKEvent(event: ProductsReservationResponseDTO): Job
+//    TODO delete this we dont need it
+//    /**
+//     * Perform the next step of the state machine when a
+//     * ProductReservationResponseDTO message is received from kafka
+//     * @param event
+//     * @return a coroutine job
+//     */
+//    fun onKafkaReceivedProductsReservationOKEvent(event: ProductsReservationResponseDTO): Job
 
     /**
      * Cancels the running jobs that keep sending messages to the microservices because a response was received

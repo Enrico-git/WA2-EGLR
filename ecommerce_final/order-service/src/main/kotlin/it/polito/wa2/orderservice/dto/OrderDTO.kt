@@ -19,8 +19,8 @@ data class OrderDTO(
     @field:NotNull(message = "Products must not be null", groups = [CreateOrder::class])
     @field:Valid
     val products: Set<Product>? = null,
-    @field:NotNull(message = "Delivery must not be null", groups = [CreateOrder::class])
-    val delivery: Delivery? = null,
+    @field:NotNull(message = "Delivery address must not be null", groups = [CreateOrder::class])
+    val deliveryAddress: String? = null,
     @field:NotNull(message = "Order status must not be null", groups = [UpdateOrder::class])
     val status: OrderStatus? = null,
     @field:NotNull(message = "Customer email must not be null", groups = [UpdateOrder::class, DeleteOrder::class, CreateOrder::class])

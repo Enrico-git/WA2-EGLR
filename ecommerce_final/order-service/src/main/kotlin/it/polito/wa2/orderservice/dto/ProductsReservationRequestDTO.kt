@@ -5,5 +5,6 @@ import java.sql.Timestamp
 data class ProductsReservationRequestDTO(
     val orderID: String,
     val products: Set<ProductDTO>,
+    val shippingAddress: String,
     val timestamp: Timestamp
 )

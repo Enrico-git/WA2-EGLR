@@ -2,7 +2,6 @@ package it.polito.wa2.orderservice.statemachine
 
 import it.polito.wa2.orderservice.common.StateMachineEvents
 import it.polito.wa2.orderservice.common.StateMachineStates
-import it.polito.wa2.orderservice.domain.ProductLocation
 import it.polito.wa2.orderservice.domain.RedisStateMachine
 import it.polito.wa2.orderservice.domain.Transition
 import it.polito.wa2.orderservice.domain.toRedisStateMachine
@@ -11,11 +10,10 @@ import it.polito.wa2.orderservice.events.SagaFailureEvent
 import it.polito.wa2.orderservice.events.SagaFinishedEvent
 import it.polito.wa2.orderservice.events.StateMachineEvent
 import it.polito.wa2.orderservice.repositories.RedisStateMachineRepository
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import org.springframework.beans.factory.annotation.Autowired
+import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.toList
 import org.springframework.context.ApplicationEvent
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.context.annotation.Scope
@@ -33,9 +31,10 @@ class StateMachineImpl(val initialState: StateMachineStates,
                        var failed: Boolean? = false,
                        var completed: Boolean? = false,
                        val customerEmail: String,
+                       val shippingAddress: String? = null,
                        val amount: BigDecimal,
                        val products: Set<ProductDTO>? = null,
-                       var productsWarehouseLocation: Set<ProductLocation>? = null,
+//                       var productsWarehouseLocation: Set<ProductLocation>? = null,
                        val auth: String,
                        val applicationEventPublisher: ApplicationEventPublisher,
                        val redisStateMachineRepository: RedisStateMachineRepository,
@@ -59,7 +58,7 @@ class StateMachineImpl(val initialState: StateMachineStates,
     }
 
     
-    override suspend fun nextStateAndFireEvent(event: StateMachineEvents, productsLocation: Set<ProductLocation>?) {
+    override suspend fun nextStateAndFireEvent(event: StateMachineEvents) {
 
         val transition = getTransition(event) ?: return
 
@@ -71,10 +70,9 @@ class StateMachineImpl(val initialState: StateMachineStates,
 
         failed = if (failed == false && transition.isRollingBack) true else failed
 
-        if (event == StateMachineEvents.RESERVE_PRODUCTS_OK  || event == StateMachineEvents.ABORT_PRODUCTS_RESERVATION_OK)
-            productsWarehouseLocation = productsLocation
+//        if (event == StateMachineEvents.RESERVE_PRODUCTS_OK  || event == StateMachineEvents.ABORT_PRODUCTS_RESERVATION_OK)
+//            productsWarehouseLocation = productsLocation
 
-        fireEvent(StateMachineEvent(this, event ))
 
         if (state == finalState){
             fireEvent(SagaFinishedEvent(this))
@@ -84,7 +82,14 @@ class StateMachineImpl(val initialState: StateMachineStates,
             completed = true
         }
 
-        backup(oldSM, this.toRedisStateMachine())
+        //        TODO fix this, basically state machine changes state so fast
+//        that we cant remove the old state in redis so we need to wait for it
+        backup(oldSM, this.toRedisStateMachine()).join()
+
+
+//        if (transition.isPassive)
+//         delay(500)
+        fireEvent(StateMachineEvent(this, event ))
 
         transition.action?.invoke()
 

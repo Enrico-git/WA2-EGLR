@@ -131,29 +131,30 @@ class KafkaConfig {
         return factory
     }
 
+//    TODO DELETE THIS I dont think we need it
     /**
      * Consumer factory for ProductReservationDTO message types
      * @return the consumer factory
      */
-    @Bean
-    fun productsReservationConsumerFactory(): ConsumerFactory<String, ProductsReservationResponseDTO> {
-        val props: MutableMap<String, Any> = HashMap()
-        props[ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG] = bootstrapAddress!!
-        props[ConsumerConfig.GROUP_ID_CONFIG] = "order_service"
-        props[ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG] = StringDeserializer::class.java
-        props[ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG] = JsonDeserializer::class.java
-        props[JsonDeserializer.TYPE_MAPPINGS] = "it.polito.wa2.warehouseservice.dto.ProductsReservationResponseDTO:it.polito.wa2.orderservice.dto.ProductsReservationResponseDTO"
-        return DefaultKafkaConsumerFactory(props)
-    }
+//    @Bean
+//    fun productsReservationConsumerFactory(): ConsumerFactory<String, ProductsReservationResponseDTO> {
+//        val props: MutableMap<String, Any> = HashMap()
+//        props[ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG] = bootstrapAddress!!
+//        props[ConsumerConfig.GROUP_ID_CONFIG] = "order_service"
+//        props[ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG] = StringDeserializer::class.java
+//        props[ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG] = JsonDeserializer::class.java
+//        props[JsonDeserializer.TYPE_MAPPINGS] = "it.polito.wa2.warehouseservice.dto.ProductsReservationResponseDTO:it.polito.wa2.orderservice.dto.ProductsReservationResponseDTO"
+//        return DefaultKafkaConsumerFactory(props)
+//    }
 
     /**
      * Make the kafka listener async
      * @return the concurrent listener container factory
      */
-    @Bean
-    fun productsReservationListenerContainerFactory(): ConcurrentKafkaListenerContainerFactory<String, ProductsReservationResponseDTO> {
-        val factory = ConcurrentKafkaListenerContainerFactory<String, ProductsReservationResponseDTO>()
-        factory.consumerFactory = productsReservationConsumerFactory()
-        return factory
-    }
+//    @Bean
+//    fun productsReservationListenerContainerFactory(): ConcurrentKafkaListenerContainerFactory<String, ProductsReservationResponseDTO> {
+//        val factory = ConcurrentKafkaListenerContainerFactory<String, ProductsReservationResponseDTO>()
+//        factory.consumerFactory = productsReservationConsumerFactory()
+//        return factory
+//    }
 }

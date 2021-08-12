@@ -25,13 +25,6 @@ interface Orchestrator {
      */
     fun onKafkaStringEvent(event: String, topic: String): Job
 
-    /**
-     * Kafka event listener
-     * @param event
-     * @param topic
-     * @return a coroutine job
-     */
-    fun onKafkaProductsReservationOKEvent(event: ProductsReservationResponseDTO, topic: String): Job
 
     /**
      * State machine application event listener

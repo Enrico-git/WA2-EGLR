@@ -2,7 +2,6 @@ package it.polito.wa2.orderservice.statemachine
 
 import it.polito.wa2.orderservice.common.StateMachineEvents
 import it.polito.wa2.orderservice.common.StateMachineStates
-import it.polito.wa2.orderservice.domain.ProductLocation
 import it.polito.wa2.orderservice.domain.Transition
 import it.polito.wa2.orderservice.dto.ProductDTO
 import it.polito.wa2.orderservice.repositories.RedisStateMachineRepository
@@ -26,10 +25,10 @@ class StateMachineBuilderImpl(
     lateinit var auth: String
     lateinit var amount: BigDecimal
     var failed: Boolean? = false
+    var shippingAddress: String? = null
     var completed: Boolean? = false
     var state: StateMachineStates? = null
     var products: Set<ProductDTO>? = null
-    var productsWarehouseLocation: Set<ProductLocation>? = null
     var transitions: MutableList<Transition> = mutableListOf(Transition(null, null, null, false, false, null))
 
     override fun initialState(source: StateMachineStates): StateMachineBuilder{
@@ -56,13 +55,13 @@ class StateMachineBuilderImpl(
         return this
     }
 
-    override fun products(newProducts: Set<ProductDTO>?): StateMachineBuilder{
-        products = newProducts
+    override fun shippingAddress(address: String?): StateMachineBuilder{
+        shippingAddress = address
         return this
     }
 
-    override fun productsWarehouseLocation(newProductsWarehouseLocation: Set<ProductLocation>?): StateMachineBuilder{
-        productsWarehouseLocation = newProductsWarehouseLocation
+    override fun products(newProducts: Set<ProductDTO>?): StateMachineBuilder{
+        products = newProducts
         return this
     }
 
@@ -128,9 +127,9 @@ class StateMachineBuilderImpl(
         false,
     false,
         customerEmail,
+        shippingAddress,
         amount,
         products,
-        productsWarehouseLocation,
         auth,
         applicationEventPublisher,
         redisStateMachineRepository,

@@ -12,5 +12,4 @@ data class EmailVerificationToken(
     val expiryDate: Timestamp,
     val token: String,
     val user: User,
-) {
-}
+)

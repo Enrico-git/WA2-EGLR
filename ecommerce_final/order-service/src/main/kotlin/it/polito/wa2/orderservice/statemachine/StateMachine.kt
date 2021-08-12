@@ -33,7 +33,7 @@ interface StateMachine {
      * @param event
      * @param productsLocation
      */
-    suspend fun nextStateAndFireEvent(event: StateMachineEvents, productsLocation: Set<ProductLocation>? = null)
+    suspend fun nextStateAndFireEvent(event: StateMachineEvents)
 
     /**
      * Resume the state machine in case the service crashed

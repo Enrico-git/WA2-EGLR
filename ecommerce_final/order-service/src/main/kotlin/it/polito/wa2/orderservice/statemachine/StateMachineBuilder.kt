@@ -51,11 +51,11 @@ interface StateMachineBuilder {
     fun products(newProducts: Set<ProductDTO>?): StateMachineBuilder
 
     /**
-     * Set the set of products location of the machine
-     * @param newProductsWarehouseLocation the set of products locations
+     * Set the shipping address for products delivery
+     * @param newAddress
      * @return the same instance
      */
-    fun productsWarehouseLocation(newProductsWarehouseLocation: Set<ProductLocation>?): StateMachineBuilder
+    fun shippingAddress(newAddress: String?): StateMachineBuilder
 
     /**
      * Set the amount the user has to pay or be refunded of the machine

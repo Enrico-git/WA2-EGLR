@@ -5,6 +5,5 @@ import java.sql.Timestamp
 
 data class AbortProductReservationRequestDTO(
     val orderID: String,
-    val productsWarehouseLocation: Set<ProductLocation>,
     val timestamp: Timestamp
 )

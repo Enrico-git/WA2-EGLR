@@ -43,7 +43,6 @@ class MailServiceImpl (
             EmailType.UPDATE -> "The Order $orderID status has been updated to $status"
             EmailType.ABORT_PRODUCT_ERROR -> "There was an error aborting the products reservation for order $orderID"
             EmailType.UPDATE_STATUS_ERROR -> "There was an error updating the status of order $orderID to $status"
-            EmailType.UPDATE_PRODUCTS_ERROR -> "There was an error updating the products location of order $orderID"
         }
         sendMessage(adminEmail, subject, body)
     }

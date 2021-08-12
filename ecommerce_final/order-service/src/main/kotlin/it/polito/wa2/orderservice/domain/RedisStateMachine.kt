@@ -15,9 +15,9 @@ data class RedisStateMachine(
     var failed: Boolean? = false,
     var completed: Boolean? = false,
     val customerEmail: String,
+    val shippingAddress: String? = null,
     val amount: BigDecimal,
     val products: Set<ProductDTO>? = null,
-    val productsWarehouseLocation: Set<ProductLocation>? = null,
     val auth: String
 )
 
@@ -27,7 +27,7 @@ fun RedisStateMachine.toStateMachine(stateMachineBuilder: StateMachineBuilder) =
         .customerEmail(customerEmail)
         .amount(amount)
         .products(products)
-        .productsWarehouseLocation(productsWarehouseLocation)
+        .shippingAddress(shippingAddress)
         .auth(auth)
         .failed(failed)
         .completed(completed)
@@ -41,8 +41,8 @@ fun StateMachineImpl.toRedisStateMachine() = RedisStateMachine(
     failed,
     completed,
     customerEmail,
+    shippingAddress,
     amount,
     products,
-    productsWarehouseLocation,
     auth
 )
