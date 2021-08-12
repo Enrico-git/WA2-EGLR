@@ -7,6 +7,7 @@ import it.polito.wa2.orderservice.events.SagaFailureEvent
 import it.polito.wa2.orderservice.events.SagaFinishedEvent
 import it.polito.wa2.orderservice.events.StateMachineEvent
 import it.polito.wa2.orderservice.statemachine.StateMachineImpl
+import kotlinx.coroutines.Job
 import org.springframework.context.event.ContextRefreshedEvent
 import org.springframework.context.event.EventListener
 import org.springframework.kafka.annotation.KafkaListener
@@ -22,8 +23,6 @@ class OrchestratorImpl(
     override suspend fun createSaga(sagaDTO: SagaDTO) = orchestratorActions.createSaga(sagaDTO)
 
     @KafkaListener(topics = [
-//        TODO make custom listener for reserve_products_ok
-        "reserve_products_ok",
         "reserve_products_failed",
         "payment_request_failed",
         "payment_request_ok",
@@ -32,7 +31,10 @@ class OrchestratorImpl(
         "abort_payment_request_ok",
         "abort_payment_request_failed"
     ])
-    override fun onKafkaEvent(event: String, @Header(KafkaHeaders.RECEIVED_TOPIC) topic: String) = orchestratorActions.onKafkaReceivedEvent(event.removeSurrounding("\""), topic)
+    override fun onKafkaStringEvent(event: String, @Header(KafkaHeaders.RECEIVED_TOPIC) topic: String) = orchestratorActions.onKafkaReceivedStringEvent(event.removeSurrounding("\""), topic)
+
+    @KafkaListener(topics = ["reserve_products_ok"])
+    override fun onKafkaProductsReservationOKEvent(event: ProductsReservationResponseDTO, topic: String): Job = orchestratorActions.onKafkaReceivedProductsReservationOKEvent(event)
 
     @EventListener
     override fun onStateMachineEvent(event: StateMachineEvent) {

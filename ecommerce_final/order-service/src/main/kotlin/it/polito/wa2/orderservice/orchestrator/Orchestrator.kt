@@ -1,5 +1,6 @@
 package it.polito.wa2.orderservice.orchestrator
 
+import it.polito.wa2.orderservice.dto.ProductsReservationResponseDTO
 import it.polito.wa2.orderservice.dto.SagaDTO
 import it.polito.wa2.orderservice.events.KafkaResponseReceivedEventInResponseTo
 import it.polito.wa2.orderservice.events.SagaFailureEvent
@@ -19,9 +20,18 @@ interface Orchestrator {
     /**
      * Kafka event listener
      * @param event
+     * @param topic
      * @return a coroutine job
      */
-    fun onKafkaEvent(event: String, topic: String): Job
+    fun onKafkaStringEvent(event: String, topic: String): Job
+
+    /**
+     * Kafka event listener
+     * @param event
+     * @param topic
+     * @return a coroutine job
+     */
+    fun onKafkaProductsReservationOKEvent(event: ProductsReservationResponseDTO, topic: String): Job
 
     /**
      * State machine application event listener

@@ -1,5 +1,6 @@
 package it.polito.wa2.orderservice.services
 
+import it.polito.wa2.orderservice.common.EmailType
 import it.polito.wa2.orderservice.common.OrderStatus
 import it.polito.wa2.orderservice.domain.Order
 import it.polito.wa2.orderservice.domain.toDTO
@@ -49,8 +50,8 @@ class OrderServiceImpl(
     override suspend fun updateOrderStatus(orderID: ObjectId, orderDTO: OrderDTO): OrderDTO {
         val order = orderRepository.findById(orderID) ?: throw IllegalArgumentException("Order not found")
         order.status = orderDTO.status!!
-        mailService.notifyCustomer(orderDTO.email!!, "Order ${order.id} Notification", order.id.toString(), "UPDATE", order.status )
-        mailService.notifyAdmin("Order ${order.id} Notification", order.id.toString(), "UPDATE", order.status )
+        mailService.notifyCustomer(orderDTO.email!!, "Order ${order.id} Notification", order.id.toString(), EmailType.UPDATE, order.status )
+        mailService.notifyAdmin("Order ${order.id} Notification", order.id.toString(), EmailType.UPDATE, order.status )
         return orderRepository.save(order).toDTO()
     }
 
@@ -111,7 +112,7 @@ class OrderServiceImpl(
         return storedOrder.toDTO()
     }
 
-    override suspend fun updateOrderOnSagaEnding(sm: StateMachineImpl, status: OrderStatus, mailType: String) {
+    override suspend fun updateOrderOnSagaEnding(sm: StateMachineImpl, status: OrderStatus, mailType: EmailType) {
         val order = orderRepository.findById(ObjectId(sm.id)) ?: throw IllegalArgumentException("Order not found")
         order.status = status
         orderRepository.save(order)

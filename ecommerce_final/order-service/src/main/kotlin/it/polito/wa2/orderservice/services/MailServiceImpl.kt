@@ -1,7 +1,7 @@
 package it.polito.wa2.orderservice.services
 
+import it.polito.wa2.orderservice.common.EmailType
 import it.polito.wa2.orderservice.common.OrderStatus
-import kotlinx.coroutines.delay
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.mail.javamail.JavaMailSender
 import org.springframework.mail.javamail.MimeMessageHelper
@@ -22,27 +22,28 @@ class MailServiceImpl (
         mailSender.send(message)
     }
 
-    override suspend fun notifyCustomer(toMail: String, subject: String, orderID: String, type: String, status: OrderStatus?) {
-        lateinit var body: String
-        when (type){
-            "ISSUED" -> body = "The Order $orderID has been ISSUED"
-            "CANCELED" -> body = "The Order $orderID has been CANCELLED"
-            "ISSUE_FAILED" -> body = "The creation of order $orderID has FAILED"
-            "CANCELLATION_FAILED" -> body = "The cancellation of $orderID has FAILED. Please try again later"
-            "UPDATE" -> body = "The Order $orderID status has been updated to $status"
+    override suspend fun notifyCustomer(toMail: String, subject: String, orderID: String, type: EmailType, status: OrderStatus?) {
+        val body = when (type){
+            EmailType.ISSUED -> "The Order $orderID has been ISSUED"
+            EmailType.CANCELED -> "The Order $orderID has been CANCELLED"
+            EmailType.ISSUE_FAILED -> "The creation of order $orderID has FAILED"
+            EmailType.CANCELLATION_FAILED -> "The cancellation of $orderID has FAILED. Please try again later"
+            EmailType.UPDATE -> "The Order $orderID status has been updated to $status"
+            else -> return
         }
         sendMessage(toMail, subject, body)
     }
 
-    override suspend fun notifyAdmin(subject: String, orderID: String, type: String, status: OrderStatus?) {
-        lateinit var body: String
-        when (type){
-            "ISSUED" -> body = "The Order $orderID has been ISSUED"
-            "CANCELED" -> body = "The Order $orderID has been CANCELLED"
-            "ISSUE_FAILED" -> body = "The creation of order $orderID has FAILED"
-            "CANCELLATION_FAILED" -> body = "The cancellation of $orderID has FAILED"
-            "UPDATE" -> body = "The Order $orderID status has been updated to $status"
-            "ERROR" -> body = "There was an error aborting the products reservation for order $orderID"
+    override suspend fun notifyAdmin(subject: String, orderID: String, type: EmailType, status: OrderStatus?) {
+        val body = when (type){
+            EmailType.ISSUED -> "The Order $orderID has been ISSUED"
+            EmailType.CANCELED -> "The Order $orderID has been CANCELLED"
+            EmailType.ISSUE_FAILED -> "The creation of order $orderID has FAILED"
+            EmailType.CANCELLATION_FAILED -> "The cancellation of $orderID has FAILED"
+            EmailType.UPDATE -> "The Order $orderID status has been updated to $status"
+            EmailType.ABORT_PRODUCT_ERROR -> "There was an error aborting the products reservation for order $orderID"
+            EmailType.UPDATE_STATUS_ERROR -> "There was an error updating the status of order $orderID to $status"
+            EmailType.UPDATE_PRODUCTS_ERROR -> "There was an error updating the products location of order $orderID"
         }
         sendMessage(adminEmail, subject, body)
     }

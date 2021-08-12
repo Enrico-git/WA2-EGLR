@@ -1,6 +1,7 @@
 package it.polito.wa2.orderservice.statemachine
 
 import it.polito.wa2.orderservice.common.StateMachineEvents
+import it.polito.wa2.orderservice.domain.ProductLocation
 import it.polito.wa2.orderservice.domain.RedisStateMachine
 import it.polito.wa2.orderservice.domain.Transition
 import kotlinx.coroutines.Job
@@ -30,8 +31,9 @@ interface StateMachine {
     /**
      * Perform next step in state machine based on event
      * @param event
+     * @param productsLocation
      */
-    suspend fun nextStateAndFireEvent(event: StateMachineEvents)
+    suspend fun nextStateAndFireEvent(event: StateMachineEvents, productsLocation: Set<ProductLocation>? = null)
 
     /**
      * Resume the state machine in case the service crashed

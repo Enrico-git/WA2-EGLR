@@ -58,7 +58,8 @@ class StateMachineImpl(val initialState: StateMachineStates,
         applicationEventPublisher.publishEvent(event)
     }
 
-    override suspend fun nextStateAndFireEvent(event: StateMachineEvents) {
+    
+    override suspend fun nextStateAndFireEvent(event: StateMachineEvents, productsLocation: Set<ProductLocation>?) {
 
         val transition = getTransition(event) ?: return
 
@@ -67,7 +68,11 @@ class StateMachineImpl(val initialState: StateMachineStates,
         val oldSM = this.toRedisStateMachine()
 
         state = transition.target
+
         failed = if (failed == false && transition.isRollingBack) true else failed
+
+        if (event == StateMachineEvents.RESERVE_PRODUCTS_OK  || event == StateMachineEvents.ABORT_PRODUCTS_RESERVATION_OK)
+            productsWarehouseLocation = productsLocation
 
         fireEvent(StateMachineEvent(this, event ))
 

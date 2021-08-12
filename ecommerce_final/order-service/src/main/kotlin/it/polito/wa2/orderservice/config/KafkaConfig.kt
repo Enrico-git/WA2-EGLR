@@ -3,6 +3,7 @@ package it.polito.wa2.orderservice.config
 import it.polito.wa2.orderservice.dto.AbortProductReservationRequestDTO
 import it.polito.wa2.orderservice.dto.PaymentRequestDTO
 import it.polito.wa2.orderservice.dto.ProductsReservationRequestDTO
+import it.polito.wa2.orderservice.dto.ProductsReservationResponseDTO
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerConfig
@@ -14,6 +15,7 @@ import org.springframework.kafka.annotation.EnableKafka
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory
 import org.springframework.kafka.core.ConsumerFactory
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory
+import org.springframework.kafka.support.serializer.JsonDeserializer
 import org.springframework.kafka.support.serializer.JsonSerializer
 import java.util.*
 
@@ -126,6 +128,32 @@ class KafkaConfig {
     fun kafkaListenerContainerFactory(): ConcurrentKafkaListenerContainerFactory<String, String> {
         val factory = ConcurrentKafkaListenerContainerFactory<String, String>()
         factory.consumerFactory = consumerFactory()
+        return factory
+    }
+
+    /**
+     * Consumer factory for ProductReservationDTO message types
+     * @return the consumer factory
+     */
+    @Bean
+    fun productsReservationConsumerFactory(): ConsumerFactory<String, ProductsReservationResponseDTO> {
+        val props: MutableMap<String, Any> = HashMap()
+        props[ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG] = bootstrapAddress!!
+        props[ConsumerConfig.GROUP_ID_CONFIG] = "order_service"
+        props[ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG] = StringDeserializer::class.java
+        props[ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG] = JsonDeserializer::class.java
+        props[JsonDeserializer.TYPE_MAPPINGS] = "it.polito.wa2.warehouseservice.dto.ProductsReservationResponseDTO:it.polito.wa2.orderservice.dto.ProductsReservationResponseDTO"
+        return DefaultKafkaConsumerFactory(props)
+    }
+
+    /**
+     * Make the kafka listener async
+     * @return the concurrent listener container factory
+     */
+    @Bean
+    fun productsReservationListenerContainerFactory(): ConcurrentKafkaListenerContainerFactory<String, ProductsReservationResponseDTO> {
+        val factory = ConcurrentKafkaListenerContainerFactory<String, ProductsReservationResponseDTO>()
+        factory.consumerFactory = productsReservationConsumerFactory()
         return factory
     }
 }

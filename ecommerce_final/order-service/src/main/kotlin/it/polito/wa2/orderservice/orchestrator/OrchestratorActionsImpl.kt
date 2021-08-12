@@ -1,14 +1,11 @@
 package it.polito.wa2.orderservice.orchestrator
 
+import it.polito.wa2.orderservice.common.EmailType
 import it.polito.wa2.orderservice.common.OrderStatus
 import it.polito.wa2.orderservice.common.StateMachineEvents
 import it.polito.wa2.orderservice.common.StateMachineStates
-import it.polito.wa2.orderservice.domain.ProductLocation
 import it.polito.wa2.orderservice.domain.toStateMachine
-import it.polito.wa2.orderservice.dto.AbortProductReservationRequestDTO
-import it.polito.wa2.orderservice.dto.PaymentRequestDTO
-import it.polito.wa2.orderservice.dto.ProductsReservationRequestDTO
-import it.polito.wa2.orderservice.dto.SagaDTO
+import it.polito.wa2.orderservice.dto.*
 import it.polito.wa2.orderservice.events.KafkaResponseReceivedEventInResponseTo
 import it.polito.wa2.orderservice.events.SagaFailureEvent
 import it.polito.wa2.orderservice.events.SagaFinishedEvent
@@ -36,7 +33,6 @@ import org.springframework.stereotype.Component
 import org.springframework.util.ConcurrentReferenceHashMap
 import java.lang.IllegalArgumentException
 import java.sql.Timestamp
-import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import java.util.logging.Logger
 
@@ -105,13 +101,22 @@ class OrchestratorActionsImpl(
     }
 
 
-    override fun onKafkaReceivedEvent(event: String, topic: String) = CoroutineScope(Dispatchers.Default).launch {
+    override fun onKafkaReceivedStringEvent(event: String, topic: String) = CoroutineScope(Dispatchers.Default).launch {
         val sagas = getListOfStateMachine()
         val sagaEvent = StateMachineEvents.valueOf(topic.uppercase())
         val saga = sagas[event]
         println(saga)
         saga?.nextStateAndFireEvent(sagaEvent)
     }
+
+    override fun onKafkaReceivedProductsReservationOKEvent(event: ProductsReservationResponseDTO): Job = CoroutineScope(Dispatchers.Default).launch {
+        val sagas = getListOfStateMachine()
+        val sagaEvent = StateMachineEvents.RESERVE_PRODUCTS_OK
+        val saga = sagas[event.orderID]
+        println(saga)
+        saga?.nextStateAndFireEvent(sagaEvent, event.productsWarehouseLocation)
+    }
+
     override fun onKafkaResponseReceivedEventInResponseTo(event: KafkaResponseReceivedEventInResponseTo) = CoroutineScope(
         Dispatchers.Default).launch {
         val sm = event.source as StateMachineImpl
@@ -140,6 +145,7 @@ class OrchestratorActionsImpl(
             sm.nextStateAndFireEvent(StateMachineEvents.RESERVE_PRODUCTS_FAILED)
         }
     }
+
     override fun onReserveProductsOk(sm: StateMachineImpl) = CoroutineScope(Dispatchers.Default).launch {
         applicationEventPublisher.publishEvent(
             KafkaResponseReceivedEventInResponseTo(
@@ -149,10 +155,7 @@ class OrchestratorActionsImpl(
         )
         CoroutineScope(Dispatchers.IO).launch Job@{
             val order = orderRepository.findById(ObjectId(sm.id))!!
-//                    TODO hardcoded warehouse response NEED FIX
-//            TODO PUT NEXT 2 LINES IN KAFKA LISTENER
-            order.delivery.productsWarehouseLocation = setOf(ProductLocation("boh", "wh1", 2))
-            sm.productsWarehouseLocation = setOf(ProductLocation("boh", "wh1", 2))
+            order.delivery.productsWarehouseLocation = sm.productsWarehouseLocation
             var counter = 5
             while (counter-- > 0)
                 try {
@@ -169,6 +172,7 @@ class OrchestratorActionsImpl(
         }
         sm.nextStateAndFireEvent(StateMachineEvents.PAYMENT_REQUEST)
     }
+
     override fun onReserveProductsFailed(sm: StateMachineImpl) = CoroutineScope(Dispatchers.Default).launch {
         applicationEventPublisher.publishEvent(
             KafkaResponseReceivedEventInResponseTo(
@@ -177,6 +181,7 @@ class OrchestratorActionsImpl(
             )
         )
     }
+
     override fun onPaymentRequest(sm: StateMachineImpl) = CoroutineScope(Dispatchers.Default).launch {
         jobs["${sm.id}-${StateMachineEvents.PAYMENT_REQUEST}"] = CoroutineScope(Dispatchers.IO).launch Job@{
             repeat(numberOfRetries) {
@@ -196,6 +201,7 @@ class OrchestratorActionsImpl(
             sm.nextStateAndFireEvent(StateMachineEvents.PAYMENT_REQUEST_FAILED)
         }
     }
+
     override fun onPaymentRequestOk(sm: StateMachineImpl) = CoroutineScope(Dispatchers.Default).launch {
         applicationEventPublisher.publishEvent(
             KafkaResponseReceivedEventInResponseTo(
@@ -204,10 +210,12 @@ class OrchestratorActionsImpl(
             )
         )
     }
+
     override fun onPaymentRequestFailed(sm: StateMachineImpl) = CoroutineScope(Dispatchers.Default).launch {
         applicationEventPublisher.publishEvent(KafkaResponseReceivedEventInResponseTo(sm, StateMachineEvents.PAYMENT_REQUEST))
         sm.nextStateAndFireEvent(StateMachineEvents.ABORT_PRODUCTS_RESERVATION)
     }
+
     override fun onAbortPaymentRequest(sm: StateMachineImpl) = CoroutineScope(Dispatchers.Default).launch {
         jobs["${sm.id}-${StateMachineEvents.ABORT_PAYMENT_REQUEST}"] =
             CoroutineScope(Dispatchers.IO).launch Job@{
@@ -230,6 +238,7 @@ class OrchestratorActionsImpl(
                 logger.severe("ABORT PAYMENT FAILED FOR ORDER ${sm.id}")
             }
     }
+
     override fun onAbortPaymentRequestOk(sm: StateMachineImpl) = CoroutineScope(Dispatchers.Default).launch {
         applicationEventPublisher.publishEvent(
             KafkaResponseReceivedEventInResponseTo(
@@ -237,8 +246,27 @@ class OrchestratorActionsImpl(
                 StateMachineEvents.ABORT_PAYMENT_REQUEST
             )
         )
+        CoroutineScope(Dispatchers.IO).launch Job@{
+            val order = orderRepository.findById(ObjectId(sm.id))!!
+            order.delivery.productsWarehouseLocation = setOf()
+            var counter = 5
+            while (counter-- > 0)
+                try {
+                    orderRepository.save(order)
+                    return@Job
+                } catch (e: UncategorizedMongoDbException) {
+                    delay(1000)
+                } catch (e: OptimisticLockingFailureException){
+                    delay(1000)
+                } catch (e: Exception) {
+                    logger.severe("Could not remove products location of order ${sm.id}")
+                }
+            logger.severe("Could not remove products location of order ${sm.id} due to Optimistic Locking Failure")
+            mailService.notifyAdmin("ORDER ${sm.id} NOTIFICATION", sm.id,  EmailType.UPDATE_PRODUCTS_ERROR)
+        }
         sm.nextStateAndFireEvent(StateMachineEvents.ABORT_PRODUCTS_RESERVATION)
     }
+
     override fun onAbortPaymentRequestFailed(sm: StateMachineImpl) = CoroutineScope(Dispatchers.Default).launch {
         applicationEventPublisher.publishEvent(
             KafkaResponseReceivedEventInResponseTo(
@@ -247,6 +275,7 @@ class OrchestratorActionsImpl(
             )
         )
     }
+
     override fun onAbortProductsReservation(sm: StateMachineImpl) = CoroutineScope(Dispatchers.Default).launch {
         jobs["${sm.id}-${StateMachineEvents.ABORT_PRODUCTS_RESERVATION}"] =
             CoroutineScope(Dispatchers.IO).launch Job@{
@@ -270,13 +299,15 @@ class OrchestratorActionsImpl(
                 sm.nextStateAndFireEvent(StateMachineEvents.ABORT_PRODUCTS_RESERVATION_FAILED)
             }
     }
+
     override fun onAbortProductsReservationOk(sm: StateMachineImpl) = CoroutineScope(Dispatchers.Default).launch {
         applicationEventPublisher.publishEvent(KafkaResponseReceivedEventInResponseTo(sm, StateMachineEvents.ABORT_PRODUCTS_RESERVATION))
     }
+
     override fun onAbortProductsReservationFailed(sm: StateMachineImpl) = CoroutineScope(Dispatchers.Default).launch {
         logger.severe("COULD NOT ABORT PRODUCTS RESERVATION FOR ORDER ${sm.id}")
         CoroutineScope(Dispatchers.IO).launch {
-            mailService.notifyAdmin("ORDER ${sm.id} NOTIFICATION", sm.id, "ERROR")
+            mailService.notifyAdmin("ORDER ${sm.id} NOTIFICATION", sm.id, EmailType.ABORT_PRODUCT_ERROR)
         }
         applicationEventPublisher.publishEvent(KafkaResponseReceivedEventInResponseTo(sm, StateMachineEvents.ABORT_PRODUCTS_RESERVATION))
     }
@@ -292,7 +323,7 @@ class OrchestratorActionsImpl(
             var counter = 5
             while (counter-- > 0)
                 try {
-                    orderService.updateOrderOnSagaEnding(sm, status, sm.finalState.toString().substringAfter("_"))
+                    orderService.updateOrderOnSagaEnding(sm, status, EmailType.valueOf(sm.finalState.toString().substringAfter("_")))
                     logger.info("SAGA OF ORDER ${sm.id} ENDED SUCCESSFULLY")
                     return@launch
                 } catch (e: UncategorizedMongoDbException) {
@@ -304,6 +335,7 @@ class OrchestratorActionsImpl(
                     return@launch
                 }
             logger.severe("Could not update order ${sm.id} status to $status")
+            mailService.notifyAdmin("ORDER ${sm.id} NOTIFICATION", sm.id,  EmailType.UPDATE_STATUS_ERROR, status)
         }
     }
 
@@ -314,7 +346,7 @@ class OrchestratorActionsImpl(
                 var counter = 5
                 while (counter-- > 0)
                     try {
-                        orderService.updateOrderOnSagaEnding(sm, OrderStatus.FAILED, "ISSUE_FAILED")
+                        orderService.updateOrderOnSagaEnding(sm, OrderStatus.FAILED, EmailType.ISSUE_FAILED)
                         return@launch
                     } catch (e: UncategorizedMongoDbException) {
                         delay(1000)
@@ -326,8 +358,8 @@ class OrchestratorActionsImpl(
                     }
                 logger.severe("Could not update order ${sm.id} status to ${OrderStatus.FAILED}")
             } else if (sm.finalState == StateMachineStates.ORDER_CANCELED){
-                mailService.notifyCustomer(sm.customerEmail, "ORDER ${sm.id} NOTIFICATION", sm.id,  "CANCELLATION_FAILED")
-                mailService.notifyAdmin("ORDER ${sm.id} NOTIFICATION", sm.id,  "CANCELLATION_FAILED")
+                mailService.notifyCustomer(sm.customerEmail, "ORDER ${sm.id} NOTIFICATION", sm.id,  EmailType.CANCELLATION_FAILED)
+                mailService.notifyAdmin("ORDER ${sm.id} NOTIFICATION", sm.id,  EmailType.CANCELLATION_FAILED)
             }
         }
         logger.info("SAGA OF ORDER ${sm.id} FAILED ")
