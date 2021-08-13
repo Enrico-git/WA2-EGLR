@@ -12,8 +12,7 @@ interface ProductService {
     suspend fun getProducts(category: String?, page: Int?, size: Int?): Flow<ProductDTO>
     suspend fun getProduct(productID: ObjectId): ProductDTO
     suspend fun getProductPicture(productID: ObjectId): PictureDTO
-    //TODO needs auth or not?
-    @PreAuthorize("hasAuthority(\"ADMIN\") or hasAuthority(\"CUSTOMER\")")
+    @PreAuthorize("hasAuthority(\"ADMIN\")")
     suspend fun getProductWarehouses(productID: ObjectId): Flow<WarehouseDTO>
     suspend fun getProductComments(productID: ObjectId): Flow<CommentDTO>
     @PreAuthorize("hasAuthority(\"ADMIN\")")
