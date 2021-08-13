@@ -1,5 +1,6 @@
 package it.polito.wa2.warehouseservice.listeners
 
+import it.polito.wa2.warehouseservice.dto.AbortProductReservationRequestDTO
 import it.polito.wa2.warehouseservice.dto.ProductsReservationRequestDTO
 import it.polito.wa2.warehouseservice.services.WarehouseService
 import kotlinx.coroutines.CoroutineScope
@@ -17,11 +18,11 @@ class ReserveProductOrAbortListener(
         private val warehouseService: WarehouseService,
         private val kafkaReserveProductFailedProducer: KafkaProducer<String, String>
 ) {
-//    @KafkaListener(topics = ["reserve_products"],
-//    containerFactory = "reserveProductContainerFactory")
+    @KafkaListener(topics = ["reserve_products"],
+    containerFactory = "reserveProductContainerFactory")
     fun reserveRequestConsumer(productsReservationRequestDTO: ProductsReservationRequestDTO, @Header(KafkaHeaders.RECEIVED_TOPIC) topic: String){
         CoroutineScope(Dispatchers.IO).launch {
-            val result = warehouseService.reserveProductOrAbort(topic, productsReservationRequestDTO)
+            val result = warehouseService.reserveProductRequest(topic, productsReservationRequestDTO)
             if(result==false){
                 println("${topic}_failed")
                 kafkaReserveProductFailedProducer.send(
@@ -30,12 +31,19 @@ class ReserveProductOrAbortListener(
             } // in case of true result, Debezium will send "Reserve_Products_ok
         }
     }
-//
-//    @KafkaListener(topics = ["abort_products_reservation"],
-//            containerFactory = "reserveProductContainerFactory")
-//    fun abortRequestConsumer(productsReservationRequestDTO: ProductsReservationRequestDTO, @Header(KafkaHeaders.RECEIVED_TOPIC) topic: String){
-//        CoroutineScope(Dispatchers.IO).launch {
-//            val result = warehouseService.reserveProductOrAbort(topic, productsReservationRequestDTO)
-//        }
-//    }
+
+
+    @KafkaListener(topics = ["abort_products_reservation"],
+            containerFactory = "reserveProductContainerFactory")
+    fun abortRequestConsumer(abortProductReservationRequestDTO: AbortProductReservationRequestDTO, @Header(KafkaHeaders.RECEIVED_TOPIC) topic: String){
+        CoroutineScope(Dispatchers.IO).launch {
+            val result = warehouseService.abortReserveProductRequest(topic, abortProductReservationRequestDTO)
+            if(result==false){
+                println("${topic}_failed")
+                kafkaReserveProductFailedProducer.send(
+                        ProducerRecord("${topic}_failed}", abortProductReservationRequestDTO.orderID)
+                )
+            }
+        }
+    }
 }

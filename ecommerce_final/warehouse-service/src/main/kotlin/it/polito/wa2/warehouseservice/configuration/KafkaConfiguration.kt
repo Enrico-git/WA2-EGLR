@@ -1,5 +1,6 @@
 package it.polito.wa2.warehouseservice.configuration
 
+import it.polito.wa2.warehouseservice.dto.AbortProductReservationRequestDTO
 import it.polito.wa2.warehouseservice.dto.ProductsReservationRequestDTO
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.clients.producer.KafkaProducer
@@ -43,6 +44,49 @@ class KafkaConfiguration {
     }
 
     @Bean
+    fun mockReserveProductOkConsumerFactory(): ConsumerFactory<String, String>{
+        val configProps = mutableMapOf<String, Any>()
+        configProps[ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG]  =  bootstrapServers
+        configProps[ConsumerConfig.GROUP_ID_CONFIG] = "warehouse_service"
+        configProps[ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG] = StringDeserializer::class.java
+        configProps[ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG] = StringDeserializer::class.java
+        return DefaultKafkaConsumerFactory(configProps, StringDeserializer(), StringDeserializer())
+    }
+
+    @Bean
+    fun mockReserveProductOkContainerFactory(): ConcurrentKafkaListenerContainerFactory<String, String>{
+        val factory = ConcurrentKafkaListenerContainerFactory<String, String>()
+        factory.consumerFactory = mockReserveProductOkConsumerFactory()
+        return factory
+    }
+
+    @Bean
+    fun producerMockReserveProduct(): KafkaProducer<String, ProductsReservationRequestDTO>{
+        val configProps = mutableMapOf<String, Any>()
+        configProps[ProducerConfig.BOOTSTRAP_SERVERS_CONFIG] = bootstrapServers
+        configProps[ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG] = StringSerializer::class.java
+        configProps[ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG] = JsonSerializer::class.java
+        configProps[ProducerConfig.CLIENT_ID_CONFIG] = "mock_order_service_prod_reserv_req_producer"
+        return KafkaProducer(configProps)
+    }
+
+//    @Bean
+//    fun mockAbortReserveProductOkContainerFactory(): ConcurrentKafkaListenerContainerFactory<String, String>{
+//        val factory = ConcurrentKafkaListenerContainerFactory<String, String>()
+//        factory.consumerFactory =
+//    }
+
+    @Bean
+    fun producerMockAbortReserveProduct(): KafkaProducer<String, AbortProductReservationRequestDTO>{
+        val configProps = mutableMapOf<String, Any>()
+        configProps[ProducerConfig.BOOTSTRAP_SERVERS_CONFIG] = bootstrapServers
+        configProps[ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG] = StringSerializer::class.java
+        configProps[ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG] = JsonSerializer::class.java
+        configProps[ProducerConfig.CLIENT_ID_CONFIG] = "mock_order_service_abort_prod_reserv_req_producer"
+        return KafkaProducer(configProps)
+    }
+
+    @Bean // (abort_)
     fun producerReserveProductFailed(): KafkaProducer<String, String>{
         val configProps = mutableMapOf<String, Any>()
         configProps[ProducerConfig.BOOTSTRAP_SERVERS_CONFIG] = bootstrapServers

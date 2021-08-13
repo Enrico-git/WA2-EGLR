@@ -2,9 +2,7 @@ package it.polito.wa2.warehouseservice.dto
 
 import java.sql.Timestamp
 
-data class ProductsReservationRequestDTO(
+data class AbortProductReservationRequestDTO(
         val orderID: String,
-        val products: Set<ReserveProductDTO>,
-        val shippingAddress: String,
         val timestamp: Timestamp
 )

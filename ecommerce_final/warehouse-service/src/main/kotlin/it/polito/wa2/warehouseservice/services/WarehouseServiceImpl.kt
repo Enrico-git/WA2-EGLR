@@ -1,6 +1,5 @@
 package it.polito.wa2.warehouseservice.services
 
-import it.polito.wa2.warehouseservice.domain.Delivery
 import it.polito.wa2.warehouseservice.domain.ProductLocation
 import it.polito.wa2.warehouseservice.domain.Warehouse
 import it.polito.wa2.warehouseservice.domain.toDTO
@@ -10,6 +9,8 @@ import it.polito.wa2.warehouseservice.repositories.DeliveryRepository
 import it.polito.wa2.warehouseservice.repositories.ProductRepository
 import it.polito.wa2.warehouseservice.repositories.WarehouseRepository
 import kotlinx.coroutines.flow.*
+import org.apache.kafka.clients.producer.KafkaProducer
+import org.apache.kafka.clients.producer.ProducerRecord
 import org.bson.types.ObjectId
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
@@ -23,7 +24,9 @@ class WarehouseServiceImpl(
         private val warehouseRepository: WarehouseRepository,
         private val productRepository: ProductRepository,
         private val mailService: MailService,
-        private val deliveryRepository: DeliveryRepository
+        private val deliveryRepository: DeliveryRepository,
+        private val mockKafkaReserveProductProducer: KafkaProducer<String, ProductsReservationRequestDTO>,
+        private val mockKafkaAbortReserveProductProducer: KafkaProducer<String, AbortProductReservationRequestDTO>
 ): WarehouseService {
 
     @Value("\${spring.kafka.retryDelay}")
@@ -123,7 +126,7 @@ class WarehouseServiceImpl(
         return warehouseRepository.deleteById(warehouseID)
     }
 
-    override suspend fun reserveProduct(reserveProductDTO: ReserveProductDTO): ProductLocation? {
+    override suspend fun reserveProduct(reserveProductDTO: ReserveProductDTO): MutableSet<ProductLocation>? {
         val warehouses = warehouseRepository.findWarehousesByProduct(ObjectId(reserveProductDTO.id)).toList().sortedWith(WarehouseComparator(ObjectId(reserveProductDTO.id)))
 //        warehouse.forEach{ println(it.products)}
 //        warehouse = warehouse.sortedWith(WarehouseComparator(ObjectId(productInfoDTO.id)))
@@ -131,26 +134,34 @@ class WarehouseServiceImpl(
         var qty = reserveProductDTO.amount
         if (warehouses.fold(0) { acc, warehouse ->  acc + warehouse.products.find { it.productId == ObjectId(reserveProductDTO.id) }!!.quantity} < reserveProductDTO.amount)
             return null
-        val productLocation = ProductLocation(
-                productID = reserveProductDTO.id,
-                amount = reserveProductDTO.amount,
-                warehouseID = mutableSetOf()
-        )
+        val productLocations = mutableSetOf<ProductLocation>()
+//        val productLocation = ProductLocation(
+//                productID = reserveProductDTO.id,
+//                amount = reserveProductDTO.amount,
+//                warehouseID = mutableSetOf()
+//        )
         warehouses.map { wh ->
             if(qty > 0){
                 val warehouseProductInfo: ProductInfoDTO = wh.products.find { it.productId == ObjectId(reserveProductDTO.id) }!!.toDTO()
                 warehouseProductInfo.quantity -= qty
-                productLocation.warehouseID.plus(wh.id.toString())
+                val productLocation = ProductLocation(
+                        productID = reserveProductDTO.id,
+                        amount = reserveProductDTO.amount,
+                        warehouseID = wh.id.toString()
+                )
                 //delivery.products.plus(ProductLocation(reserveProductDTO.id, wh.id.toString(), warehouseProductInfo.quantity))
                 if(warehouseProductInfo.quantity < 0){
                     qty -=  warehouseProductInfo.quantity.absoluteValue
                     warehouseProductInfo.quantity = 0
                 }
                 wh.products.find { it.productId == ObjectId(reserveProductDTO.id) }!!.quantity = warehouseProductInfo.quantity
+                if(wh.products.find{it.productId == ObjectId(reserveProductDTO.id)}!!.quantity < wh.products.find{it.productId == ObjectId(reserveProductDTO.id)}!!.alarm)
+                    mailService.notifyAdmin("Warehouse ${wh.id} Notification", reserveProductDTO.id)
+                productLocations.plus(productLocation)
             }
         }
         warehouseRepository.saveAll(warehouses)
-        return productLocation
+        return productLocations
 
 //            wh.products.find { it.productId == ObjectId(reserveProductDTO.id) }!!.quantity -= qty
 //            if(wh.products.find { it. })
@@ -190,16 +201,14 @@ class WarehouseServiceImpl(
     }
 
 
-    override suspend fun abortReserveProduct(reserveProductDTO: ReserveProductDTO, orderId: String): Boolean {
-        val delivery = deliveryRepository.findByOrderId(ObjectId(orderId)) ?: return false
-        delivery.products.forEach{ ot ->
-            ot.warehouseID.forEach{
-                val wh = warehouseRepository.findById(ObjectId(it)) ?: return false
-                wh.products.find{ iit ->
-                    iit.productId == ObjectId(reserveProductDTO.id)
-                }!!.quantity += ot.amount
-                warehouseRepository.save(wh)
-            }
+    override suspend fun abortReserveProduct(abortProductReservationRequestDTO: AbortProductReservationRequestDTO): Boolean {
+        val delivery = deliveryRepository.findByOrderId(ObjectId(abortProductReservationRequestDTO.orderID)) ?: return false
+        delivery.products.forEach { ot ->
+            val wh = warehouseRepository.findById(ObjectId(ot.warehouseID)) ?: return false
+            wh.products.find{
+                it.productId == ObjectId(ot.productID)
+            }!!.quantity += ot.amount
+            warehouseRepository.save(wh)
         }
         return true
     }
@@ -208,24 +217,26 @@ class WarehouseServiceImpl(
      * wh = {id:1,  products = [{productId: 2, alarm = 3, qty: 10}, {productId:3, alarm:5, qty = 8}]}
      * productInfoDTO = {productId: 2, alarm = 3, qty: 10}
      */
-    override suspend fun reserveProductOrAbort(topic: String, productsReservationRequestDTO: ProductsReservationRequestDTO): Boolean? {
+    override suspend fun reserveProductRequest(topic: String, productsReservationRequestDTO: ProductsReservationRequestDTO): Boolean? {
         if(Timestamp(productsReservationRequestDTO.timestamp.time + retryDelay) > Timestamp(System.currentTimeMillis()) )
             return null
 
-        println("ReserveProductOrAbort")
-        when(topic){
-            "reserve_products" -> {
+        println("ReserveProductRequest")
+        if(topic == "reserve_products"){
                 val delivery = DeliveryDTO(
                         id = null,
                         orderId = productsReservationRequestDTO.orderID,
                         timestamp = productsReservationRequestDTO.timestamp,
                         products = mutableSetOf()
                 )
-                productsReservationRequestDTO.products.forEach {
-                    val productLocation = reserveProduct(it)
-                    if (productLocation != null)
-                        delivery.products.plus(productLocation)
-                    else
+                productsReservationRequestDTO.products.forEach { ot ->
+                    val productLocations = reserveProduct(ot)
+                    if (productLocations != null) {
+                        productLocations.forEach {
+                            delivery.products.plus(it)
+                            deliveryRepository.save(delivery.toEntity())
+                        }
+                    }else
                         return false
                 }
                 return true
@@ -239,17 +250,66 @@ class WarehouseServiceImpl(
 //                    return reserveProduct(productInfoDTO)
 //                }
             }
-            "abort_products_reservation" -> {
-                productsReservationRequestDTO.products.forEach {
-                    val result = abortReserveProduct(it, productsReservationRequestDTO.orderID)
-                    if(!result)
-                        return false
-                }
-                return true
-            }
-            else ->
+//            "abort_products_reservation" -> {
+//                productsReservationRequestDTO.products.forEach {
+//                    val result = abortReserveProduct(it, productsReservationRequestDTO.orderID)
+//                    if(!result)
+//                        return false
+//                }
+//                return true
+//            }
+            else
                 return false
-         }
+    }
 
+    override suspend fun abortReserveProductRequest(topic: String, abortProductReservationRequestDTO: AbortProductReservationRequestDTO): Boolean? {
+        if(Timestamp(abortProductReservationRequestDTO.timestamp.time + retryDelay) > Timestamp(System.currentTimeMillis()) )
+            return null
+
+        println("AbortReserveProductRequest")
+        return if(topic == "abort_products_reservation"){
+            abortReserveProduct(abortProductReservationRequestDTO)
+//            productsReservationRequestDTO.products.forEach {
+//                    val result = abortReserveProduct(it, productsReservationRequestDTO.orderID)
+//                    if(!result)
+//                        return false
+//                }
+//                return true
+        }else
+            false
+    }
+
+    override suspend fun mockReserveProductRequest(): String {
+        val mockProductsReservationRequestDTO = ProductsReservationRequestDTO(
+                orderID = ObjectId().toHexString(),
+                products = mutableSetOf(
+                        ReserveProductDTO(
+                                id = "61080cb4d24d6d314d55898d",
+                                amount = 21000
+                        ),
+                        ReserveProductDTO(
+                                id = "61080cd9d24d6d314d55898e",
+                                amount = 1
+                        )
+                ),
+                shippingAddress = "via del cazzo",
+                timestamp = Timestamp(System.currentTimeMillis())
+        )
+
+        println("MOCK: $mockProductsReservationRequestDTO")
+
+        mockKafkaReserveProductProducer.send(ProducerRecord("reserve_products", mockProductsReservationRequestDTO))
+        return "OK"
+    }
+
+    override suspend fun mockAbortReserveProductRequest(): String {
+        val mockAbortProductReservationRequestDTO = AbortProductReservationRequestDTO(
+                orderID = ObjectId().toHexString(),
+                timestamp = Timestamp(System.currentTimeMillis())
+        )
+
+        println("MOCK: $mockAbortProductReservationRequestDTO")
+        mockKafkaAbortReserveProductProducer.send(ProducerRecord("abort_products_reservation", mockAbortProductReservationRequestDTO))
+        return "OK"
     }
 }

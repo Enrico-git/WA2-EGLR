@@ -2,20 +2,16 @@ package it.polito.wa2.warehouseservice.services
 
 import it.polito.wa2.warehouseservice.domain.ProductInfo
 import it.polito.wa2.warehouseservice.domain.ProductLocation
-import it.polito.wa2.warehouseservice.dto.ProductInfoDTO
-import it.polito.wa2.warehouseservice.dto.ProductsReservationRequestDTO
-import it.polito.wa2.warehouseservice.dto.ReserveProductDTO
-import it.polito.wa2.warehouseservice.dto.WarehouseDTO
+import it.polito.wa2.warehouseservice.dto.*
 import kotlinx.coroutines.flow.Flow
 import org.bson.types.ObjectId
 import org.springframework.security.access.prepost.PreAuthorize
 
 interface WarehouseService {
-    //    TODO why customer can see warehouses?
-    @PreAuthorize("hasAuthority(\"ADMIN\") or hasAuthority(\"CUSTOMER\")")
+    @PreAuthorize("hasAuthority(\"ADMIN\")")
     suspend fun getWarehouses(): Flow<WarehouseDTO>
 
-    @PreAuthorize("hasAuthority(\"ADMIN\") or hasAuthority(\"CUSTOMER\")")
+    @PreAuthorize("hasAuthority(\"ADMIN\")")
     suspend fun getWarehouse(warehouseID: ObjectId): WarehouseDTO
 
     @PreAuthorize("hasAuthority(\"ADMIN\")")
@@ -30,10 +26,15 @@ interface WarehouseService {
     @PreAuthorize("hasAuthority(\"ADMIN\")")
     suspend fun deleteWarehouses(warehouseID: ObjectId)
 
-    suspend fun reserveProductOrAbort(topic: String, productsReservationRequestDTO: ProductsReservationRequestDTO): Boolean? //kafka
+    suspend fun reserveProductRequest(topic: String, productsReservationRequestDTO: ProductsReservationRequestDTO): Boolean? //kafka
 
-    suspend fun reserveProduct(reserveProductDTO: ReserveProductDTO): ProductLocation?
+    suspend fun abortReserveProductRequest(topic: String, abortProductReservationRequestDTO: AbortProductReservationRequestDTO): Boolean? //kafka
 
-    suspend fun abortReserveProduct(reserveProductDTO: ReserveProductDTO, orderId: String): Boolean
+    suspend fun reserveProduct(reserveProductDTO: ReserveProductDTO): MutableSet<ProductLocation>?
 
+    suspend fun abortReserveProduct(abortProductReservationRequestDTO: AbortProductReservationRequestDTO): Boolean
+
+    suspend fun mockReserveProductRequest(): String
+
+    suspend fun mockAbortReserveProductRequest(): String
 }
