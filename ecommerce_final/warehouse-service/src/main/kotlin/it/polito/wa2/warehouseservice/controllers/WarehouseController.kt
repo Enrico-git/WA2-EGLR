@@ -2,6 +2,7 @@ package it.polito.wa2.warehouseservice.controllers
 
 import it.polito.wa2.warehouseservice.constraintGroups.CreateOrReplaceWarehouse
 import it.polito.wa2.warehouseservice.constraintGroups.PartialCreateOrUpdateWarehouse
+import it.polito.wa2.warehouseservice.dto.AbortProductReservationRequestDTO
 import it.polito.wa2.warehouseservice.dto.ProductsReservationRequestDTO
 import it.polito.wa2.warehouseservice.dto.WarehouseDTO
 import it.polito.wa2.warehouseservice.services.WarehouseService
@@ -110,9 +111,18 @@ class WarehouseController(
         throw OptimisticLockingFailureException("Warehouse")
     }
 
-    @PostMapping("/andonio")
-    suspend fun andonio(@RequestBody productsReservationRequestDTO: ProductsReservationRequestDTO): Boolean?{
-        return warehouseService.reserveProductOrAbort("reserve_products", productsReservationRequestDTO)
+    @PostMapping("/reserveproducts")
+    suspend fun mockReserveProductRequest(@RequestBody productsReservationRequestDTO: ProductsReservationRequestDTO): String?{
+        val result = warehouseService.mockReserveProductRequest()
+        println(result)
+        return result
+    }
+
+    @PostMapping("/abortreserveproducts")
+    suspend fun mockAbortReserveProductRequest(@RequestBody abortProductReservationRequestDTO: AbortProductReservationRequestDTO): String? {
+        val result = warehouseService.mockAbortReserveProductRequest()
+        println(result)
+        return result
     }
 
 }

@@ -1,6 +1,7 @@
 package it.polito.wa2.warehouseservice.dto
 
 import it.polito.wa2.warehouseservice.domain.Delivery
+import it.polito.wa2.warehouseservice.domain.DeliveryDescription
 import it.polito.wa2.warehouseservice.domain.ProductLocation
 import org.bson.types.ObjectId
 import java.sql.Timestamp
@@ -12,12 +13,15 @@ data class DeliveryDTO(
         val orderId: String,
         @field:NotNull(message = "timestamp must be not null")
         val timestamp: Timestamp,
-        val products: MutableSet<ProductLocation>
+        val products: MutableSet<ProductLocation>,
+        @field:NotNull(message = "status must be not null")
+        val status: DeliveryDescription
 )
 
 fun DeliveryDTO.toEntity() = Delivery(
         id = ObjectId(id),
         orderId = ObjectId(orderId),
         timestamp = timestamp,
-        products = products
+        products = products,
+        status = status
 )

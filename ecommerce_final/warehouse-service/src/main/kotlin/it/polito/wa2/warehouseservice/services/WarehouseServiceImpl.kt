@@ -1,5 +1,6 @@
 package it.polito.wa2.warehouseservice.services
 
+import it.polito.wa2.warehouseservice.domain.DeliveryDescription
 import it.polito.wa2.warehouseservice.domain.ProductLocation
 import it.polito.wa2.warehouseservice.domain.Warehouse
 import it.polito.wa2.warehouseservice.domain.toDTO
@@ -203,6 +204,8 @@ class WarehouseServiceImpl(
 
     override suspend fun abortReserveProduct(abortProductReservationRequestDTO: AbortProductReservationRequestDTO): Boolean {
         val delivery = deliveryRepository.findByOrderId(ObjectId(abortProductReservationRequestDTO.orderID)) ?: return false
+        if(delivery.status == DeliveryDescription.CANCELLATION)
+            return false
         delivery.products.forEach { ot ->
             val wh = warehouseRepository.findById(ObjectId(ot.warehouseID)) ?: return false
             wh.products.find{
@@ -210,6 +213,8 @@ class WarehouseServiceImpl(
             }!!.quantity += ot.amount
             warehouseRepository.save(wh)
         }
+        delivery.status = DeliveryDescription.CANCELLATION
+        deliveryRepository.save(delivery)
         return true
     }
 
@@ -227,7 +232,8 @@ class WarehouseServiceImpl(
                         id = null,
                         orderId = productsReservationRequestDTO.orderID,
                         timestamp = productsReservationRequestDTO.timestamp,
-                        products = mutableSetOf()
+                        products = mutableSetOf(),
+                        status = DeliveryDescription.RESERVATION
                 )
                 productsReservationRequestDTO.products.forEach { ot ->
                     val productLocations = reserveProduct(ot)
@@ -280,6 +286,7 @@ class WarehouseServiceImpl(
     }
 
     override suspend fun mockReserveProductRequest(): String {
+        TODO("To change the product's ids and amounts (new database)")
         val mockProductsReservationRequestDTO = ProductsReservationRequestDTO(
                 orderID = ObjectId().toHexString(),
                 products = mutableSetOf(
