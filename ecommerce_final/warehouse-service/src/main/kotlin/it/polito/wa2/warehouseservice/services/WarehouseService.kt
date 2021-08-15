@@ -28,11 +28,13 @@ interface WarehouseService {
 
     suspend fun reserveProductRequest(topic: String, productsReservationRequestDTO: ProductsReservationRequestDTO): Boolean? //kafka
 
+    suspend fun reserveAllProducts(productsReservationRequestDTO: ProductsReservationRequestDTO): Boolean? //kafka
+
     suspend fun abortReserveProductRequest(topic: String, abortProductReservationRequestDTO: AbortProductReservationRequestDTO): Boolean? //kafka
 
     suspend fun reserveProduct(reserveProductDTO: ReserveProductDTO): MutableSet<ProductLocation>?
 
-    suspend fun abortReserveProduct(abortProductReservationRequestDTO: AbortProductReservationRequestDTO): Boolean
+    suspend fun abortReserveProduct(abortProductReservationRequestDTO: AbortProductReservationRequestDTO): Boolean?
 
     suspend fun mockReserveProductRequest(): String
 

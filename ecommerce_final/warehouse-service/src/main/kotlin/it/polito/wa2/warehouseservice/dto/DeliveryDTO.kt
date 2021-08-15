@@ -20,8 +20,8 @@ data class DeliveryDTO(
 
 fun DeliveryDTO.toEntity() = Delivery(
         id = ObjectId(id),
-        orderId = ObjectId(orderId),
+        orderID = ObjectId(orderId),
         timestamp = timestamp,
         products = products,
-        status = status
+        description = status
 )

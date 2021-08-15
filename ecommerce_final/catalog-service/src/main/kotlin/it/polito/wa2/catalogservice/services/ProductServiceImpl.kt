@@ -44,10 +44,24 @@ class ProductServiceImpl(
         return client
             .get()
             .uri{
-                it.path("$serviceURL/products")
+                it.host("warehouse-service").path("/products")
                     .queryParamIfPresent("category", categoryOpt)
                     .queryParamIfPresent("page", pageOpt)
                     .queryParamIfPresent("size", sizeOpt)
+                    .build()
+            }
+            .accept(MediaType.APPLICATION_NDJSON)
+            .retrieve()
+            .onStatus(Predicate { it == HttpStatus.INTERNAL_SERVER_ERROR }) { throw UnavailableServiceException("Something went wrong") }
+            .bodyToFlow()
+    }
+
+    override suspend fun getProductsByIDS(ids: List<String>): Flow<ProductDTO> {
+        return client
+            .get()
+            .uri{
+                it.host("warehouse-service").path("/products")
+                    .queryParam("ids", ids)
                     .build()
             }
             .accept(MediaType.APPLICATION_NDJSON)

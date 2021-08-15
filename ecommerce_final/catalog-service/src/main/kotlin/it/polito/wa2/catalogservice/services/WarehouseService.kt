@@ -6,6 +6,7 @@ import org.bson.types.ObjectId
 import org.springframework.security.access.prepost.PreAuthorize
 
 interface WarehouseService {
+
     @PreAuthorize("hasAuthority(\"ADMIN\")")
     suspend fun getWarehouses(): Flow<WarehouseDTO>
     @PreAuthorize("hasAuthority(\"ADMIN\")")

@@ -13,9 +13,9 @@
     "transforms": "route,unwrap,key",
     "transforms.unwrap.type": "io.debezium.connector.mongodb.transforms.ExtractNewDocumentState",
     "transforms.key.type": "org.apache.kafka.connect.transforms.ExtractField$Value",
-    "transforms.key.field": "id",
+    "transforms.key.field": "orderID",
     "transforms.route.type": "io.debezium.transforms.ContentBasedRouter",
     "transforms.route.language": "jsr223.groovy",
-    "transforms.route.topic.expression": "def description = (new groovy.json.JsonSlurper()).parseText(value.after).description; if (description == 'RESERVATION') return 'reserve_products_ok'; else if (description == 'CANCELLATION') return 'abort_products_reservation'; else return null"
+    "transforms.route.topic.expression": "def description = (new groovy.json.JsonSlurper()).parseText(value.after).description; if (description == 'RESERVATION') return 'reserve_products_ok'; else if (description == 'CANCELLATION') return 'abort_products_reservation_ok'; else return null"
   }
 }

@@ -21,7 +21,7 @@ data class ProductDTO (
     @field:NotNull(message = "Product category must not be null", groups = [CreateProduct::class, CreateOrReplaceProduct::class])
     val category: String?,
     @field:NotNull(message = "Product price must not be null", groups = [CreateProduct::class, CreateOrReplaceProduct::class])
-    @field:Min(0, message = "Product price must not be null", groups = [CreateProduct::class, CreateOrReplaceProduct::class])
+    @field:Min(0, message = "Product price must be > 0", groups = [CreateProduct::class, CreateOrReplaceProduct::class])
     val price: BigDecimal?,
     val avgRating: Double ? = null,
     val creationDate: Timestamp? = null,

@@ -44,6 +44,24 @@ class KafkaConfiguration {
     }
 
     @Bean
+    fun abortProductsReservationConsumerFactory(): ConsumerFactory<String, AbortProductReservationRequestDTO>{
+        val configProps = mutableMapOf<String, Any>()
+        configProps[ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG]  =  bootstrapServers
+        configProps[ConsumerConfig.GROUP_ID_CONFIG] = "warehouse_service"
+        configProps[ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG] = StringDeserializer::class.java
+        configProps[ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG] = JsonDeserializer::class.java
+        configProps[JsonDeserializer.TYPE_MAPPINGS] = "it.polito.wa2.orderservice.dto.AbortProductReservationRequestDTO:it.polito.wa2.warehouseservice.dto.AbortProductReservationRequestDTO"
+        return DefaultKafkaConsumerFactory(configProps)
+    }
+
+    @Bean
+    fun abortProductsReservationContainerFactory(): ConcurrentKafkaListenerContainerFactory<String, AbortProductReservationRequestDTO>{
+        val factory = ConcurrentKafkaListenerContainerFactory<String, AbortProductReservationRequestDTO>()
+        factory.consumerFactory = abortProductsReservationConsumerFactory()
+        return factory
+    }
+
+    @Bean
     fun mockReserveProductOkConsumerFactory(): ConsumerFactory<String, String>{
         val configProps = mutableMapOf<String, Any>()
         configProps[ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG]  =  bootstrapServers

@@ -3,6 +3,8 @@ package it.polito.wa2.catalogservice.services
 import it.polito.wa2.catalogservice.dto.OrderDTO
 import it.polito.wa2.catalogservice.exceptions.*
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.toSet
 import kotlinx.coroutines.reactive.awaitSingle
 import org.bson.types.ObjectId
 import org.springframework.beans.factory.annotation.Qualifier
@@ -18,7 +20,8 @@ import java.util.function.Predicate
 
 @Service
 class OrderServiceImpl(
-    @Qualifier("order-service-client") private val loadBalancedWebClientBuilder: WebClient.Builder
+    @Qualifier("order-service-client") private val loadBalancedWebClientBuilder: WebClient.Builder,
+    private val productService: ProductService
 ) : OrderService{
     val serviceURL = "http://order-service"
 
@@ -57,6 +60,13 @@ class OrderServiceImpl(
 
     override suspend fun newOrder(orderDTO: OrderDTO): OrderDTO {
         val token = ReactiveSecurityContextHolder.getContext().awaitSingle().authentication.credentials as String
+
+         val productsInStock = productService.getProductsByIDS(orderDTO.products!!.map { it.id!! }).toSet()
+        orderDTO.products.forEach { product ->
+            val whProduct = productsInStock.find { it.id == product.id } ?: throw RuntimeException("error")
+            product.price = whProduct.price
+        }
+
         return client
             .post()
             .uri("$serviceURL/orders/")

@@ -1,9 +1,6 @@
 package it.polito.wa2.warehouseservice.services
 
-import it.polito.wa2.warehouseservice.domain.DeliveryDescription
-import it.polito.wa2.warehouseservice.domain.ProductLocation
-import it.polito.wa2.warehouseservice.domain.Warehouse
-import it.polito.wa2.warehouseservice.domain.toDTO
+import it.polito.wa2.warehouseservice.domain.*
 import it.polito.wa2.warehouseservice.dto.*
 import it.polito.wa2.warehouseservice.exceptions.*
 import it.polito.wa2.warehouseservice.repositories.DeliveryRepository
@@ -127,6 +124,77 @@ class WarehouseServiceImpl(
         return warehouseRepository.deleteById(warehouseID)
     }
 
+
+    override suspend fun reserveAllProducts(productsReservationRequestDTO: ProductsReservationRequestDTO): Boolean? {
+        if(Timestamp(productsReservationRequestDTO.timestamp.time + retryDelay) < Timestamp(System.currentTimeMillis()) )
+            return null
+
+        val deliveries = deliveryRepository.findAllByOrderID(productsReservationRequestDTO.orderID).toSet()
+        if (deliveries.isNotEmpty())
+            return null
+        println("qui")
+        val pIDS = productsReservationRequestDTO.products.map { ObjectId(it.id) }.toSet()
+//            .asFlow()
+        val warehouses =
+            warehouseRepository.findWarehousesByProductsIDIn(pIDS).toSet()
+        println(warehouses)
+        println("dopo wh")
+
+        if (warehouses.isEmpty())
+            return false
+
+        println("quo")
+
+        val productLocations = mutableSetOf<ProductLocation>()
+
+
+        productsReservationRequestDTO.products.forEach { product ->
+            warehouses.sortedWith(WarehouseComparator(ObjectId(product.id)))
+            var amount = product.amount
+            warehouses.forEach InnerLoop@{
+                if (amount > 0) {
+                    val whProd = it.products.find { whProd -> whProd.productId == ObjectId(product.id) } ?: return false
+                    val removed: Int
+                    if (whProd.quantity > amount) {
+                        whProd.quantity -= amount
+                        removed = amount
+                        amount = 0
+                    } else {
+                        removed = whProd.quantity
+                        whProd.quantity = 0
+                        amount -= removed
+                    }
+                    productLocations.add(
+                        ProductLocation(
+                            productID = product.id,
+                            warehouseID = it.id!!.toHexString(),
+                            amount = removed
+                        )
+                    )
+                }
+                else
+                    return@InnerLoop
+            }
+            if (amount > 0)
+                return false
+        }
+        warehouseRepository.saveAll(warehouses).collect()
+        deliveryRepository.save(Delivery(
+            id = null,
+            orderID = productsReservationRequestDTO.orderID,
+            products = productLocations,
+            description = DeliveryDescription.RESERVATION,
+            timestamp = Timestamp(System.currentTimeMillis())
+        ))
+
+        warehouses.forEach { wh ->
+            wh.products.filter { pIDS.toSet().contains(it.productId) }.forEach {
+                if(it.quantity < it.alarm)
+                    mailService.notifyAdmin("Warehouse ${wh.id} Notification", it.productId.toHexString())
+            }
+        }
+        return true
+    }
     override suspend fun reserveProduct(reserveProductDTO: ReserveProductDTO): MutableSet<ProductLocation>? {
         val warehouses = warehouseRepository.findWarehousesByProduct(ObjectId(reserveProductDTO.id)).toList().sortedWith(WarehouseComparator(ObjectId(reserveProductDTO.id)))
 //        warehouse.forEach{ println(it.products)}
@@ -202,19 +270,37 @@ class WarehouseServiceImpl(
     }
 
 
-    override suspend fun abortReserveProduct(abortProductReservationRequestDTO: AbortProductReservationRequestDTO): Boolean {
-        val delivery = deliveryRepository.findByOrderId(ObjectId(abortProductReservationRequestDTO.orderID)) ?: return false
-        if(delivery.status == DeliveryDescription.CANCELLATION)
+    override suspend fun abortReserveProduct(abortProductReservationRequestDTO: AbortProductReservationRequestDTO): Boolean? {
+        if(Timestamp(abortProductReservationRequestDTO.timestamp.time + retryDelay) < Timestamp(System.currentTimeMillis()) )
+            return null
+
+        val deliveries = deliveryRepository.findAllByOrderID(abortProductReservationRequestDTO.orderID).toSet()
+        if (deliveries.any{ it.description == DeliveryDescription.CANCELLATION })
+            return null
+
+        val delivery = deliveries.find{it.description == DeliveryDescription.RESERVATION} ?: return null
+        val warehousesIDS = delivery.products.map { ObjectId(it.warehouseID) }.asFlow()
+        val warehouses: Set<Warehouse>
+        try {
+            warehouses = warehouseRepository.findAllById(warehousesIDS).toSet()
+        } catch (e: IllegalArgumentException){
             return false
-        delivery.products.forEach { ot ->
-            val wh = warehouseRepository.findById(ObjectId(ot.warehouseID)) ?: return false
-            wh.products.find{
-                it.productId == ObjectId(ot.productID)
-            }!!.quantity += ot.amount
-            warehouseRepository.save(wh)
         }
-        delivery.status = DeliveryDescription.CANCELLATION
-        deliveryRepository.save(delivery)
+        delivery.products.forEach { product ->
+            warehouses
+                .find { it.id == ObjectId(product.warehouseID) }!!
+                .products.find { it.productId == ObjectId(product.productID) }!!
+                .quantity += product.amount
+        }
+//        delivery.description = DeliveryDescription.CANCELLATION
+        warehouseRepository.saveAll(warehouses.asFlow()).collect()
+        deliveryRepository.save(Delivery(
+            id = null,
+            orderID = delivery.orderID,
+            timestamp = Timestamp(System.currentTimeMillis()),
+            products = delivery.products,
+            description = DeliveryDescription.CANCELLATION
+        ))
         return true
     }
 
@@ -230,11 +316,13 @@ class WarehouseServiceImpl(
         if(topic == "reserve_products"){
                 val delivery = DeliveryDTO(
                         id = null,
-                        orderId = productsReservationRequestDTO.orderID,
+                        orderId = productsReservationRequestDTO.orderID.toHexString(),
+//                    TODO remove this
                         timestamp = productsReservationRequestDTO.timestamp,
                         products = mutableSetOf(),
                         status = DeliveryDescription.RESERVATION
                 )
+//            TODO not optimized, 1 db query per product bought
                 productsReservationRequestDTO.products.forEach { ot ->
                     val productLocations = reserveProduct(ot)
                     if (productLocations != null) {
@@ -243,6 +331,7 @@ class WarehouseServiceImpl(
                             deliveryRepository.save(delivery.toEntity())
                         }
                     }else
+//                        TODO doesnt rollback
                         return false
                 }
                 return true
@@ -286,9 +375,8 @@ class WarehouseServiceImpl(
     }
 
     override suspend fun mockReserveProductRequest(): String {
-        TODO("To change the product's ids and amounts (new database)")
         val mockProductsReservationRequestDTO = ProductsReservationRequestDTO(
-                orderID = ObjectId().toHexString(),
+                orderID = ObjectId(),
                 products = mutableSetOf(
                         ReserveProductDTO(
                                 id = "61080cb4d24d6d314d55898d",
@@ -311,7 +399,7 @@ class WarehouseServiceImpl(
 
     override suspend fun mockAbortReserveProductRequest(): String {
         val mockAbortProductReservationRequestDTO = AbortProductReservationRequestDTO(
-                orderID = ObjectId().toHexString(),
+                orderID = ObjectId(),
                 timestamp = Timestamp(System.currentTimeMillis())
         )
 

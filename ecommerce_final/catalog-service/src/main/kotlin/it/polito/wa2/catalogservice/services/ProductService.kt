@@ -10,6 +10,7 @@ import org.springframework.security.access.prepost.PreAuthorize
 
 interface ProductService {
     suspend fun getProducts(category: String?, page: Int?, size: Int?): Flow<ProductDTO>
+    suspend fun getProductsByIDS(ids: List<String>): Flow<ProductDTO>
     suspend fun getProduct(productID: ObjectId): ProductDTO
     suspend fun getProductPicture(productID: ObjectId): PictureDTO
     @PreAuthorize("hasAuthority(\"ADMIN\")")

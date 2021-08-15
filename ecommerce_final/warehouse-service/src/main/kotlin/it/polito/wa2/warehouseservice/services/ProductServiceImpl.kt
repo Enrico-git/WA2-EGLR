@@ -26,9 +26,11 @@ class ProductServiceImpl(
 
 
 
-    override suspend fun getProductsByCategory(category: String?, pageable: Pageable): Flow<ProductDTO> {
+    override suspend fun getProducts(category: String?,  ids: Set<ObjectId>?, pageable: Pageable): Flow<ProductDTO> {
         return if(category != null)
             productRepository.findAllByCategory(category, pageable).map { it.toDTO() }
+        else if (ids != null)
+            productRepository.findAllById(ids).map { it.toDTO() }
         else
             productRepository.findAll(pageable).map { it.toDTO() }
     }
@@ -36,6 +38,10 @@ class ProductServiceImpl(
     override suspend fun getProductById(productID: ObjectId): ProductDTO {
         val product = productRepository.findById(productID) ?: throw NotFoundException("Product not found")
         return product.toDTO()
+    }
+
+    override suspend fun getAllProductsById(products: Set<ObjectId>): Flow<ProductDTO> {
+        return productRepository.findAllById(products).map { it.toDTO() }
     }
 
     override suspend fun addProduct(productDTO: ProductDTO): ProductDTO {

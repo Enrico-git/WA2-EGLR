@@ -29,8 +29,8 @@ class ProductController(
      * @return the flow of the products
      */
     @GetMapping("", produces = [MediaType.APPLICATION_NDJSON_VALUE])
-    suspend fun getProductByCategory(@RequestParam category: String?, pageable: Pageable): Flow<ProductDTO> {
-        return productService.getProductsByCategory(category, pageable)
+    suspend fun getProducts(@RequestParam category: String?, @RequestParam ids: Set<ObjectId>?, pageable: Pageable): Flow<ProductDTO> {
+        return productService.getProducts(category, ids, pageable)
     }
     /**
      * API endpoint to retrieve a product by its ID
@@ -38,9 +38,19 @@ class ProductController(
      * @return the product object
      */
     @GetMapping("/{productID}")
-    suspend fun getProduct(@PathVariable productID: ObjectId): ProductDTO{
+    suspend fun getProductByID(@PathVariable productID: ObjectId): ProductDTO{
         return productService.getProductById(productID)
     }
+
+    /**
+     * API endpoint to retrieve a product by its ID
+     * @param productID the ID of the product
+     * @return the product object
+     */
+//    @GetMapping("/")
+//    suspend fun getProduct(@PathVariable productID: ObjectId): ProductDTO{
+//        return productService.getProductById(productID)
+//    }
 
     /**
      * API endpoint to insert a product

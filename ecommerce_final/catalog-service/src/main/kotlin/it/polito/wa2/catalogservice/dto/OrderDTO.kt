@@ -4,7 +4,6 @@ import it.polito.wa2.catalogservice.common.OrderStatus
 import it.polito.wa2.catalogservice.constraintGroups.CreateOrder
 import it.polito.wa2.catalogservice.constraintGroups.DeleteOrder
 import it.polito.wa2.catalogservice.constraintGroups.UpdateOrder
-import it.polito.wa2.catalogservice.domain.Product
 import org.bson.types.ObjectId
 import javax.validation.Valid
 import javax.validation.constraints.Email
@@ -16,7 +15,7 @@ data class OrderDTO(
     val buyer: ObjectId? = null,
     @field:NotNull(message = "Products must not be null", groups = [CreateOrder::class])
     @field:Valid
-    val products: Set<Product>? = null,
+    val products: Set<OrderProductDTO>? = null,
     @field:NotNull(message = "Delivery address must not be null", groups = [CreateOrder::class])
     val deliveryAddress: String? = null,
     @field:NotNull(message = "Order status must not be null", groups = [UpdateOrder::class])

@@ -13,9 +13,9 @@ enum class DeliveryDescription {
 @Document(collection = "deliveries")
 data class Delivery (
         @Id
-        val id: ObjectId,
-        val orderId: ObjectId,
+        val id: ObjectId?,
+        val orderID: ObjectId,
         val timestamp: Timestamp,
         val products: MutableSet<ProductLocation>,
-        var status: DeliveryDescription
+        val description: DeliveryDescription
 )

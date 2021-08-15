@@ -9,10 +9,14 @@
 #Creo nuovo prodotto
 # 6109033269d5116f05c9f447
   curl -i -v -X POST  \
-  -H "Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJyb2xlcyI6IkFETUlOIiwic3ViIjoiYWxpY2VfaW5fd29uZGVybGFuZCIsImlhdCI6MTAxNjIzOTAyMiwiZXhwIjo2MDE2MjM5MDIyfQ.UgdtjYTDBh7jt5z-lA3pyVLwdS1fzFwJQqRnaHw8q6yctUkgLzHHfIDRMJYoO5qHq3DISeClH09oRKM92RLVpw" \
+  -H "Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJyb2xlcyI6IkFETUlOIiwic3ViIjoiNjBmODAzZjgwYjgxZDBmN2JhODgxZTczIiwiaWF0IjoxMDE2MjM5MDIyLCJleHAiOjYwMTYyMzkwMjJ9.CUEY8nJrjtZAxaPVj5KTelTAzTOaNFoIdvUfhstCUFNBPeRoEM2Gnyq6srWYiihYIrTqbtP4-9ZU-IJnoMBQkA" \
   -H "Content-Type: application/json" \
   -d '{"name": "Sprite", "description": "A good drink2", "pictureUrl": "SpriteURL", "category": "Drink", "price": 3 }' \
- "172.20.208.1:8200/products"
+ "localhost:8081/products"
+
+6117d21238e21856d4b9fe8e
+6117d23a38e21856d4b9fe8f
+6117d24c38e21856d4b9fe90
 
 #Creo nuovo warehouse
 # 6109036d69d5116f05c9f448, 6109037069d5116f05c9f449

@@ -56,7 +56,7 @@ class WalletServiceImpl(
         return client
             .get()
             .uri{
-                it.path("$serviceURL/wallets/$walletID/transactions")
+                it.host("wallet-service").path("/wallets/$walletID/transactions")
                     .queryParamIfPresent("from",fromOpt)
                     .queryParamIfPresent("to",toOpt)
                     .queryParamIfPresent("page", pageOpt)
