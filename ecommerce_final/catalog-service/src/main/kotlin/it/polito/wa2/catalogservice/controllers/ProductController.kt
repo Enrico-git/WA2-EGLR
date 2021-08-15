@@ -47,6 +47,12 @@ class ProductController(
        return productService.getProductPicture(productID)
     }
 
+    @GetMapping("/{productID}/warehouses")
+    @ResponseStatus(HttpStatus.OK)
+    suspend fun getProductWarehouses(@PathVariable productID: ObjectId): Flow<WarehouseDTO> {
+       return productService.getProductWarehouses(productID)
+    }
+
     //DELETE A PRODUCT GIVEN ITS ID
     @DeleteMapping("/{productID}")
     @ResponseStatus(HttpStatus.NO_CONTENT)

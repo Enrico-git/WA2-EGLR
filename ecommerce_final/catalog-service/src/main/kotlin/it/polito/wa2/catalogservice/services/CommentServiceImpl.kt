@@ -65,7 +65,7 @@ class CommentServiceImpl(
         val token = ReactiveSecurityContextHolder.getContext().awaitSingle().authentication.credentials as String
         return client
             .post()
-            .uri("$serviceURL/comments/$productID")
+            .uri("$serviceURL/products/$productID/comments")
             .bodyValue(commentDTO)
             .accept(MediaType.APPLICATION_JSON)
             .header(HttpHeaders.AUTHORIZATION, "Bearer $token")
@@ -82,7 +82,7 @@ class CommentServiceImpl(
 
         return client
             .put()
-            .uri("$serviceURL/comments/$productID/$commentID")
+            .uri("$serviceURL/products/$productID/comments/$commentID")
             .bodyValue(commentDTO)
             .header(HttpHeaders.AUTHORIZATION, "Bearer $token")
             .retrieve()
@@ -96,7 +96,7 @@ class CommentServiceImpl(
         val token = ReactiveSecurityContextHolder.getContext().awaitSingle().authentication.credentials as String
         client
             .method(HttpMethod.DELETE)
-            .uri("$serviceURL/comments/$productID/$commentID")
+            .uri("$serviceURL/products/$productID/comments/$commentID")
             .header(HttpHeaders.AUTHORIZATION, "Bearer $token")
             .retrieve()
             .onStatus(Predicate { it == HttpStatus.UNAUTHORIZED }) { throw UnauthorizedException("Unauthorized") }

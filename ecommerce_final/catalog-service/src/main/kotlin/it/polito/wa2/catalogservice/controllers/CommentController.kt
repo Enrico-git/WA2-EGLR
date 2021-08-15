@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.*
 class CommentController(
     private val commentService: CommentService
 ) {
+    @GetMapping("")
     @ResponseStatus(HttpStatus.OK)
     suspend fun getProductComments(@PathVariable productID: ObjectId): Flow<CommentDTO> {
         return commentService.getComments(productID)
