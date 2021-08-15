@@ -16,10 +16,6 @@ import org.springframework.web.reactive.function.server.*
 class WalletHandler(
     private val walletService: WalletService
 ) {
-    /**
-     * coroutine uses ServerResponse instead of Flux and Mono.
-     * https://blog.frankel.ch/reactor-to-coroutines/
-     */
 
     suspend fun getWallet(request: ServerRequest): ServerResponse {
         val walletID = request.pathVariable("walletID")
@@ -85,12 +81,5 @@ class WalletHandler(
             .ok()
             .json()
             .bodyValueAndAwait(walletService.getTransaction(walletID, transactionID))
-    }
-
-    suspend fun mockPaymentOrAbortRequest(request: ServerRequest): ServerResponse{
-        return ServerResponse
-            .ok()
-            .json()
-            .bodyValueAndAwait(walletService.mockPaymentOrAbortRequest())
     }
 }

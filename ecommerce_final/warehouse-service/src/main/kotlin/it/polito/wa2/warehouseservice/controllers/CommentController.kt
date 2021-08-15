@@ -3,6 +3,7 @@ package it.polito.wa2.warehouseservice.controllers
 import it.polito.wa2.warehouseservice.dto.CommentDTO
 import it.polito.wa2.warehouseservice.services.CommentService
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
 import org.bson.types.ObjectId
 import org.springframework.dao.OptimisticLockingFailureException
 import org.springframework.http.HttpStatus
@@ -21,8 +22,8 @@ class CommentController(
      */
     @PostMapping("")
     @ResponseStatus(HttpStatus.CREATED)
-    suspend fun addComment(@PathVariable productID: String, @RequestBody @Validated commentDTO: CommentDTO): CommentDTO {
-        return commentService.addComment(ObjectId(productID), commentDTO)
+    suspend fun addComment(@PathVariable productID: ObjectId, @RequestBody @Validated commentDTO: CommentDTO): CommentDTO {
+        return commentService.addComment(productID, commentDTO)
     }
 
     /**
@@ -33,11 +34,11 @@ class CommentController(
      */
     @PutMapping("/{commentID}")
     @ResponseStatus(HttpStatus.CREATED)
-    suspend fun updateComment(@PathVariable productID: String, @PathVariable commentID: String, @Validated @RequestBody commentDTO: CommentDTO): CommentDTO {
+    suspend fun updateComment(@PathVariable productID: ObjectId, @PathVariable commentID: ObjectId, @Validated @RequestBody commentDTO: CommentDTO): CommentDTO {
         var counter = 5
         while(counter-- > 0){
             try{
-                return commentService.updateComment(ObjectId(productID), ObjectId(commentID), commentDTO)
+                return commentService.updateComment(productID, commentID, commentDTO)
             }
             catch(e: OptimisticLockingFailureException){
                 delay(1000)
@@ -54,11 +55,11 @@ class CommentController(
      */
     @DeleteMapping("/{commentID}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    suspend fun deleteComment(@PathVariable productID: String, @PathVariable commentID: String) {
+    suspend fun deleteComment(@PathVariable productID: ObjectId, @PathVariable commentID: ObjectId) {
         var counter = 5
         while(counter-- > 0){
             try{
-                return commentService.deleteComment(ObjectId(productID), ObjectId(commentID))
+                return commentService.deleteComment(productID, commentID)
             }
             catch(e: OptimisticLockingFailureException){
                 delay(1000)
@@ -68,14 +69,22 @@ class CommentController(
     }
 
     /**
+     * API endpoint to get all the comments of the product
+     * @param productID the ID of the product
+     * @return flow of CommentDTO
+     */
+    @GetMapping("")
+    suspend fun getProductComments(@PathVariable productID: ObjectId): Flow<CommentDTO> {
+        return commentService.getComments(productID)
+    }
+
+    /**
      * API endpoint to get a comment
      * @param commentID the ID of the product
      * @return the comment object
      */
     @GetMapping("/{commentID}")
-    suspend fun getComment(@PathVariable commentID: String): CommentDTO{
-        return commentService.getComment(ObjectId(commentID))
+    suspend fun getComment(@PathVariable productID: ObjectId, @PathVariable commentID: ObjectId): CommentDTO{
+        return commentService.getComment(commentID)
     }
-    
-
 }

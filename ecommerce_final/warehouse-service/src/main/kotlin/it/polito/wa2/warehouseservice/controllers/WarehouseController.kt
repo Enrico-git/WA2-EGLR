@@ -102,27 +102,13 @@ class WarehouseController(
         var counter = 5
         while(counter-- > 0){
             try{
-                return warehouseService.deleteWarehouses(warehouseID)
+                return warehouseService.deleteWarehouse(warehouseID)
             }
             catch(e: OptimisticLockingFailureException){
                 delay(1000)
             }
         }
         throw OptimisticLockingFailureException("Warehouse")
-    }
-
-    @PostMapping("/reserveproducts")
-    suspend fun mockReserveProductRequest(@RequestBody productsReservationRequestDTO: ProductsReservationRequestDTO): String?{
-        val result = warehouseService.mockReserveProductRequest()
-        println(result)
-        return result
-    }
-
-    @PostMapping("/abortreserveproducts")
-    suspend fun mockAbortReserveProductRequest(@RequestBody abortProductReservationRequestDTO: AbortProductReservationRequestDTO): String? {
-        val result = warehouseService.mockAbortReserveProductRequest()
-        println(result)
-        return result
     }
 
 }

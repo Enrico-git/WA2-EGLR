@@ -29,14 +29,7 @@ class RouterConfiguration(
 
     @Bean
     fun walletRoutes(walletHandler: WalletHandler) = coRouter {
-        /**
-         * 'nest' is used to group all API with the same prefix (/wallets):
-         * walletHandler contains the handler functions needed for solving requests.
-         */
-        /**
-         * 'nest' is used to group all API with the same prefix (/wallets):
-         * walletHandler contains the handler functions needed for solving requests.
-         */
+
         "/wallets".nest {
             accept(MediaType.APPLICATION_JSON).nest {
                 GET("/{walletID}", walletHandler::getWallet)
@@ -45,8 +38,6 @@ class RouterConfiguration(
                 GET("/{walletID}/transactions", walletHandler::getAllTransactions)
                 GET("/{walletID}/transactions/{transactionID}", walletHandler::getTransaction)
 
-                //These mocks simulate 'creteTransaction' in kafka done by order-service.
-                GET("/", walletHandler::mockPaymentOrAbortRequest)
             }
         }
         /**
@@ -74,7 +65,6 @@ class RouterConfiguration(
         onError<ValidationException> { e, _ ->  status(HttpStatus.UNPROCESSABLE_ENTITY).bodyValueAndAwait(e.localizedMessage)}
         onError<IllegalArgumentException> {e, _ ->  status(HttpStatus.BAD_REQUEST).bodyValueAndAwait(e.localizedMessage)}
         onError<OptimisticLockingFailureException> { _, _ ->  status(HttpStatus.INTERNAL_SERVER_ERROR).bodyValueAndAwait("Database concurrency error")}
-//        onError<UncategorizedMongoDbException>{e, _ -> status(HttpStatus.INTERNAL_SERVER_ERROR).bodyValueAndAwait(e.localizedMessage) }
         onError<InvalidOperationException> { e, _ ->  status(HttpStatus.CONFLICT).bodyValueAndAwait(e.localizedMessage)}
         onError<UnauthorizedException> { e, _ ->  status(HttpStatus.UNAUTHORIZED).bodyValueAndAwait(e.localizedMessage)}
         onError<Exception> {e, _ ->  status(HttpStatus.INTERNAL_SERVER_ERROR).bodyValueAndAwait(e.localizedMessage)}

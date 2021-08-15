@@ -4,6 +4,7 @@ import it.polito.wa2.catalogservice.dto.WarehouseDTO
 import it.polito.wa2.catalogservice.exceptions.NotFoundException
 import it.polito.wa2.catalogservice.exceptions.UnauthorizedException
 import it.polito.wa2.catalogservice.exceptions.UnavailableServiceException
+import it.polito.wa2.catalogservice.exceptions.WebClientBadRequestException
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.reactive.awaitSingle
 import org.bson.types.ObjectId
@@ -54,8 +55,7 @@ class WarehouseServiceImpl(
             .header(HttpHeaders.AUTHORIZATION, "Bearer $token")
             .retrieve()
             .onStatus(Predicate { it == HttpStatus.NOT_FOUND }) { throw NotFoundException("Warehouse not found") }
-            .onStatus(Predicate { it == HttpStatus.FORBIDDEN }) { throw UnauthorizedException("Nice try") }
-            .onStatus(Predicate { it == HttpStatus.UNAUTHORIZED }) { throw UnauthorizedException("Nice try") }
+            .onStatus(Predicate { it == HttpStatus.UNAUTHORIZED }) { throw UnauthorizedException("Unauthorized") }
             .onStatus(Predicate { it == HttpStatus.INTERNAL_SERVER_ERROR }) { throw UnavailableServiceException("Something went wrong") }
             .awaitBody()
     }
@@ -67,8 +67,7 @@ class WarehouseServiceImpl(
             .uri("$serviceURL/warehouses/$warehouseID")
             .header(HttpHeaders.AUTHORIZATION, "Bearer $token")
             .retrieve()
-            .onStatus(Predicate { it == HttpStatus.UNAUTHORIZED }) { throw UnauthorizedException("Nice try") }
-            .onStatus(Predicate { it == HttpStatus.FORBIDDEN }) { throw UnauthorizedException("Nice try") }
+            .onStatus(Predicate { it == HttpStatus.UNAUTHORIZED }) { throw UnauthorizedException("Unauthorized") }
             .onStatus(Predicate { it == HttpStatus.INTERNAL_SERVER_ERROR }) { throw UnavailableServiceException("Something went wrong") }
             .onStatus(Predicate { it == HttpStatus.BAD_REQUEST }) { throw IllegalArgumentException("The warehouse does not exist") }
             .awaitBodilessEntity()
@@ -83,8 +82,9 @@ class WarehouseServiceImpl(
             .accept(MediaType.APPLICATION_JSON)
             .header(HttpHeaders.AUTHORIZATION, "Bearer $token")
             .retrieve()
-            .onStatus(Predicate { it == HttpStatus.UNAUTHORIZED }) { throw UnauthorizedException("Nice try") }
+            .onStatus(Predicate { it == HttpStatus.UNAUTHORIZED }) { throw UnauthorizedException("Unauthorized") }
             .onStatus(Predicate { it == HttpStatus.INTERNAL_SERVER_ERROR }) { throw UnavailableServiceException("Something went wrong") }
+            .onStatus(Predicate { it == HttpStatus.BAD_REQUEST }) { it.bodyToMono(WebClientBadRequestException::class.java) }
             .awaitBody()
     }
 
@@ -96,9 +96,9 @@ class WarehouseServiceImpl(
             .bodyValue(warehouseDTO)
             .header(HttpHeaders.AUTHORIZATION, "Bearer $token")
             .retrieve()
-            .onStatus(Predicate { it == HttpStatus.UNAUTHORIZED }) { throw UnauthorizedException("Nice try") }
+            .onStatus(Predicate { it == HttpStatus.UNAUTHORIZED }) { throw UnauthorizedException("Unauthorized") }
             .onStatus(Predicate { it == HttpStatus.INTERNAL_SERVER_ERROR }) { throw UnavailableServiceException("Something went wrong") }
-            .onStatus(Predicate { it == HttpStatus.BAD_REQUEST }) { throw IllegalArgumentException("The warehouse does not exist") }
+            .onStatus(Predicate { it == HttpStatus.BAD_REQUEST }) { it.bodyToMono(WebClientBadRequestException::class.java) }
             .awaitBody()
     }
 
@@ -110,9 +110,9 @@ class WarehouseServiceImpl(
             .bodyValue(warehouseDTO)
             .header(HttpHeaders.AUTHORIZATION, "Bearer $token")
             .retrieve()
-            .onStatus(Predicate { it == HttpStatus.UNAUTHORIZED }) { throw UnauthorizedException("Nice try") }
+            .onStatus(Predicate { it == HttpStatus.UNAUTHORIZED }) { throw UnauthorizedException("Unauthorized") }
             .onStatus(Predicate { it == HttpStatus.INTERNAL_SERVER_ERROR }) { throw UnavailableServiceException("Something went wrong") }
-            .onStatus(Predicate { it == HttpStatus.BAD_REQUEST }) { throw IllegalArgumentException("The warehouse does not exist") }
+            .onStatus(Predicate { it == HttpStatus.BAD_REQUEST }) { it.bodyToMono(WebClientBadRequestException::class.java) }
             .awaitBody()
     }
 }

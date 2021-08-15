@@ -5,7 +5,7 @@ import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.mapping.Document
 import java.sql.Timestamp
 
-@Document(collection = "email_verification_token")
+@Document(collection = "email_verification_tokens")
 data class EmailVerificationToken(
     @Id
     val id: ObjectId? = null,

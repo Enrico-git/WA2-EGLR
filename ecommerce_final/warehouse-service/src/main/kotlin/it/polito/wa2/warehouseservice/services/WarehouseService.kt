@@ -24,19 +24,9 @@ interface WarehouseService {
     suspend fun partialUpdateWarehouses(warehouseID: ObjectId, warehouseDTO: WarehouseDTO): WarehouseDTO
 
     @PreAuthorize("hasAuthority(\"ADMIN\")")
-    suspend fun deleteWarehouses(warehouseID: ObjectId)
-
-    suspend fun reserveProductRequest(topic: String, productsReservationRequestDTO: ProductsReservationRequestDTO): Boolean? //kafka
+    suspend fun deleteWarehouse(warehouseID: ObjectId)
 
     suspend fun reserveAllProducts(productsReservationRequestDTO: ProductsReservationRequestDTO): Boolean? //kafka
 
-    suspend fun abortReserveProductRequest(topic: String, abortProductReservationRequestDTO: AbortProductReservationRequestDTO): Boolean? //kafka
-
-    suspend fun reserveProduct(reserveProductDTO: ReserveProductDTO): MutableSet<ProductLocation>?
-
     suspend fun abortReserveProduct(abortProductReservationRequestDTO: AbortProductReservationRequestDTO): Boolean?
-
-    suspend fun mockReserveProductRequest(): String
-
-    suspend fun mockAbortReserveProductRequest(): String
 }

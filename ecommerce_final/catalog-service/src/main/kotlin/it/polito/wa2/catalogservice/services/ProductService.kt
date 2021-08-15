@@ -15,7 +15,6 @@ interface ProductService {
     suspend fun getProductPicture(productID: ObjectId): PictureDTO
     @PreAuthorize("hasAuthority(\"ADMIN\")")
     suspend fun getProductWarehouses(productID: ObjectId): Flow<WarehouseDTO>
-    suspend fun getProductComments(productID: ObjectId): Flow<CommentDTO>
     @PreAuthorize("hasAuthority(\"ADMIN\")")
     suspend fun addProduct(productDTO: ProductDTO): ProductDTO
     @PreAuthorize("hasAuthority(\"ADMIN\")")

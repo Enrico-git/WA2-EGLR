@@ -16,8 +16,6 @@ interface ProductService {
 
     suspend fun getProductById(productID: ObjectId): ProductDTO
 
-    suspend fun getAllProductsById(products: Set<ObjectId>): Flow<ProductDTO>
-
     @PreAuthorize("hasAuthority(\"ADMIN\")")
     suspend fun addProduct(productDTO: ProductDTO): ProductDTO
 
@@ -30,17 +28,13 @@ interface ProductService {
     @PreAuthorize("hasAuthority(\"ADMIN\")")
     suspend fun deleteProduct(productID: ObjectId)
 
-    @PreAuthorize("hasAuthority(\"ADMIN\") or hasAuthority(\"CUSTOMER\")")
     suspend fun getProductPicture(productID: ObjectId): PictureDTO
 
     @PreAuthorize("hasAuthority(\"ADMIN\")")
     suspend fun modifyProductPicture(pictureDTO: PictureDTO, productID: ObjectId): ProductDTO
 
-    @PreAuthorize("hasAuthority(\"ADMIN\") or hasAuthority(\"CUSTOMER\")")
+    @PreAuthorize("hasAuthority(\"ADMIN\")")
     suspend fun getProductWarehouses(productID: ObjectId): Flow<WarehouseDTO>
-
-    @PreAuthorize("hasAuthority(\"ADMIN\") or hasAuthority(\"CUSTOMER\")")
-    suspend fun getProductComments(productID: ObjectId): Flow<CommentDTO>
 
     @PreAuthorize("hasAuthority(\"ADMIN\") or hasAuthority(\"CUSTOMER\")")
     suspend fun calculateRating(commentsIDs: Set<ObjectId>): Double

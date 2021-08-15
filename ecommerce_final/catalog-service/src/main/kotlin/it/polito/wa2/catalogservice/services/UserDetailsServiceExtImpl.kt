@@ -100,10 +100,9 @@ class UserDetailsServiceExtImpl(
         val authentication: Authentication = authenticationManager.authenticate(
             UsernamePasswordAuthenticationToken(loginDTO.username, loginDTO.password)
         ).awaitFirstOrNull() ?: throw UnauthorizedException("Invalid Login")
-        ReactiveSecurityContextHolder.getContext().awaitFirst().authentication = authentication
+//        ReactiveSecurityContextHolder.getContext().awaitFirst().authentication = authentication
         loginDTO.jwt = jwtUtils.generateJwtToken(authentication)
-        loginDTO.roles =
-            authentication.authorities.map { it.authority }.toMutableSet()
+        loginDTO.roles = authentication.authorities.map { it.authority }.toMutableSet()
         return loginDTO
     }
 }

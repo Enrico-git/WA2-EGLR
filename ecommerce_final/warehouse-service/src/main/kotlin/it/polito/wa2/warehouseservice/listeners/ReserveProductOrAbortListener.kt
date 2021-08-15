@@ -24,13 +24,15 @@ class ReserveProductOrAbortListener(
     containerFactory = "reserveProductContainerFactory")
     fun reserveRequestConsumer(productsReservationRequestDTO: ProductsReservationRequestDTO, @Header(KafkaHeaders.RECEIVED_TOPIC) topic: String){
         CoroutineScope(Dispatchers.IO).launch {
-            println(productsReservationRequestDTO)
-            var result: Boolean? = null
-            try {
-                result = warehouseService.reserveAllProducts(productsReservationRequestDTO)
-            } catch (e: UncategorizedMongoDbException){
-                delay(1000)
-            }
+            var result: Boolean? = false
+            var counter = 5
+
+            while (counter-- > 0)
+                try {
+                    result = warehouseService.reserveAllProducts(productsReservationRequestDTO)
+                } catch (e: UncategorizedMongoDbException){
+                    delay(1000)
+                }
 
             if(result==false){
                 println("${topic}_failed")
@@ -46,12 +48,14 @@ class ReserveProductOrAbortListener(
             containerFactory = "abortProductsReservationContainerFactory")
     fun abortRequestConsumer(abortProductReservationRequestDTO: AbortProductReservationRequestDTO, @Header(KafkaHeaders.RECEIVED_TOPIC) topic: String){
         CoroutineScope(Dispatchers.IO).launch {
-            var result: Boolean? = null
-            try {
-                result = warehouseService.abortReserveProduct(abortProductReservationRequestDTO)
-            } catch (e: UncategorizedMongoDbException){
-                delay(1000)
-            }
+            var result: Boolean? = false
+            var counter = 5
+            while (counter-- > 0)
+                try {
+                    result = warehouseService.abortReserveProduct(abortProductReservationRequestDTO)
+                } catch (e: UncategorizedMongoDbException){
+                    delay(1000)
+                }
 
             if(result==false){
                 println("${topic}_failed")

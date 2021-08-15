@@ -1,5 +1,6 @@
 package it.polito.wa2.walletservice.entities
 
+import it.polito.wa2.walletservice.common.TransactionDescription
 import it.polito.wa2.walletservice.dto.TransactionDTO
 import org.bson.types.ObjectId
 import org.springframework.data.annotation.Id
@@ -7,10 +8,6 @@ import org.springframework.data.mongodb.core.mapping.Document
 import java.math.BigDecimal
 import java.sql.Timestamp
 
-
-enum class TransactionDescription {
-    REFUND, RECHARGE, PAYMENT
-}
 
 @Document(collection = "transactions")
 data class Transaction (
@@ -22,7 +19,7 @@ data class Transaction (
     val description: TransactionDescription,
 //    TODO change this name to reason (it can bne order ID or recharge reference)
 //    as it is now it is confusing
-    val orderID: ObjectId, //also recharge reference
+    val reason: ObjectId?, //also recharge reference
 )
 
 fun Transaction.toDTO() = TransactionDTO(
@@ -31,7 +28,7 @@ fun Transaction.toDTO() = TransactionDTO(
     walletID = walletID.toString(),
     amount = amount,
     description = description.name,
-    orderID = orderID.toString()
+    reason = reason?.toHexString()
 )
 
 

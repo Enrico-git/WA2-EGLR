@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.ControllerAdvice
 import org.springframework.web.bind.support.WebExchangeBindException
+import org.springframework.web.reactive.function.client.WebClientRequestException
 import org.springframework.web.reactive.function.client.WebClientResponseException
 import java.sql.Timestamp
 import javax.validation.ValidationException
@@ -22,7 +23,8 @@ class ControllerAdvice {
         UnavailableServiceException::class,
         WebClientBadRequestException::class,
         WebExchangeBindException::class,
-        WebClientResponseException::class
+        WebClientResponseException::class,
+        WebClientRequestException::class,
     ])
     fun genericExceptionHandler(e: Exception): ResponseEntity<ErrorDTO> {
         val errorDTO = ErrorDTO(
@@ -67,6 +69,11 @@ class ControllerAdvice {
                 errorDTO.error = e.message
             }
             is WebClientResponseException -> {
+                errorDTO.status = 500
+                status = HttpStatus.INTERNAL_SERVER_ERROR
+                errorDTO.error = "Could not reach service"
+            }
+            is WebClientRequestException -> {
                 errorDTO.status = 500
                 status = HttpStatus.INTERNAL_SERVER_ERROR
                 errorDTO.error = "Could not reach service"

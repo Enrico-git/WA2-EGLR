@@ -2,25 +2,26 @@ package it.polito.wa2.catalogservice.controllers
 
 import it.polito.wa2.catalogservice.dto.CommentDTO
 import it.polito.wa2.catalogservice.services.CommentService
+import kotlinx.coroutines.flow.Flow
 import org.bson.types.ObjectId
-import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
-import org.springframework.http.MediaType
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
-import org.springframework.web.reactive.function.client.WebClient
-import java.util.*
 
 @RestController
 @RequestMapping("/products/{productID}/comments")
 class CommentController(
     private val commentService: CommentService
 ) {
+    @ResponseStatus(HttpStatus.OK)
+    suspend fun getProductComments(@PathVariable productID: ObjectId): Flow<CommentDTO> {
+        return commentService.getComments(productID)
+    }
     //RETRIEVE INFO ABOUT A COMMENT GIVEN ITS ID
     @GetMapping("/{commentID}")
     @ResponseStatus(HttpStatus.OK)
-    suspend fun getComment(@PathVariable commentID: ObjectId): CommentDTO {
-        return commentService.getComment(commentID)
+    suspend fun getComment(@PathVariable productID: ObjectId, @PathVariable commentID: ObjectId): CommentDTO {
+        return commentService.getComment(productID, commentID)
     }
 
     //CREATE A NEW COMMENT TO A PRODUCT

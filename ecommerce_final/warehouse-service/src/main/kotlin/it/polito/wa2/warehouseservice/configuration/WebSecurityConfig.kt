@@ -43,10 +43,9 @@ class WebSecurityConfig(
                 .authenticationManager(authenticationManager)
                 .securityContextRepository(securityContextRepository)
                 .authorizeExchange()
-                .pathMatchers("/products/**").permitAll()
-            //.pathMatchers(*patterns).permitAll() // the endpoint /auth is permitted to access without any token where as all the REST endpoints are secured
+                .pathMatchers(HttpMethod.GET,"/products/**/warehouses", ).authenticated()
+                .pathMatchers(HttpMethod.GET,"/products/**", ).permitAll()
                 .pathMatchers(HttpMethod.OPTIONS).permitAll()
-//                .pathMatchers().permitAll()
                 .anyExchange().authenticated()
                 .and()
                 .build()

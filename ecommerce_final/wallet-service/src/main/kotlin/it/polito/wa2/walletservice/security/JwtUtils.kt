@@ -59,7 +59,7 @@ class JwtUtils(
             .build()
             .parseClaimsJws(authToken)
             .body
-//        logger.info(parsedToken)
+
         return UserDetailsDTO(
             id = ObjectId(parsedToken["sub"].toString()),
             username = null,

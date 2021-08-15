@@ -43,16 +43,6 @@ class ProductController(
     }
 
     /**
-     * API endpoint to retrieve a product by its ID
-     * @param productID the ID of the product
-     * @return the product object
-     */
-//    @GetMapping("/")
-//    suspend fun getProduct(@PathVariable productID: ObjectId): ProductDTO{
-//        return productService.getProductById(productID)
-//    }
-
-    /**
      * API endpoint to insert a product
      * @param productDTO
      * @return the product object
@@ -100,6 +90,7 @@ class ProductController(
             }
         throw OptimisticLockingFailureException("Product")
     }
+
     /**
      * API endpoint to delete a product
      * @param productID the ID of the product
@@ -148,16 +139,6 @@ class ProductController(
             }
         }
         throw OptimisticLockingFailureException("Product")
-    }
-
-    /**
-     * API endpoint to get all the comments of the product
-     * @param productID the ID of the product
-     * @return flow of CommentDTO
-     */
-    @GetMapping("/{productID}/comments")
-    suspend fun getProductComments(@PathVariable productID: ObjectId): Flow<CommentDTO>{
-        return productService.getProductComments(productID)
     }
 
     /**

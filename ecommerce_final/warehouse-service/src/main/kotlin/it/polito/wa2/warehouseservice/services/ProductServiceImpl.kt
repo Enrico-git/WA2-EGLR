@@ -40,10 +40,6 @@ class ProductServiceImpl(
         return product.toDTO()
     }
 
-    override suspend fun getAllProductsById(products: Set<ObjectId>): Flow<ProductDTO> {
-        return productRepository.findAllById(products).map { it.toDTO() }
-    }
-
     override suspend fun addProduct(productDTO: ProductDTO): ProductDTO {
         val product = Product(
             id = null,
@@ -102,7 +98,7 @@ class ProductServiceImpl(
             commentRepository.deleteAllById(product.comments)
         val warehouses = warehouseRepository.findWarehousesByProduct(productID).map {
                 wh ->
-                    wh.products!!.removeIf { it.productId == productID }
+                    wh.products.removeIf { it.productId == productID }
                     wh
                 }
         warehouseRepository.saveAll(warehouses).collect()
@@ -121,14 +117,7 @@ class ProductServiceImpl(
     }
 
     override suspend fun getProductWarehouses(productID: ObjectId): Flow<WarehouseDTO> {
-//        TODO this is useless, if there is no product the flow is empty
-//        productRepository.findById(productID) ?: throw IllegalArgumentException("Product not found")
         return warehouseRepository.findWarehousesByProduct(productID).map { it.toDTO() }
-    }
-
-    override suspend fun getProductComments(productID: ObjectId): Flow<CommentDTO> {
-        val commentsIds = productRepository.findById(productID)?.comments ?: throw IllegalArgumentException("Comments not found")
-        return commentRepository.findAllById(commentsIds.asIterable()).map{ it.toDTO() }
     }
 
     override suspend fun calculateRating(commentsIDs: Set<ObjectId>): Double {
@@ -136,7 +125,7 @@ class ProductServiceImpl(
             0.0
         else {
             val comments = commentRepository.findAllById(commentsIDs).toSet()
-            if (comments.isEmpty())
+            if (comments.size != commentsIDs.size)
                 throw IllegalArgumentException("Invalid comments ids")
             comments.map{ it.stars }.reduce { acc, elem -> acc + elem }.div(comments.size).toDouble()
         }

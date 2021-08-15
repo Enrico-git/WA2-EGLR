@@ -47,26 +47,9 @@ class ProductController(
        return productService.getProductPicture(productID)
     }
 
-    //RETRIEVE THE LIST OF WAREHOUSES THAT CONTAIN A PRODUCT GIVEN ITS ID
-    //NO NEED OF AUTHENTICATION -> NO TOKEN
-    @GetMapping("/{productID}/warehouses")
-    @ResponseStatus(HttpStatus.OK)
-    suspend fun getProductWarehouses(@PathVariable productID: ObjectId): Flow<WarehouseDTO> {
-        return productService.getProductWarehouses(productID)
-    }
-
-    //RETRIEVE THE LIST OF WAREHOUSES THAT CONTAIN A PRODUCT GIVEN ITS ID
-    //NO NEED OF AUTHENTICATION -> NO TOKEN
-    @GetMapping("/{productID}/comments")
-    @ResponseStatus(HttpStatus.OK)
-    suspend fun getProductComments(@PathVariable productID: ObjectId): Flow<CommentDTO> {
-        return productService.getProductComments(productID)
-    }
-
     //DELETE A PRODUCT GIVEN ITS ID
     @DeleteMapping("/{productID}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    @PreAuthorize("hasAuthority(\"ADMIN\")")
     suspend fun deleteProduct(@PathVariable productID: ObjectId) {
         return productService.deleteProduct(productID)
     }

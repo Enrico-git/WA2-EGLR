@@ -26,7 +26,6 @@ class WebSecurityConfig(
 ){
     @Bean
     fun springWebFilterChain(http: ServerHttpSecurity): SecurityWebFilterChain {
-        val patterns = arrayOf("/auth/**")
         return http
             .exceptionHandling()
             .authenticationEntryPoint { swe: ServerWebExchange, e: AuthenticationException? ->
@@ -34,20 +33,13 @@ class WebSecurityConfig(
             }.accessDeniedHandler { swe: ServerWebExchange, e: AccessDeniedException? ->
                 Mono.fromRunnable { swe.response.statusCode = HttpStatus.FORBIDDEN }
             }.and()
-            //.cors().disable()
             .csrf().disable()
             .authenticationManager(authenticationManager)
             .securityContextRepository(securityContextRepository)
             .authorizeExchange()
-            .pathMatchers(*patterns).permitAll() // the endpoint /auth is permitted to access without any token where as all the REST endpoints are secured
             .pathMatchers(HttpMethod.OPTIONS).permitAll()
             .anyExchange().authenticated()
             .and()
             .build()
     }
-
-//    @Bean
-//    fun passwordEncoder(): BCryptPasswordEncoder {
-//        return BCryptPasswordEncoder()
-//    }
 }

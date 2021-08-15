@@ -18,14 +18,12 @@ interface WalletService {
     @PreAuthorize("hasAuthority(\"ADMIN\")") // recharge wallet
     suspend fun createRechargeTransaction(walletID: String, transactionDTO: TransactionDTO): TransactionDTO
 
-    suspend fun createPaymentOrRefundTransaction (topic: String, paymentRequestDTO: KafkaPaymentRequestDTO): Boolean? //Kafka
-
     @PreAuthorizeCustomerOrAdmin
     suspend fun getAllTransactions(walletID: String, from: Long?, to: Long?, pageable: Pageable): Flow<TransactionDTO>
 
     @PreAuthorizeCustomerOrAdmin
     suspend fun getTransaction(walletID: String, transactionID: String): TransactionDTO
 
-    suspend fun mockPaymentOrAbortRequest(): String
+    suspend fun createPaymentOrRefundTransaction (topic: String, paymentRequestDTO: KafkaPaymentRequestDTO): Boolean? //Kafka
 
 }

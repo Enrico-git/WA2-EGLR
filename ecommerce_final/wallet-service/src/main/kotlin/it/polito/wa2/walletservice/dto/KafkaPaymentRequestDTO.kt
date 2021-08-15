@@ -6,6 +6,6 @@ import java.sql.Timestamp
 data class KafkaPaymentRequestDTO (
     val orderID: String = "",
     val amount: BigDecimal = BigDecimal(0),
-    val token: String = "",//from userID I will get walletID
+    val token: String = "",
     val timestamp: Timestamp = Timestamp(0)
 )

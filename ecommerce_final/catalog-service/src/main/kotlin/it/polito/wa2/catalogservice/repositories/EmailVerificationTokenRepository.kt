@@ -9,8 +9,8 @@ import java.sql.Timestamp
 import java.util.*
 
 interface EmailVerificationTokenRepository : CoroutineCrudRepository<EmailVerificationToken, Long> {
-    fun findByToken(token: String): EmailVerificationToken?
+    suspend fun findByToken(token: String): EmailVerificationToken?
 
     @Transactional
-    fun deleteAllByExpiryDateBefore(actualTime: Timestamp)
+    suspend fun deleteAllByExpiryDateBefore(actualTime: Timestamp)
 }

@@ -11,11 +11,10 @@ import org.springframework.stereotype.Repository
 
 @Repository
 interface WarehouseRepository: CoroutineCrudRepository<Warehouse, ObjectId> {
-    //val template: ReactiveMongoTemplate
 
     @Query(value = "{'products.productId': ?0}")
     fun findWarehousesByProduct(productID: ObjectId): Flow<Warehouse>
 
     @Query(value = "{'products.productId': {\$in: ?0}}")
-    fun findWarehousesByProductsIDIn(products: Set<ObjectId>): Flow<Warehouse>
+    fun findWarehousesByProductsIDIn(products: Flow<ObjectId>): Flow<Warehouse>
 }

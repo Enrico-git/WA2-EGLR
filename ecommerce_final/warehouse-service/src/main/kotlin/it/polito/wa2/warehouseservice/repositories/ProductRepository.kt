@@ -11,7 +11,6 @@ import org.springframework.stereotype.Repository
 @Repository
 interface ProductRepository: CoroutineCrudRepository<Product, ObjectId> {
 
-//    fun findAllById()
     fun findAllByCategory(category: String, pageable: Pageable): Flow<Product>
     @Query("{ id: { \$exists: true }}")
     fun findAll(pageable: Pageable): Flow<Product>

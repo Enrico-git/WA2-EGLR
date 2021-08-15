@@ -13,9 +13,8 @@ data class Wallet (
     val id: ObjectId?,
     var balance: BigDecimal = BigDecimal(0.0),
     val userID: ObjectId,
-    //  00
     @Version
-    val version: Long = 0 //needed for createTransaction cuncurrent
+    val version: Long = 0
 )
 
 fun Wallet.toDTO() = WalletDTO(
@@ -24,7 +23,3 @@ fun Wallet.toDTO() = WalletDTO(
     userID = userID.toHexString(),
 )
 
-// 00
-// Please notice that the Wallet doesn't have the
-// "var transactions: Set<ObjectId>?" proprieties since we assume that
-// will be used the specific end-point for retrieve wallet Transactions!
