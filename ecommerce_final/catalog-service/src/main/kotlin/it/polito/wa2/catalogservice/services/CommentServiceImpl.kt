@@ -34,12 +34,10 @@ class CommentServiceImpl(
         .build()
 
     override suspend fun getComments(productID: ObjectId): Flow<CommentDTO> {
-        val token = ReactiveSecurityContextHolder.getContext().awaitSingle().authentication.credentials as String
         return client
             .get()
             .uri("$serviceURL/products/$productID/comments")
             .accept(MediaType.APPLICATION_NDJSON)
-            .header(HttpHeaders.AUTHORIZATION, "Bearer $token")
             .retrieve()
             .onStatus(Predicate { it == HttpStatus.INTERNAL_SERVER_ERROR }) { throw UnavailableServiceException("Something went wrong") }
             .onStatus(Predicate { it == HttpStatus.BAD_REQUEST }) { throw IllegalArgumentException("Product not found") }
@@ -48,7 +46,6 @@ class CommentServiceImpl(
 
     //RETRIEVE INFO ABOUT A COMMENT GIVEN ITS ID
     override suspend fun getComment(productID: ObjectId, commentID: ObjectId): CommentDTO {
-        val token = ReactiveSecurityContextHolder.getContext().awaitSingle().authentication.credentials as String
         return client
             .get()
             .uri("$serviceURL/products/$productID/comments/$commentID")

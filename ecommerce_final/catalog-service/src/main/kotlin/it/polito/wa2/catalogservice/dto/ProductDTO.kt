@@ -26,5 +26,6 @@ data class ProductDTO (
     val avgRating: Double ? = null,
     val creationDate: Timestamp? = null,
     @field:NotNull(message = "Product comments must not be null",groups = [CreateOrReplaceProduct::class])
-    val comments: Set<String>? = null
+    val comments: Set<String>? = null,
+    val availability: Int = 0
 )

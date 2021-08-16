@@ -32,7 +32,7 @@ class CommentServiceImpl(
             body = commentDTO.body!!,
             stars = commentDTO.stars!!,
             creationDate = Timestamp(System.currentTimeMillis()),
-            userId = user.username,
+            userId = user.id!!,
         )
         val product = productRepository.findById(productID) ?: throw IllegalArgumentException("Product not found")
         val newComment = commentRepository.save(comment)
@@ -45,7 +45,7 @@ class CommentServiceImpl(
     override suspend fun updateComment(productID: ObjectId, commentId: ObjectId, commentDTO: CommentDTO): CommentDTO {
         val user = ReactiveSecurityContextHolder.getContext().awaitFirst().authentication.principal as UserDetailsDTO
         val comment = commentRepository.findById(commentId) ?: throw IllegalArgumentException("Comment not found")
-        if (! user.roles!!.contains("ADMIN") && user.id != ObjectId(comment.userId!!))
+        if (! user.roles!!.contains("ADMIN") && user.id != comment.userId)
             throw UnauthorizedException("Nice try")
         val ratingChanged = comment.stars != commentDTO.stars
         comment.body = commentDTO.body!!
@@ -64,7 +64,7 @@ class CommentServiceImpl(
         val user = ReactiveSecurityContextHolder.getContext().awaitFirst().authentication.principal as UserDetailsDTO
         val product = productRepository.findById(productID) ?: throw IllegalArgumentException("Product not found")
         val comment = commentRepository.findById(commentId) ?: throw NotFoundException("Comment not found")
-        if (! user.roles!!.contains("ADMIN") && user.id != ObjectId(comment.userId!!))
+        if (! user.roles!!.contains("ADMIN") && user.id != comment.userId)
             throw UnauthorizedException("Nice try")
         commentRepository.delete(comment)
         product.comments = product.comments.minus(commentId)

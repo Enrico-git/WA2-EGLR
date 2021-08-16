@@ -15,7 +15,7 @@ data class Comment (
         var body: String,
         var stars: Float,
         val creationDate: Timestamp,
-        val userId: String?,
+        val userId: ObjectId?,
         @Version
         val version: Long? = null
 )
@@ -28,5 +28,5 @@ fun Comment.toDTO() = CommentDTO(
         body = body,
         stars = stars,
         creationDate = creationDate,
-        userId = userId
+        userId = userId?.toHexString()
 )

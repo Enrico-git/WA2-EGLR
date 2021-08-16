@@ -43,7 +43,7 @@ class WebSecurityConfig(
                 .authenticationManager(authenticationManager)
                 .securityContextRepository(securityContextRepository)
                 .authorizeExchange()
-                .pathMatchers(HttpMethod.GET,"/products/**/warehouses", ).authenticated()
+                .pathMatchers(HttpMethod.GET,"/products/*/warehouses", ).authenticated()
                 .pathMatchers(HttpMethod.GET,"/products/**", ).permitAll()
                 .pathMatchers(HttpMethod.OPTIONS).permitAll()
                 .anyExchange().authenticated()

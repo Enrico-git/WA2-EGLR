@@ -33,5 +33,6 @@ fun Product.toDTO() = ProductDTO(
         price = price,
         avgRating = avgRating,
         creationDate = creationDate,
-        comments = comments?.map{ it.toString() }?.toSet()
+        comments = comments.map{ it.toString() }.toSet(),
+        availability = 0
 )

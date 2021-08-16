@@ -2,6 +2,7 @@ package it.polito.wa2.warehouseservice.services
 
 
 import it.polito.wa2.warehouseservice.domain.Product
+import it.polito.wa2.warehouseservice.domain.Warehouse
 import it.polito.wa2.warehouseservice.domain.toDTO
 import it.polito.wa2.warehouseservice.dto.*
 import it.polito.wa2.warehouseservice.exceptions.*
@@ -27,17 +28,28 @@ class ProductServiceImpl(
 
 
     override suspend fun getProducts(category: String?,  ids: Set<ObjectId>?, pageable: Pageable): Flow<ProductDTO> {
+        val warehouses = warehouseRepository.findAll()
         return if(category != null)
-            productRepository.findAllByCategory(category, pageable).map { it.toDTO() }
+            productRepository.findAllByCategory(category, pageable).map { productDTOWithAvailability(it, warehouses) }
         else if (ids != null)
-            productRepository.findAllById(ids).map { it.toDTO() }
+            productRepository.findAllById(ids).map { productDTOWithAvailability(it, warehouses) }
         else
-            productRepository.findAll(pageable).map { it.toDTO() }
+            productRepository.findAll(pageable).map { productDTOWithAvailability(it, warehouses) }
     }
 
+    private suspend fun productDTOWithAvailability(product: Product, warehouses: Flow<Warehouse>): ProductDTO{
+            val productDTO = product.toDTO()
+            productDTO.availability = warehouses
+                .map { wh -> wh.products.find { it.productId == product.id}?.quantity ?: 0}
+                .reduce { acc, value -> acc+value }
+        return productDTO
+    }
     override suspend fun getProductById(productID: ObjectId): ProductDTO {
-        val product = productRepository.findById(productID) ?: throw NotFoundException("Product not found")
-        return product.toDTO()
+        val product = productRepository.findById(productID)?.toDTO() ?: throw NotFoundException("Product not found")
+        product.availability = warehouseRepository.findWarehousesByProduct(productID)
+            .map { wh -> wh.products.first { it.productId == productID}.quantity }
+            .fold(0) { acc, value -> acc+value }
+        return product
     }
 
     override suspend fun addProduct(productDTO: ProductDTO): ProductDTO {
