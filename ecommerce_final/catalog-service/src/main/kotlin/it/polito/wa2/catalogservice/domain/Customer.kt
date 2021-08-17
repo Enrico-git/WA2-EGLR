@@ -12,5 +12,5 @@ data class Customer(
     var surname: String = "",
     var address: String = "",
     var email: String = "",
-    val user: ObjectId 
+    val user: ObjectId
 )

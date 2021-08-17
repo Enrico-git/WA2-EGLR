@@ -67,7 +67,6 @@ class WalletHandler(
         var pageable: Pageable = Pageable.unpaged()
         if(page != null && size != null)
             pageable = PageRequest.of(page, size)
-
         return ServerResponse
             .ok()
             .contentType(MediaType.APPLICATION_NDJSON)

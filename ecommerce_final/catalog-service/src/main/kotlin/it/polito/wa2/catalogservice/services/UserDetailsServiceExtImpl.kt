@@ -92,7 +92,6 @@ class UserDetailsServiceExtImpl(
         if (emailVerification.expiryDate <= Timestamp(System.currentTimeMillis()))
             throw IllegalArgumentException("Token expired")
         enableUser(emailVerification.user.username)
-
     }
 
     override suspend fun authAndCreateToken(loginDTO: LoginDTO): LoginDTO {

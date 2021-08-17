@@ -41,7 +41,7 @@ class WalletController(
     }
 
     //ADD A WALLET FOR A GIVEN CUSTOMER
-    @PostMapping("/")
+    @PostMapping("")
     @ResponseStatus(HttpStatus.CREATED)
     suspend fun newWallet(@RequestBody @Validated walletDTO: WalletDTO): WalletDTO {
         return walletService.newWallet(walletDTO)

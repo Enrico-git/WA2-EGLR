@@ -117,7 +117,7 @@ class WalletServiceImpl(
         else
             TransactionDescription.REFUND
 
-        if (transactionRepository.findByOrderIDAndDescription(ObjectId(paymentRequestDTO.orderID), transactionDescription) != null)
+        if (transactionRepository.findByReasonAndDescription(ObjectId(paymentRequestDTO.orderID), transactionDescription) != null)
                 return null
 
 
