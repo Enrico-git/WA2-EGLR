@@ -5,25 +5,23 @@ import it.polito.wa2.catalogservice.domain.User
 import it.polito.wa2.catalogservice.dto.LoginDTO
 import it.polito.wa2.catalogservice.dto.RegistrationDTO
 import it.polito.wa2.catalogservice.dto.UserDetailsDTO
-import it.polito.wa2.catalogservice.repositories.UserRepository
-import it.polito.wa2.catalogservice.security.JwtUtils
-import it.polito.wa2.catalogservice.security.AuthenticationManager
 import it.polito.wa2.catalogservice.dto.toDTO
 import it.polito.wa2.catalogservice.exceptions.UnauthorizedException
 import it.polito.wa2.catalogservice.repositories.EmailVerificationTokenRepository
-import kotlinx.coroutines.reactive.awaitFirst
+import it.polito.wa2.catalogservice.repositories.UserRepository
+import it.polito.wa2.catalogservice.security.AuthenticationManager
+import it.polito.wa2.catalogservice.security.JwtUtils
 import kotlinx.coroutines.reactive.awaitFirstOrNull
+import org.apache.http.auth.UsernamePasswordCredentials
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Lazy
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.Authentication
-import org.springframework.security.core.context.ReactiveSecurityContextHolder
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.security.core.userdetails.UsernameNotFoundException
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.lang.IllegalArgumentException
 import java.sql.Timestamp
 
 @Service
@@ -58,7 +56,7 @@ class UserDetailsServiceExtImpl(
         val token = notificationService.createEmailVerificationToken(user)
         mailService.sendMessage(
             registrationDTO.email, "Confirm registration",
-            "<a href='http://$serverURL/registrationConfirm?$token'>Click here</a>"
+            "<a href='http://$serverURL/auth/registrationConfirm?token=$token'>Click here</a>"
         )
         return user.toDTO()
     }
@@ -94,15 +92,18 @@ class UserDetailsServiceExtImpl(
         if (emailVerification.expiryDate <= Timestamp(System.currentTimeMillis()))
             throw IllegalArgumentException("Token expired")
         enableUser(emailVerification.user.username)
+
     }
 
     override suspend fun authAndCreateToken(loginDTO: LoginDTO): LoginDTO {
-        val authentication: Authentication = authenticationManager.authenticate(
-            UsernamePasswordAuthenticationToken(loginDTO.username, loginDTO.password)
-        ).awaitFirstOrNull() ?: throw UnauthorizedException("Invalid Login")
-//        ReactiveSecurityContextHolder.getContext().awaitFirst().authentication = authentication
-        loginDTO.jwt = jwtUtils.generateJwtToken(authentication)
-        loginDTO.roles = authentication.authorities.map { it.authority }.toMutableSet()
-        return loginDTO
+        val user = findByUsername(loginDTO.username) as UserDetailsDTO
+        if ( passwordEncoder.matches(loginDTO.password, user.password )) {
+            loginDTO.jwt =
+                jwtUtils.generateJwtToken(UsernamePasswordAuthenticationToken(user, loginDTO.password))
+            loginDTO.roles = user.roles?.split(",")?.toMutableSet()
+            return loginDTO
+        } else {
+            throw UnauthorizedException("Invalid Login")
+        }
     }
 }

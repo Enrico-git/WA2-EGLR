@@ -30,7 +30,7 @@ class JwtUtils {
     fun generateJwtToken(authentication: Authentication): String {
 
         val userPrincipal: UserDetailsDTO = authentication.principal as UserDetailsDTO
-        val claims: Claims = Jwts.claims(mapOf(Pair("roles", userPrincipal.roles), Pair("sub", userPrincipal.id)))
+        val claims: Claims = Jwts.claims(mapOf(Pair("roles", userPrincipal.roles), Pair("sub", userPrincipal.id?.toHexString())))
         return Jwts.builder()
             .setClaims(claims)
             .setIssuedAt(Date())
