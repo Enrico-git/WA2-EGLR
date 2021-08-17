@@ -6,12 +6,12 @@ import org.springframework.security.access.prepost.PreAuthorize
 
 //TODO isUser and IsCustomer??
 interface CustomerService {
-    @PreAuthorize("hasAuthority(\"CUSTOMER\") and isUser(authentication, #customerDTO.userID)")
+    @PreAuthorize("hasAuthority(\"CUSTOMER\") or hasAuthority(\"ADMIN\")")
     suspend fun addCustomer(customerDTO: CustomerDTO): CustomerDTO
 
-    @PreAuthorize("hasAuthority(\"CUSTOMER\") and isCustomer(authentication, #customerID)")
+    @PreAuthorize("hasAuthority(\"CUSTOMER\") or hasAuthority(\"ADMIN\")")
     suspend fun getCustomer(customerID: ObjectId): CustomerDTO
 
-    @PreAuthorize("hasAuthority(\"CUSTOMER\") and isCustomer(authentication, #customerID)")
+    @PreAuthorize("hasAuthority(\"CUSTOMER\") or hasAuthority(\"ADMIN\")")
     suspend fun updateCustomer(customerDTO: CustomerDTO, customerID: ObjectId): CustomerDTO
 }

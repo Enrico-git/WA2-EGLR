@@ -8,11 +8,11 @@ import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
 
 @RestController
-@RequestMapping("/customer")
+@RequestMapping("/customers")
 class CustomerController(
     private val customerService: CustomerService
 ) {
-    @PostMapping("/")
+    @PostMapping("")
     @ResponseStatus(HttpStatus.CREATED)
     suspend fun createCustomer(@RequestBody @Validated customerDTO: CustomerDTO): CustomerDTO {
         return customerService.addCustomer(customerDTO)
