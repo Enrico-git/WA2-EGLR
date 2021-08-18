@@ -13,19 +13,34 @@ import org.springframework.web.bind.annotation.*
 class CommentController(
     private val commentService: CommentService
 ) {
+    /**
+     * API endpoint to get the list of comments of a product
+     * @param productID the ID of the product
+     * @return flow of CommentDTO
+     */
     @GetMapping("")
     @ResponseStatus(HttpStatus.OK)
     suspend fun getProductComments(@PathVariable productID: ObjectId): Flow<CommentDTO> {
         return commentService.getComments(productID)
     }
-    //RETRIEVE INFO ABOUT A COMMENT GIVEN ITS ID
+
+    /**
+     * API endpoint to get a comment
+     * @param productID the ID of the product
+     * @param commentID the ID of the comment
+     * @return CommentDTO object
+     */
     @GetMapping("/{commentID}")
     @ResponseStatus(HttpStatus.OK)
     suspend fun getComment(@PathVariable productID: ObjectId, @PathVariable commentID: ObjectId): CommentDTO {
         return commentService.getComment(productID, commentID)
     }
 
-    //CREATE A NEW COMMENT TO A PRODUCT
+    /**
+     * API endpoint to insert a new comment
+     * @param productID the ID of the product, the body is the comment
+     * @return the comment object
+     */
     @PostMapping("")
     @ResponseStatus(HttpStatus.CREATED)
     suspend fun addComment(@PathVariable productID: ObjectId,
@@ -33,7 +48,12 @@ class CommentController(
         return commentService.addComment(productID,commentDTO)
     }
 
-    //UPDATE A COMMENT GIVEN ITS ID AND THE PRODUCT ID
+    /**
+     * API endpoint to update a comment
+     * @param productID the ID of the product
+     * @requestBody CommentDTO
+     * @return the comment object
+     */
     @PutMapping("/{commentID}")
     @ResponseStatus(HttpStatus.CREATED)
     suspend fun updateComment(@PathVariable productID: ObjectId,
@@ -42,7 +62,12 @@ class CommentController(
         return commentService.updateComment(productID,commentID,commentDTO)
     }
 
-    //DELETE A COMMENT GIVEN ITS ID AND THE PRODUCT ID
+    /**
+     * API endpoint to delete a comment
+     * @param productID the ID of the product
+     * @param commentID the id of the comment
+     * @return
+     */
     @DeleteMapping("/{commentID}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     suspend fun deleteComment(@PathVariable productID: ObjectId, @PathVariable commentID: ObjectId) {

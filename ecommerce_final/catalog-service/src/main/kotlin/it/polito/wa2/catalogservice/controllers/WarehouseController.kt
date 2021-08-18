@@ -15,35 +15,55 @@ import org.springframework.web.bind.annotation.*
 class WarehouseController(
     private val warehouseService: WarehouseService
 ) {
-    //RETRIEVE THE LIST OF WAREHOUSES
+    /**
+     * API endpoint to get all the warehouses
+     * @return the flow of the warehouses
+     */
     @GetMapping("")
     @ResponseStatus(HttpStatus.OK)
     suspend fun getWarehouses(): Flow<WarehouseDTO> {
         return warehouseService.getWarehouses()
     }
 
-    //RETRIEVE INFO ABOUT A WAREHOUSE GIVEN ITS ID
+    /**
+     * API endpoint to get a warehouse
+     * @param warehouseID
+     * @return the warehouse object
+     */
     @GetMapping("/{warehouseID}")
     @ResponseStatus(HttpStatus.OK)
     suspend fun getWarehouse(@PathVariable warehouseID: ObjectId): WarehouseDTO {
         return warehouseService.getWarehouse(warehouseID)
     }
 
-    //DELETE A WAREHOUSE GIVEN ITS ID, IF POSSIBLE
+    /**
+     * API endpoint to remove a warehouse
+     * @param warehouseID
+     * @return nothing
+     */
     @DeleteMapping("/{warehouseID}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     suspend fun deleteWarehouse(@PathVariable warehouseID: ObjectId) {
         return warehouseService.deleteWarehouse(warehouseID)
     }
 
-    //CREATE A NEW WAREHOUSE WITH A LIST OF PRODUCTS
+    /**
+     * API endpoint to add a new warehouse
+     * @param warehouseDTO
+     * @return the warehouse object
+     */
     @PostMapping("")
     @ResponseStatus(HttpStatus.CREATED)
     suspend fun newWarehouse(@RequestBody(required = false) @Validated(PartialCreateOrUpdateWarehouse::class) warehouseDTO: WarehouseDTO): WarehouseDTO {
         return warehouseService.newWarehouse(warehouseDTO)
     }
 
-    //PARTIALLY UPDATE A WAREHOUSE GIVEN ITS ID
+    /**
+     * API endpoint to partial update a warehouse
+     * @param warehouseDTO
+     * @param warehouseDTO
+     * @return the warehouse object
+     */
     @PatchMapping("/{warehouseID}")
     @ResponseStatus(HttpStatus.CREATED)
     suspend fun patchWarehouse(@PathVariable warehouseID: ObjectId,
@@ -51,7 +71,12 @@ class WarehouseController(
         return warehouseService.patchWarehouse(warehouseID,warehouseDTO)
     }
 
-    //UPDATE A WAREHOUSE GIVEN ITS ID, OR ADD A NEW ONE IF THE ID DOES NOT EXIST
+    /**
+     * API endpoint to update a warehouse or insert it
+     * @param warehouseID
+     * @param warehouseDTO
+     * @return the warehouse object
+     */
     @PutMapping("/{warehouseID}")
     @ResponseStatus(HttpStatus.CREATED)
     suspend fun updateWarehouse(@PathVariable warehouseID: ObjectId,

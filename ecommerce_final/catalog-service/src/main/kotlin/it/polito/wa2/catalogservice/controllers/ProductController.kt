@@ -21,8 +21,14 @@ import org.springframework.web.bind.annotation.*
 class ProductController(
     private val productService: ProductService
 ) {
-    //RETRIEVE ALL THE PRODUCTS, OR ALL THE PRODUCTS OF A GIVEN CATEGORY
-    //NO NEED OF AUTHENTICATION -> NO TOKEN
+    /**
+     * API endpoint to retrieve a list of products by their category (if present)
+     * no need of authentication
+     * @param category which is the category to search
+     * @param page the page number of the pagination
+     * @param size the size of the pagination
+     * @return the flow of the products
+     */
     @GetMapping("", produces = [MediaType.APPLICATION_NDJSON_VALUE])
     @ResponseStatus(HttpStatus.OK)
     suspend fun getProducts(@RequestParam category: String?,
@@ -31,36 +37,57 @@ class ProductController(
         return productService.getProducts(category,page,size)
     }
 
-    //RETRIEVE INFO ABOUT A PRODUCT GIVEN ITS ID
-    //NO NEED OF AUTHENTICATION -> NO TOKEN
+    /**
+     * API endpoint to retrieve a product by its ID
+     * no need of authentication
+     * @param productID the ID of the product
+     * @return the product object
+     */
     @GetMapping("/{productID}")
     @ResponseStatus(HttpStatus.OK)
     suspend fun getProduct(@PathVariable productID: ObjectId): ProductDTO {
         return productService.getProduct(productID)
     }
 
-    //RETRIEVE THE PICTURE URL OF A PRODUCT GIVEN ITS ID
-    //NO NEED OF AUTHENTICATION -> NO TOKEN
+    /**
+     * API endpoint to get the product's picture
+     * no need of authentication
+     * @param productID the ID of the product
+     * @return the string of the picture
+     */
     @GetMapping("/{productID}/picture")
     @ResponseStatus(HttpStatus.OK)
     suspend fun getProductPicture(@PathVariable productID: ObjectId): PictureDTO {
        return productService.getProductPicture(productID)
     }
 
+    /**
+     * API endpoint to get all the warehouses which contain the productID
+     * @param productID the ID of the product
+     * @return flow of WarehouseDTO
+     */
     @GetMapping("/{productID}/warehouses")
     @ResponseStatus(HttpStatus.OK)
     suspend fun getProductWarehouses(@PathVariable productID: ObjectId): Flow<WarehouseDTO> {
        return productService.getProductWarehouses(productID)
     }
 
-    //DELETE A PRODUCT GIVEN ITS ID
+    /**
+     * API endpoint to delete a product
+     * @param productID the ID of the product
+     * @return nothing
+     */
     @DeleteMapping("/{productID}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     suspend fun deleteProduct(@PathVariable productID: ObjectId) {
         return productService.deleteProduct(productID)
     }
 
-    //UPDATE THE PICTURE OF A PRODUCT GIVEN ITS ID AND THE NEW PICTURE
+    /**
+     * API endpoint to modify the product's picture
+     * @param productID the ID of the product, the body is the picture (a string)
+     * @return the product object
+     */
     @PostMapping("/{productID}/picture")
     @ResponseStatus(HttpStatus.CREATED)
     suspend fun updatePicture(@PathVariable productID: ObjectId,
@@ -68,14 +95,23 @@ class ProductController(
         return productService.updatePicture(productID,pictureDTO)
     }
 
-    //ADD A PRODUCT
+    /**
+     * API endpoint to insert a product
+     * @param productDTO
+     * @return the product object
+     */
     @PostMapping("")
     @ResponseStatus(HttpStatus.CREATED)
     suspend fun addProduct(@RequestBody @Validated(CreateProduct::class) productDTO: ProductDTO): ProductDTO {
         return productService.addProduct(productDTO)
     }
 
-    //PARTIALLY UPDATE A PRODUCT GIVEN ITS ID
+    /**
+     * API endpoint to partial modify a product
+     * @param productID the ID of the product
+     * @param productDTO the DTO with the elements to modify
+     * @return ProductDTO
+     */
     @PatchMapping("/{productID}")
     @ResponseStatus(HttpStatus.CREATED)
     suspend fun patchProduct(@PathVariable productID: ObjectId,
@@ -83,7 +119,12 @@ class ProductController(
         return productService.patchProduct(productID,productDTO)
     }
 
-    //UPDATE A PRODUCT GIVEN ITS ID, OR ADD A NEW ONE IF THE ID DOES NOT EXIST
+    /**
+     * API endpoint to modify or insert a product
+     * @param productID the ID of the product, @param productDTO which is the product to insert or it owns the product's information to change
+     * @return the product object
+     * Being a PUT we need the entire ProductDTO
+     */
     @PutMapping("/{productID}")
     @ResponseStatus(HttpStatus.CREATED)
     suspend fun updateProduct(@PathVariable productID: ObjectId,
