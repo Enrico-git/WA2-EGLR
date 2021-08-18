@@ -3,7 +3,7 @@ package it.polito.wa2.walletservice.dto
 import java.math.BigDecimal
 import java.sql.Timestamp
 
-data class KafkaPaymentRequestDTO (
+data class KafkaPaymentOrRefundRequestDTO (
     val orderID: String = "",
     val amount: BigDecimal = BigDecimal(0),
     val token: String = "",

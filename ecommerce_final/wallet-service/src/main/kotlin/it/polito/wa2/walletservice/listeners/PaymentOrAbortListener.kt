@@ -1,6 +1,6 @@
 package it.polito.wa2.walletservice.listeners
 
-import it.polito.wa2.walletservice.dto.KafkaPaymentRequestDTO
+import it.polito.wa2.walletservice.dto.KafkaPaymentOrRefundRequestDTO
 import it.polito.wa2.walletservice.services.WalletService
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -10,8 +10,6 @@ import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.springframework.data.mongodb.UncategorizedMongoDbException
 import org.springframework.kafka.annotation.KafkaListener
-import org.springframework.kafka.support.KafkaHeaders
-import org.springframework.messaging.handler.annotation.Header
 import org.springframework.stereotype.Component
 
 /**
@@ -30,24 +28,48 @@ class PaymentOrAbortListener(
     private val kafkaPaymentRequestFailedProducer: KafkaProducer<String, String>
 ) {
     @KafkaListener(
-        topics=["payment_request", "abort_payment_request"],
-        containerFactory = "paymentRequestContainerFactory"
+        topics=["payment_request"],
+        containerFactory = "paymentOrRefundRequestContainerFactory"
     )
-    fun requestConsumer(paymentOrAbortRequestDTO: KafkaPaymentRequestDTO, @Header(KafkaHeaders.RECEIVED_TOPIC) topic: String){
+    fun paymentRequestConsumer(paymentRequestDTO: KafkaPaymentOrRefundRequestDTO){
         CoroutineScope(Dispatchers.IO).launch {
             var counter = 5
             var result : Boolean? = false
             while (counter-- > 0)
                 try {
-                    result = walletService.createPaymentOrRefundTransaction(topic, paymentOrAbortRequestDTO)
+                    result = walletService.createPaymentTransaction(paymentRequestDTO)
                     break
                 } catch (e: UncategorizedMongoDbException){
                     delay(1000)
                 }
             if (result==false) {
-                println("${topic}_failed")
+                println("payment_req_failed")
                 kafkaPaymentRequestFailedProducer.send(
-                    ProducerRecord("${topic}_failed", paymentOrAbortRequestDTO.orderID)
+                    ProducerRecord("payment_request_failed", paymentRequestDTO.orderID)
+                )
+            } // if the result == true, debezium will send "payment_request_ok"
+        }
+    }
+
+    @KafkaListener(
+        topics=["abort_payment_request"],
+        containerFactory = "paymentOrRefundRequestContainerFactory"
+    )
+    fun requestConsumer(abortRequestDTO: KafkaPaymentOrRefundRequestDTO){
+        CoroutineScope(Dispatchers.IO).launch {
+            var counter = 5
+            var result : Boolean? = false
+            while (counter-- > 0)
+                try {
+                    result = walletService.createRefundTransaction(abortRequestDTO)
+                    break
+                } catch (e: UncategorizedMongoDbException){
+                    delay(1000)
+                }
+            if (result==false) {
+                println("abort_payment_request_failed")
+                kafkaPaymentRequestFailedProducer.send(
+                    ProducerRecord("abort_payment_request_failed", abortRequestDTO.orderID)
                 )
             } // if the result == true, debezium will send "payment_request_ok"
         }

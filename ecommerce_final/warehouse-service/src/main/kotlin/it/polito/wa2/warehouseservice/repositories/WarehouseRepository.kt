@@ -16,5 +16,5 @@ interface WarehouseRepository: CoroutineCrudRepository<Warehouse, ObjectId> {
     fun findWarehousesByProduct(productID: ObjectId): Flow<Warehouse>
 
     @Query(value = "{'products.productId': {\$in: ?0}}")
-    fun findWarehousesByProductsIDIn(products: Flow<ObjectId>): Flow<Warehouse>
+    fun findWarehousesByProductsIDIn(products: Set<ObjectId>): Flow<Warehouse>
 }

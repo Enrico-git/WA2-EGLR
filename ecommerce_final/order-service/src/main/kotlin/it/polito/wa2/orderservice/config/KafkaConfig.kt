@@ -1,9 +1,8 @@
 package it.polito.wa2.orderservice.config
 
 import it.polito.wa2.orderservice.dto.AbortProductReservationRequestDTO
-import it.polito.wa2.orderservice.dto.PaymentRequestDTO
+import it.polito.wa2.orderservice.dto.PaymentOrRefundRequestDTO
 import it.polito.wa2.orderservice.dto.ProductsReservationRequestDTO
-import it.polito.wa2.orderservice.dto.ProductsReservationResponseDTO
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerConfig
@@ -15,7 +14,6 @@ import org.springframework.kafka.annotation.EnableKafka
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory
 import org.springframework.kafka.core.ConsumerFactory
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory
-import org.springframework.kafka.support.serializer.JsonDeserializer
 import org.springframework.kafka.support.serializer.JsonSerializer
 import java.util.*
 
@@ -48,7 +46,7 @@ class KafkaConfig {
      * @return the kafka producer with String as key and PaymentRequest class as value
      */
     @Bean
-    fun getPaymentRequestProducer(): KafkaProducer<String, PaymentRequestDTO> {
+    fun getPaymentRequestProducer(): KafkaProducer<String, PaymentOrRefundRequestDTO> {
         val props = Properties()
         props[ProducerConfig.BOOTSTRAP_SERVERS_CONFIG] = bootstrapAddress!!
         props[ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG] =
@@ -63,7 +61,7 @@ class KafkaConfig {
 //        props[JsonSerializer.TYPE_MAPPINGS] = "payment_done:it.polito.wa2.orderservice.domain.PaymentRequest"
 //        props[ProducerConfig.ISOLATION_LEVEL_CONFIG] = "read_committed"
 //        props[ProducerConfig.ENABLE_AUTO_COMMIT_CONFIG] = false
-        return KafkaProducer<String, PaymentRequestDTO>(props)
+        return KafkaProducer<String, PaymentOrRefundRequestDTO>(props)
     }
 
     /**

@@ -14,12 +14,12 @@ interface OrderService {
     @PreAuthorize("hasAuthority(\"ADMIN\") or hasAuthority(\"CUSTOMER\")")
     suspend fun getOrder(orderID: ObjectId): OrderDTO
 
-    @PreAuthorize("hasAuthority(\"ADMIN\") or hasAuthority(\"CUSTOMER\")")
+    @PreAuthorize("hasAuthority(\"CUSTOMER\")")
     suspend fun newOrder(orderDTO: OrderDTO): OrderDTO
 
     @PreAuthorize("hasAuthority(\"ADMIN\") or hasAuthority(\"CUSTOMER\")")
     suspend fun deleteOrder(orderID: ObjectId, orderDTO: OrderDTO)
 
-//    @PreAuthorize("hasAuthority(\"ADMIN\")")
+    @PreAuthorize("hasAuthority(\"ADMIN\")")
     suspend fun updateOrder(orderID: ObjectId, orderDTO: OrderDTO): OrderDTO
 }

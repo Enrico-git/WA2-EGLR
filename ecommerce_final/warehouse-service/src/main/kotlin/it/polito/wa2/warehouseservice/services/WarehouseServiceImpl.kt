@@ -84,7 +84,7 @@ class WarehouseServiceImpl(
         val deliveries = deliveryRepository.findAllByOrderID(productsReservationRequestDTO.orderID).toSet()
         if (deliveries.isNotEmpty())
             return null
-        val productIDS = productsReservationRequestDTO.products.map { ObjectId(it.id) }.asFlow()
+        val productIDS = productsReservationRequestDTO.products.map { ObjectId(it.id) }.toSet()
         val warehouses = warehouseRepository.findWarehousesByProductsIDIn(productIDS).toSet()
 
         if (warehouses.isEmpty())

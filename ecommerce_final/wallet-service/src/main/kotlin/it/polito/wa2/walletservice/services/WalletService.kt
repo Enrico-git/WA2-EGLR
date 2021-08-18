@@ -1,7 +1,7 @@
 package it.polito.wa2.walletservice.services
 
 import it.polito.wa2.walletservice.annotations.PreAuthorizeCustomerOrAdmin
-import it.polito.wa2.walletservice.dto.KafkaPaymentRequestDTO
+import it.polito.wa2.walletservice.dto.KafkaPaymentOrRefundRequestDTO
 import it.polito.wa2.walletservice.dto.TransactionDTO
 import it.polito.wa2.walletservice.dto.WalletDTO
 import kotlinx.coroutines.flow.Flow
@@ -24,6 +24,8 @@ interface WalletService {
     @PreAuthorizeCustomerOrAdmin
     suspend fun getTransaction(walletID: String, transactionID: String): TransactionDTO
 
-    suspend fun createPaymentOrRefundTransaction (topic: String, paymentRequestDTO: KafkaPaymentRequestDTO): Boolean? //Kafka
+    suspend fun createPaymentTransaction(paymentRequestDTO: KafkaPaymentOrRefundRequestDTO): Boolean? //Kafka
+
+    suspend fun createRefundTransaction(abortPaymentRequestDTO: KafkaPaymentOrRefundRequestDTO): Boolean?
 
 }

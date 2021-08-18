@@ -62,8 +62,10 @@ class OrderServiceImpl(
         val token = auth.credentials as String
         if ( ! user.roles!!.contains("ADMIN") && user.id != order.buyer )
             throw UnauthorizedException("Forbidden")
+        println("qui")
         if (order.status != OrderStatus.ISSUED)
             throw InvalidOperationException("You cannot cancel the order anymore")
+        println("qua")
         CoroutineScope(Dispatchers.Default).launch {
             orchestrator.createSaga(SagaDTO(
                 id = order.id.toString(),

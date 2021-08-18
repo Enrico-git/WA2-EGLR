@@ -39,7 +39,7 @@ class OrchestratorActionsImpl(
     @Qualifier("new_order_sm") private val stateMachineBuilder: StateMachineBuilder,
     @Qualifier("delete_order_sm") private val deleteOrderStateMachineBuilder: StateMachineBuilder,
     private val redisStateMachineRepository: RedisStateMachineRepository,
-    private val kafkaPaymentReqProducer: KafkaProducer<String, PaymentRequestDTO>,
+    private val kafkaPaymentOrRefundReqProducer: KafkaProducer<String, PaymentOrRefundRequestDTO>,
     private val kafkaProdResReqProducer: KafkaProducer<String, ProductsReservationRequestDTO>,
     private val kafkaAbortProdResReqProducer: KafkaProducer<String, AbortProductReservationRequestDTO>,
     private val applicationEventPublisher: ApplicationEventPublisher,
@@ -102,18 +102,8 @@ class OrchestratorActionsImpl(
         val sagas = getListOfStateMachine()
         val sagaEvent = StateMachineEvents.valueOf(topic.uppercase())
         val saga = sagas[event]
-        println(saga)
         saga?.nextStateAndFireEvent(sagaEvent)
     }
-
-//    TODO delete this we dont need it
-//    override fun onKafkaReceivedProductsReservationOKEvent(event: ProductsReservationResponseDTO): Job = CoroutineScope(Dispatchers.Default).launch {
-//        val sagas = getListOfStateMachine()
-//        val sagaEvent = StateMachineEvents.RESERVE_PRODUCTS_OK
-//        val saga = sagas[event.orderID]
-//        println(saga)
-//        saga?.nextStateAndFireEvent(sagaEvent)
-//    }
 
     override fun onKafkaResponseReceivedEventInResponseTo(event: KafkaResponseReceivedEventInResponseTo) = CoroutineScope(
         Dispatchers.Default).launch {
@@ -169,10 +159,10 @@ class OrchestratorActionsImpl(
             repeat(numberOfRetries) {
                 if (isActive)
                     try {
-                        kafkaPaymentReqProducer.send(
+                        kafkaPaymentOrRefundReqProducer.send(
                             ProducerRecord(
                                 "payment_request",
-                                PaymentRequestDTO(sm.id, sm.amount, sm.auth, Timestamp(System.currentTimeMillis()))
+                                PaymentOrRefundRequestDTO(sm.id, sm.amount, sm.auth, Timestamp(System.currentTimeMillis()))
                             )
                         )
                         delay(delay)
@@ -204,7 +194,7 @@ class OrchestratorActionsImpl(
                 repeat(numberOfRetries) {
                     if (isActive)
                         try {
-                            kafkaPaymentReqProducer.send(ProducerRecord("abort_payment_request", PaymentRequestDTO(
+                            kafkaPaymentOrRefundReqProducer.send(ProducerRecord("abort_payment_request", PaymentOrRefundRequestDTO(
                                 sm.id,
                                 sm.amount,
                                 sm.auth,

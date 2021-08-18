@@ -17,4 +17,6 @@ interface TransactionRepository : CoroutineCrudRepository<Transaction, ObjectId>
     fun findAllByWalletID(walletID: ObjectId, pageable: Pageable): Flow<Transaction>
 
     suspend fun findByReasonAndDescription(reason: ObjectId, description: TransactionDescription): Transaction?
+
+    suspend fun findAllByReason(reason: ObjectId): Flow<Transaction>
 }

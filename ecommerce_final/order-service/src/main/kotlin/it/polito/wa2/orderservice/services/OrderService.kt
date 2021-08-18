@@ -22,7 +22,7 @@ interface OrderService {
     @PreAuthorize("hasAuthority(\"ADMIN\") or hasAuthority(\"CUSTOMER\")")
     suspend fun deleteOrder(orderID: ObjectId, orderDTO: OrderDTO)
 
-    @PreAuthorize("hasAuthority(\"ADMIN\") or hasAuthority(\"CUSTOMER\")")
+    @PreAuthorize("hasAuthority(\"CUSTOMER\")")
     suspend fun createOrder(orderDTO: OrderDTO): OrderDTO
 
     suspend fun updateOrderOnSagaEnding(sm: StateMachineImpl, status: OrderStatus, mailType: EmailType)

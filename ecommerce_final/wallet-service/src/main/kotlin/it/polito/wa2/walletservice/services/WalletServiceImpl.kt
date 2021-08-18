@@ -12,6 +12,7 @@ import it.polito.wa2.walletservice.repositories.WalletRepository
 import it.polito.wa2.walletservice.security.JwtUtils
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.toSet
 import kotlinx.coroutines.reactive.awaitSingle
 import org.bson.types.ObjectId
 import org.springframework.beans.factory.annotation.Value
@@ -106,16 +107,13 @@ class WalletServiceImpl(
         return user
     }
 
-    override suspend fun createPaymentOrRefundTransaction(topic: String, paymentRequestDTO: KafkaPaymentRequestDTO): Boolean? {
+    override suspend fun createPaymentTransaction(paymentRequestDTO: KafkaPaymentOrRefundRequestDTO): Boolean? {
         if (Timestamp(paymentRequestDTO.timestamp.time + retryDelay) < Timestamp(System.currentTimeMillis()))
             return false
 
         val user = getAuthorizedUser(paymentRequestDTO.token) ?: return false
 
-        val transactionDescription = if (topic == "payment_request")
-            TransactionDescription.PAYMENT
-        else
-            TransactionDescription.REFUND
+        val transactionDescription = TransactionDescription.PAYMENT
 
         if (transactionRepository.findByReasonAndDescription(ObjectId(paymentRequestDTO.orderID), transactionDescription) != null)
                 return null
@@ -123,27 +121,59 @@ class WalletServiceImpl(
 
         val wallet = walletRepository.findByUserID(user.id) ?: return false
 
-            if (topic == "payment_request" && wallet.balance >= paymentRequestDTO.amount) {
-                wallet.balance -= paymentRequestDTO.amount
-            }
-            else if (topic == "abort_payment_request"){
-                wallet.balance += paymentRequestDTO.amount
-            }
-            else
-                return false
+        if (wallet.balance >= paymentRequestDTO.amount)
+            wallet.balance -= paymentRequestDTO.amount
+        else
+            return false
 
-            walletRepository.save(wallet)
+        walletRepository.save(wallet)
 
-            transactionRepository.save(
-                Transaction(
-                    id = null,
-                    timestamp = Timestamp(System.currentTimeMillis()),
-                    walletID = wallet.id!!,
-                    amount = paymentRequestDTO.amount,
-                    description = transactionDescription,
-                    reason = ObjectId(paymentRequestDTO.orderID)
-                )
+        transactionRepository.save(
+            Transaction(
+                id = null,
+                timestamp = Timestamp(System.currentTimeMillis()),
+                walletID = wallet.id!!,
+                amount = paymentRequestDTO.amount,
+                description = transactionDescription,
+                reason = ObjectId(paymentRequestDTO.orderID)
             )
+        )
+
+        return true
+    }
+
+    override suspend fun createRefundTransaction(abortPaymentRequestDTO: KafkaPaymentOrRefundRequestDTO): Boolean? {
+        if (Timestamp(abortPaymentRequestDTO.timestamp.time + retryDelay) < Timestamp(System.currentTimeMillis()))
+            return false
+
+        val user = getAuthorizedUser(abortPaymentRequestDTO.token) ?: return false
+
+        val transactions = transactionRepository.findAllByReason(ObjectId(abortPaymentRequestDTO.orderID)).toSet()
+        if (transactions.any{it.description == TransactionDescription.REFUND})
+            return null
+
+        val transaction = transactions.find{it.description == TransactionDescription.PAYMENT} ?: return false
+
+        val wallet = walletRepository.findById(transaction.walletID) ?: return false
+
+        if ( ! user.roles!!.contains("ADMIN") && wallet.userID != user.id)
+            return false
+
+        wallet.balance += transaction.amount
+
+        walletRepository.save(wallet)
+
+
+        transactionRepository.save(
+            Transaction(
+                id = null,
+                timestamp = Timestamp(System.currentTimeMillis()),
+                walletID = wallet.id!!,
+                amount = abortPaymentRequestDTO.amount,
+                description = TransactionDescription.REFUND,
+                reason = ObjectId(abortPaymentRequestDTO.orderID)
+            )
+        )
 
         return true
     }

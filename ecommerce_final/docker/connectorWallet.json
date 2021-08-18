@@ -13,7 +13,7 @@
     "transforms": "route,unwrap,key",
     "transforms.unwrap.type": "io.debezium.connector.mongodb.transforms.ExtractNewDocumentState",
     "transforms.key.type": "org.apache.kafka.connect.transforms.ExtractField$Value",
-    "transforms.key.field": "orderID",
+    "transforms.key.field": "reason",
     "transforms.route.type": "io.debezium.transforms.ContentBasedRouter",
     "transforms.route.language": "jsr223.groovy",
     "transforms.route.topic.expression": "def description = (new groovy.json.JsonSlurper()).parseText(value.after).description; if (description == 'PAYMENT') return 'payment_request_ok'; else if (description == 'REFUND') return 'abort_payment_request_ok'; else return null"
