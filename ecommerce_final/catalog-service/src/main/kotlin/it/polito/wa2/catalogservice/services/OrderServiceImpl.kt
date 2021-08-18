@@ -34,11 +34,18 @@ class OrderServiceImpl(
         .defaultUriVariables(Collections.singletonMap("url", serviceURL))
         .build()
 
-    override suspend fun getOrders(): Flow<OrderDTO> {
+    override suspend fun getOrders(page: Int?, size: Int?): Flow<OrderDTO> {
         val token = ReactiveSecurityContextHolder.getContext().awaitSingle().authentication.credentials as String
+        val pageOpt = if ( page != null) Optional.of(page) else Optional.empty()
+        val sizeOpt = if ( size != null) Optional.of(size) else Optional.empty()
         return client
             .get()
-            .uri("$serviceURL/orders")
+            .uri{
+                it.host("order-service").path("/orders")
+                    .queryParamIfPresent("page", pageOpt)
+                    .queryParamIfPresent("size", sizeOpt)
+                    .build()
+            }
             .accept(MediaType.APPLICATION_NDJSON)
             .header(HttpHeaders.AUTHORIZATION, "Bearer $token")
             .retrieve()

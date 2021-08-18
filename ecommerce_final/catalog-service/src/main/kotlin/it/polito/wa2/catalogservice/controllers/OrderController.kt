@@ -19,13 +19,14 @@ class OrderController(
 ) {
     /**
      * API endpoint to retrieve all the orders of the users
-     * @param pageable the pagination details
+     * @param page the page number of the pagination
+     * @param size the size of the pagination
      * @return the stream of orders object
      */
     @GetMapping("", produces = [MediaType.APPLICATION_NDJSON_VALUE])
     @ResponseStatus(HttpStatus.OK)
-    suspend fun getOrders(): Flow<OrderDTO> {
-        return orderService.getOrders()
+    suspend fun getOrders(@RequestParam page: Int?, @RequestParam size: Int?): Flow<OrderDTO> {
+        return orderService.getOrders(page,size)
     }
 
     /**

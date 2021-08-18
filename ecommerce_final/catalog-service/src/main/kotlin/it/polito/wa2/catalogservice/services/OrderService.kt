@@ -9,7 +9,7 @@ import reactor.core.publisher.Mono
 
 interface OrderService {
     @PreAuthorize("hasAuthority(\"ADMIN\") or hasAuthority(\"CUSTOMER\")")
-    suspend fun getOrders(): Flow<OrderDTO>
+    suspend fun getOrders(page: Int?, size: Int?): Flow<OrderDTO>
 
     @PreAuthorize("hasAuthority(\"ADMIN\") or hasAuthority(\"CUSTOMER\")")
     suspend fun getOrder(orderID: ObjectId): OrderDTO
