@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.reactive.awaitSingle
 import org.bson.types.ObjectId
 import org.springframework.beans.factory.annotation.Qualifier
+import org.springframework.dao.DuplicateKeyException
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
@@ -102,6 +103,7 @@ class WalletServiceImpl(
             .retrieve()
             .onStatus(Predicate { it == HttpStatus.UNAUTHORIZED }) { throw UnauthorizedException("Nice try") }
             .onStatus(Predicate { it == HttpStatus.INTERNAL_SERVER_ERROR }) { throw UnavailableServiceException("Something went wrong") }
+            .onStatus(Predicate { it == HttpStatus.BAD_REQUEST }) { throw DuplicateKeyException("dup key: {userID: ${walletDTO.userID}};") }
             .awaitBody()
     }
 

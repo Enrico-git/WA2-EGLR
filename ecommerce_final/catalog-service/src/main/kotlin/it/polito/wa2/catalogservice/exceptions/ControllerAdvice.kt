@@ -1,5 +1,6 @@
 package it.polito.wa2.catalogservice.exceptions
 
+import org.springframework.dao.DuplicateKeyException
 import org.springframework.dao.OptimisticLockingFailureException
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -25,6 +26,7 @@ class ControllerAdvice {
         WebExchangeBindException::class,
         WebClientResponseException::class,
         WebClientRequestException::class,
+        DuplicateKeyException::class
     ])
     fun genericExceptionHandler(e: Exception): ResponseEntity<ErrorDTO> {
         val errorDTO = ErrorDTO(
@@ -80,6 +82,10 @@ class ControllerAdvice {
             }
             is WebExchangeBindException -> {
                 errorDTO.error = e.fieldErrors.map { it.defaultMessage.toString() }.reduce{acc, elem -> "$acc, $elem" }
+            }
+            is DuplicateKeyException -> {
+                println(e)
+                errorDTO.error = "Duplicate key: ${e.message!!.substringAfter("dup key:").substringBefore(";")}"
             }
         }
 

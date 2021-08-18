@@ -5,6 +5,7 @@ import it.polito.wa2.walletservice.exceptions.NotFoundException
 import it.polito.wa2.walletservice.exceptions.UnauthorizedException
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.dao.DuplicateKeyException
 import org.springframework.dao.OptimisticLockingFailureException
 import org.springframework.data.mongodb.UncategorizedMongoDbException
 import org.springframework.http.HttpStatus
@@ -67,6 +68,7 @@ class RouterConfiguration(
         onError<OptimisticLockingFailureException> { _, _ ->  status(HttpStatus.INTERNAL_SERVER_ERROR).bodyValueAndAwait("Database concurrency error")}
         onError<InvalidOperationException> { e, _ ->  status(HttpStatus.CONFLICT).bodyValueAndAwait(e.localizedMessage)}
         onError<UnauthorizedException> { e, _ ->  status(HttpStatus.UNAUTHORIZED).bodyValueAndAwait(e.localizedMessage)}
+        onError<DuplicateKeyException> {e, _ ->  status(HttpStatus.BAD_REQUEST).bodyValueAndAwait("Duplicate key: ${e.message!!.substringAfter("dup key:").substringBefore(";")}")}
         onError<Exception> {e, _ ->  status(HttpStatus.INTERNAL_SERVER_ERROR).bodyValueAndAwait(e.localizedMessage)}
     }
 }
