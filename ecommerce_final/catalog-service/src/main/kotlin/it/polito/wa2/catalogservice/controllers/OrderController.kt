@@ -17,35 +17,55 @@ import org.springframework.web.bind.annotation.*
 class OrderController(
     private val orderService: OrderService
 ) {
-
+    /**
+     * API endpoint to retrieve all the orders of the users
+     * @param pageable the pagination details
+     * @return the stream of orders object
+     */
     @GetMapping("", produces = [MediaType.APPLICATION_NDJSON_VALUE])
     @ResponseStatus(HttpStatus.OK)
     suspend fun getOrders(): Flow<OrderDTO> {
         return orderService.getOrders()
     }
 
-    //RETRIEVE AN ORDER GIVEN ITS ID
+    /**
+     * API endpoint to retrieve the order by its ID
+     * @param orderID the ID of the order
+     * @return the order object
+     */
     @GetMapping("/{orderID}")
     @ResponseStatus(HttpStatus.OK)
     suspend fun getOrder(@PathVariable orderID: ObjectId): OrderDTO {
         return orderService.getOrder(orderID)
     }
 
-    //CREATE A NEW ORDER
+    /**
+     * API endpoint to create a new order
+     * @param orderDTO the details of the order
+     * @return the created order details
+     */
     @PostMapping("")
     @ResponseStatus(HttpStatus.CREATED)
     suspend fun newOrder(@RequestBody @Validated(CreateOrder::class) orderDTO: OrderDTO): OrderDTO {
         return orderService.newOrder(orderDTO)
     }
 
-    //DELETE AN ORDER GIVEN ITS ID (IF POSSIBLE)
+    /**
+     * API endpoint to delete the order by its ID
+     * @param orderID the id of the order
+     */
     @DeleteMapping("/{orderID}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     suspend fun deleteOrder(@PathVariable orderID: ObjectId, @RequestBody @Validated(DeleteOrder::class) orderDTO: OrderDTO) {
         return orderService.deleteOrder(orderID, orderDTO)
     }
-//
-    //UPDATE AN ORDER GIVEN ITS ID
+
+    /**
+     * API endpoint to update the order by its ID
+     * @param orderID the id of the order
+     * @param orderDTO JSON object with only the new status field
+     * @return the updated object
+     */
     @PatchMapping("/{orderID}")
     @ResponseStatus(HttpStatus.CREATED)
     suspend fun updateOrder(@PathVariable orderID: ObjectId, @RequestBody @Validated(UpdateOrder::class) orderDTO: OrderDTO): OrderDTO {
