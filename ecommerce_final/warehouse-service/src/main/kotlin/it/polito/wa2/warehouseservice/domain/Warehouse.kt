@@ -6,9 +6,6 @@ import org.bson.types.ObjectId
 import org.springframework.data.annotation.Id
 import org.springframework.data.annotation.Version
 import org.springframework.data.mongodb.core.mapping.Document
-import javax.validation.Valid
-import javax.validation.constraints.Min
-import javax.validation.constraints.NotNull
 
 @Document(collection = "warehouses")
 data class Warehouse (
@@ -19,19 +16,8 @@ data class Warehouse (
         val version: Long? = null
 )
 
-data class ProductInfo(
-        val productId: ObjectId, //ProductId
-        var alarm: Int,
-        var quantity: Int
-)
-
 fun Warehouse.toDTO() = WarehouseDTO(
         id = id.toString(),
         products = products.map{ ProductInfoDTO(it.productId.toString(), it.alarm, it.quantity) }.toSet()
 )
 
-fun ProductInfo.toDTO() = ProductInfoDTO(
-        id = productId.toString(),
-        alarm = alarm,
-        quantity = quantity
-)

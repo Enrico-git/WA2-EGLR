@@ -15,8 +15,3 @@ data class WarehouseDTO (
         @field:Valid
         val products: Set<ProductInfoDTO>?
 )
-
-//fun WarehouseDTO.toEntity() = Warehouse(
-//        id = ObjectId(id),
-//        products = products?.map{it.toEntity()}?.toMutableSet() ?: mutableSetOf()
-//)

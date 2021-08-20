@@ -3,8 +3,6 @@ spring:
     name: catalog-service
   data:
     mongodb:
-      #      change to container name when you spawn the jar
-      #        host: mongo
       host: localhost
       username: catalogservice
       password: catalogservice

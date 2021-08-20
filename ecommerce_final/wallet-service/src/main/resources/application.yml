@@ -3,18 +3,17 @@ server:
 spring:
   application:
     name: wallet-service
-#  security:
-#    user:
-#      name: wallet-service
-#      password: wallet-service
-#  data:
-#    mongodb:
-#      host: localhost
-#      port: 27017
-#      username: walletservice
-#      password: walletservice
-#      authentication-database: admin
-#      database: walletservice
+  security:
+    user:
+      name: wallet-service
+      password: wallet-service
+  data:
+    mongodb:
+      host: localhost
+      username: walletservice
+      password: walletservice
+      authentication-database: admin
+      database: walletservice
   kafka:
     bootstrap-servers: "localhost:29092"
     retryDelay: 25000
@@ -25,8 +24,9 @@ eureka:
     lease-expiration-duration-in-seconds: 5
     lease-renewal-interval-in-seconds: 5
   client:
-    service-url:
-      default-zone: ${EUREKA_URI:http://localhost:8761/eureka}
+    serviceUrl:
+      defaultZone: ${EUREKA_URI:http://localhost:8761/eureka}
+
 application:
   jwt:
     jwtSecret: that_depends_a_good_deal_on_where_you_want_to_get_to_then_it_doesnt_much_matter_which_way_you_go

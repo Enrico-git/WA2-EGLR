@@ -1,6 +1,5 @@
 package it.polito.wa2.orderservice.orchestrator
 
-import it.polito.wa2.orderservice.dto.ProductsReservationResponseDTO
 import it.polito.wa2.orderservice.dto.SagaDTO
 import it.polito.wa2.orderservice.events.KafkaResponseReceivedEventInResponseTo
 import it.polito.wa2.orderservice.events.SagaFailureEvent
@@ -11,6 +10,7 @@ import org.springframework.context.event.ContextRefreshedEvent
 import java.util.concurrent.ConcurrentHashMap
 
 interface OrchestratorActions {
+
     fun getListOfStateMachine(): ConcurrentHashMap<String, StateMachineImpl>
 
     /**
@@ -34,15 +34,6 @@ interface OrchestratorActions {
      * @return a coroutine job
      */
     fun onKafkaReceivedStringEvent(event: String, topic: String): Job
-
-//    TODO delete this we dont need it
-//    /**
-//     * Perform the next step of the state machine when a
-//     * ProductReservationResponseDTO message is received from kafka
-//     * @param event
-//     * @return a coroutine job
-//     */
-//    fun onKafkaReceivedProductsReservationOKEvent(event: ProductsReservationResponseDTO): Job
 
     /**
      * Cancels the running jobs that keep sending messages to the microservices because a response was received

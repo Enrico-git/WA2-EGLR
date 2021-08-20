@@ -30,7 +30,6 @@ import java.util.logging.Logger
 @Transactional
 class OrderServiceImpl(
     private val orderRepository: OrderRepository,
-    private val logger: Logger,
     private val orchestrator: OrchestratorImpl,
     private val mailService: MailService
 ): OrderService {
@@ -62,10 +61,8 @@ class OrderServiceImpl(
         val token = auth.credentials as String
         if ( ! user.roles!!.contains("ADMIN") && user.id != order.buyer )
             throw UnauthorizedException("Forbidden")
-        println("qui")
         if (order.status != OrderStatus.ISSUED)
             throw InvalidOperationException("You cannot cancel the order anymore")
-        println("qua")
         CoroutineScope(Dispatchers.Default).launch {
             orchestrator.createSaga(SagaDTO(
                 id = order.id.toString(),
@@ -104,12 +101,6 @@ class OrderServiceImpl(
                 auth = token
             ))
         }
-
-//        val fw = FileWriter("boh", true);
-//        val bw = BufferedWriter(fw);
-//        bw.write(storedOrder.id.toString());
-//        bw.newLine();
-//        bw.close()
 
         return storedOrder.toDTO()
     }

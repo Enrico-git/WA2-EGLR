@@ -1,21 +1,19 @@
 package it.polito.wa2.walletservice.configuration
 
 
-import com.mongodb.reactivestreams.client.MongoClient
 import com.mongodb.reactivestreams.client.MongoClients
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import org.springframework.context.annotation.Primary
 import org.springframework.core.convert.converter.Converter
 import org.springframework.data.convert.ReadingConverter
 import org.springframework.data.convert.WritingConverter
+import org.springframework.data.mongodb.ReactiveMongoDatabaseFactory
 import org.springframework.data.mongodb.ReactiveMongoTransactionManager
-import org.springframework.data.mongodb.SessionSynchronization
 import org.springframework.data.mongodb.config.AbstractReactiveMongoConfiguration
-import org.springframework.data.mongodb.core.ReactiveMongoTemplate
+import org.springframework.data.mongodb.core.SimpleReactiveMongoDatabaseFactory
 import org.springframework.data.mongodb.core.convert.MongoCustomConversions
 import org.springframework.data.mongodb.repository.config.EnableReactiveMongoRepositories
-import org.springframework.stereotype.Component
 import org.springframework.transaction.ReactiveTransactionManager
 import org.springframework.transaction.annotation.EnableTransactionManagement
 import org.springframework.transaction.reactive.TransactionalOperator
@@ -23,32 +21,16 @@ import java.sql.Timestamp
 import java.util.*
 
 
-/**
- * MongoDB reactive configuration
- */
 @Configuration
-@Component
 @EnableReactiveMongoRepositories(value = ["it.polito.wa2.walletservice.repositories"])
 @EnableTransactionManagement
-class MongoConfiguration : AbstractReactiveMongoConfiguration() {
-    @Bean
-    fun mongoClient(): MongoClient {
-        return MongoClients.create()
-    }
+class MongoConfiguration: AbstractReactiveMongoConfiguration() {
+    @Value("\${spring.data.mongodb.database}") private val database: String = ""
+    @Value("\${spring.data.mongodb.host}") private val host: String = ""
 
-    override fun getDatabaseName() = "walletservice"
 
-    @Bean
-    fun reactiveMongoTemplate(): ReactiveMongoTemplate {
-        val template = ReactiveMongoTemplate(mongoClient(), "walletservice")
-        template.setSessionSynchronization(SessionSynchronization.ALWAYS)
-        return template
-    }
+    override fun getDatabaseName() = database
 
-    /**
-     * These converters are needed from handle the Timestamp
-     * in Transaction entity.
-     */
     override fun customConversions(): MongoCustomConversions {
         return MongoCustomConversions(
             listOf( // writing converter, reader converter
@@ -72,12 +54,17 @@ class MongoConfiguration : AbstractReactiveMongoConfiguration() {
     }
 
     /**
-     * This is used for apply @Transacitonal in ReactiveMongo
+     * This is used to apply @Transactional in ReactiveMongo
      * https://spring.io/blog/2019/05/16/reactive-transactions-with-spring
      */
     @Bean
     fun getTM(): ReactiveTransactionManager {
-        return ReactiveMongoTransactionManager(reactiveMongoTemplate().mongoDatabaseFactory)
+        return ReactiveMongoTransactionManager(reactiveMongoDbFactory())
+    }
+
+    @Bean
+    override fun reactiveMongoDbFactory(): ReactiveMongoDatabaseFactory {
+        return SimpleReactiveMongoDatabaseFactory(MongoClients.create("mongodb://$host"), database)
     }
 
     @Bean

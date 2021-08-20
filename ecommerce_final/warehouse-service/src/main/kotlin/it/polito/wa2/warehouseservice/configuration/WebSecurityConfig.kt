@@ -28,7 +28,6 @@ class WebSecurityConfig(
 ){
     @Bean
     fun springWebFilterChain(http: ServerHttpSecurity): SecurityWebFilterChain {
-        val patterns = arrayOf("/auth/**")
         return http
                 .exceptionHandling()
                 .authenticationEntryPoint { swe: ServerWebExchange, e: AuthenticationException? ->

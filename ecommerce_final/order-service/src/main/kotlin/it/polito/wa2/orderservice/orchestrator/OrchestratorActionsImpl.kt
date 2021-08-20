@@ -48,10 +48,10 @@ class OrchestratorActionsImpl(
     private val logger: Logger,
     private val mailService: MailServiceImpl
 ) : OrchestratorActions{
-    @Value("\${application.kafka.retryDelay}")
+    @Value("\${spring.kafka.retryDelay}")
     val delay: Long = 0
 
-    @Value("\${application.kafka.numberOfRetries}")
+    @Value("\${spring.kafka.numberOfRetries}")
     val numberOfRetries: Int = 0
 
     @Lookup
@@ -63,7 +63,6 @@ class OrchestratorActionsImpl(
     override fun onApplicationStartUp(event: ContextRefreshedEvent) = CoroutineScope(Dispatchers.Default).launch{
         val sagas = getListOfStateMachine()
         redisStateMachineRepository.getAll().onEach {
-            println("RESUMING: $it")
             sagas[it.id] = it.toStateMachine(
                 if (it.initialState == StateMachineStates.ORDER_REQ)
                     stateMachineBuilder
@@ -99,6 +98,7 @@ class OrchestratorActionsImpl(
 
 
     override fun onKafkaReceivedStringEvent(event: String, topic: String) = CoroutineScope(Dispatchers.Default).launch {
+        println("event: $event --- topic: $topic")
         val sagas = getListOfStateMachine()
         val sagaEvent = StateMachineEvents.valueOf(topic.uppercase())
         val saga = sagas[event]

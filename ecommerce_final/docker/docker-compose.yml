@@ -2,9 +2,9 @@ version: '2'
 volumes:
   mongodb_server_data:
 services:
-  eureka:
+  eureka-server:
     image: thepassengerhub/eureka:0.1
-    container_name: eureka
+    container_name: eureka-server
     ports:
       - 8761:8761
   mongo:
@@ -15,6 +15,21 @@ services:
       - 27017:27017 
     volumes:
       - mongodb_server_data:/data/db
+  wallet-service:
+    image: thepassengerhub/wallet-service:0.1
+    container_name: wallet-service
+    ports:
+      - 8100:8100
+    depends_on:
+      - eureka-server
+      - mongo
+      - kafka
+    links:
+      - eureka-server
+      - kafka
+      - mongo
+    env_file:
+      - ./walletservice.env
   zookeeper:
     image: confluentinc/cp-zookeeper:latest
     container_name: zookeeper
@@ -34,6 +49,7 @@ services:
     ports:
       - 29092:29092
     environment:
+      KAFKA_ADVERTISED_HOST_NAME: kafka
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:29092

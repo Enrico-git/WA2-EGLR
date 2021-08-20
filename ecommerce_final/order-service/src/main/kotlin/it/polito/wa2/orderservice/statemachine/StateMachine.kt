@@ -1,7 +1,6 @@
 package it.polito.wa2.orderservice.statemachine
 
 import it.polito.wa2.orderservice.common.StateMachineEvents
-import it.polito.wa2.orderservice.domain.ProductLocation
 import it.polito.wa2.orderservice.domain.RedisStateMachine
 import it.polito.wa2.orderservice.domain.Transition
 import kotlinx.coroutines.Job

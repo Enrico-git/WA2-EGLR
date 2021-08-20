@@ -35,7 +35,6 @@ class ReserveProductOrAbortListener(
                 }
 
             if(result==false){
-                println("${topic}_failed")
                 kafkaReserveProductFailedProducer.send(
                         ProducerRecord("${topic}_failed", productsReservationRequestDTO.orderID.toHexString())
                 )
@@ -58,7 +57,6 @@ class ReserveProductOrAbortListener(
                 }
 
             if(result==false){
-                println("${topic}_failed")
                 kafkaReserveProductFailedProducer.send(
                         ProducerRecord("${topic}_failed}", abortProductReservationRequestDTO.orderID.toHexString())
                 )

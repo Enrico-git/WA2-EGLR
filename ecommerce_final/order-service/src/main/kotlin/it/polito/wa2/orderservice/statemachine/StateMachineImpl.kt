@@ -4,16 +4,12 @@ import it.polito.wa2.orderservice.common.StateMachineEvents
 import it.polito.wa2.orderservice.common.StateMachineStates
 import it.polito.wa2.orderservice.domain.RedisStateMachine
 import it.polito.wa2.orderservice.domain.Transition
-import it.polito.wa2.orderservice.domain.toRedisStateMachine
 import it.polito.wa2.orderservice.dto.ProductDTO
 import it.polito.wa2.orderservice.events.SagaFailureEvent
 import it.polito.wa2.orderservice.events.SagaFinishedEvent
 import it.polito.wa2.orderservice.events.StateMachineEvent
 import it.polito.wa2.orderservice.repositories.RedisStateMachineRepository
 import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.flow.toList
 import org.springframework.context.ApplicationEvent
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.context.annotation.Scope
@@ -34,7 +30,6 @@ class StateMachineImpl(val initialState: StateMachineStates,
                        val shippingAddress: String? = null,
                        val amount: BigDecimal,
                        val products: Set<ProductDTO>? = null,
-//                       var productsWarehouseLocation: Set<ProductLocation>? = null,
                        val auth: String,
                        val applicationEventPublisher: ApplicationEventPublisher,
                        val redisStateMachineRepository: RedisStateMachineRepository,
@@ -62,16 +57,11 @@ class StateMachineImpl(val initialState: StateMachineStates,
 
         val transition = getTransition(event) ?: return
 
-        println("ID: $id, state $state, event $event")
-
         val oldSM = this.toRedisStateMachine()
 
         state = transition.target
 
         failed = if (failed == false && transition.isRollingBack) true else failed
-
-//        if (event == StateMachineEvents.RESERVE_PRODUCTS_OK  || event == StateMachineEvents.ABORT_PRODUCTS_RESERVATION_OK)
-//            productsWarehouseLocation = productsLocation
 
 
         if (state == finalState){
@@ -82,13 +72,8 @@ class StateMachineImpl(val initialState: StateMachineStates,
             completed = true
         }
 
-        //        TODO fix this, basically state machine changes state so fast
-//        that we cant remove the old state in redis so we need to wait for it
         backup(oldSM, this.toRedisStateMachine()).join()
 
-
-//        if (transition.isPassive)
-//         delay(500)
         fireEvent(StateMachineEvent(this, event ))
 
         transition.action?.invoke()
@@ -121,3 +106,16 @@ class StateMachineImpl(val initialState: StateMachineStates,
         return "[ID: $id, STATE: $state FAILED: $failed, COMPLETED: $completed"
     }
 }
+
+fun StateMachineImpl.toRedisStateMachine() = RedisStateMachine(
+    initialState,
+    state,
+    id,
+    failed,
+    completed,
+    customerEmail,
+    shippingAddress,
+    amount,
+    products,
+    auth
+)

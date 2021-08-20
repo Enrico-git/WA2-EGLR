@@ -1,6 +1,5 @@
 package it.polito.wa2.orderservice.orchestrator
 
-import it.polito.wa2.orderservice.dto.ProductsReservationResponseDTO
 import it.polito.wa2.orderservice.dto.SagaDTO
 import it.polito.wa2.orderservice.events.KafkaResponseReceivedEventInResponseTo
 import it.polito.wa2.orderservice.events.SagaFailureEvent

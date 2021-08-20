@@ -1,6 +1,6 @@
 package it.polito.wa2.orderservice.schedulingTasks
 
-import it.polito.wa2.orderservice.domain.toRedisStateMachine
+import it.polito.wa2.orderservice.statemachine.toRedisStateMachine
 import it.polito.wa2.orderservice.repositories.RedisStateMachineRepository
 import it.polito.wa2.orderservice.statemachine.StateMachineImpl
 import kotlinx.coroutines.*

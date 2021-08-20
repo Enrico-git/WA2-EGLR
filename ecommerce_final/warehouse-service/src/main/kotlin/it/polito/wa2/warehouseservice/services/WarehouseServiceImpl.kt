@@ -1,5 +1,6 @@
 package it.polito.wa2.warehouseservice.services
 
+import it.polito.wa2.warehouseservice.common.DeliveryDescription
 import it.polito.wa2.warehouseservice.comparators.WarehouseComparator
 import it.polito.wa2.warehouseservice.domain.*
 import it.polito.wa2.warehouseservice.dto.*

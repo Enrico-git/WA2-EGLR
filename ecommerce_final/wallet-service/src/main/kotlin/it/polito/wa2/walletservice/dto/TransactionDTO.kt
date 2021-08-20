@@ -12,7 +12,7 @@ class TransactionDTO(
     var walletID: String?,
     val amount: BigDecimal,
     var description: String?,
-    val reason: String?,
+    var reason: String?,
 ){
     override fun toString(): String {
         return "id: $id, timestamp: $timestamp, walletID: $walletID, " +
@@ -26,5 +26,5 @@ fun TransactionDTO.toEntity() = Transaction(
     walletID = ObjectId(walletID),
     amount = amount,
     description = TransactionDescription.valueOf(description!!),
-    reason = if (reason!= null) ObjectId(reason) else null
+    reason = reason!!
 )

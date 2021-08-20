@@ -2,7 +2,6 @@ package it.polito.wa2.orderservice.statemachine
 
 import it.polito.wa2.orderservice.common.StateMachineEvents
 import it.polito.wa2.orderservice.common.StateMachineStates
-import it.polito.wa2.orderservice.domain.ProductLocation
 import it.polito.wa2.orderservice.dto.ProductDTO
 import java.math.BigDecimal
 

@@ -2,7 +2,6 @@ package it.polito.wa2.orderservice.domain
 
 import it.polito.wa2.orderservice.common.StateMachineStates
 import it.polito.wa2.orderservice.dto.ProductDTO
-import it.polito.wa2.orderservice.statemachine.StateMachineImpl
 import it.polito.wa2.orderservice.statemachine.StateMachineBuilder
 import org.springframework.data.redis.core.RedisHash
 import java.math.BigDecimal
@@ -34,15 +33,3 @@ fun RedisStateMachine.toStateMachine(stateMachineBuilder: StateMachineBuilder) =
         .build()
 
 
-fun StateMachineImpl.toRedisStateMachine() = RedisStateMachine(
-    initialState,
-    state,
-    id,
-    failed,
-    completed,
-    customerEmail,
-    shippingAddress,
-    amount,
-    products,
-    auth
-)

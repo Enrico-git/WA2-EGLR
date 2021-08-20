@@ -67,7 +67,7 @@ class WalletServiceImpl(
         transactionDTO.walletID = walletID
         transactionDTO.timestamp = Timestamp(System.currentTimeMillis())
         transactionDTO.description = TransactionDescription.RECHARGE.toString()
-
+        transactionDTO.reason = "RECHARGE"
         wallet.balance += transactionDTO.amount
         walletRepository.save(wallet)
 
@@ -135,7 +135,7 @@ class WalletServiceImpl(
                 walletID = wallet.id!!,
                 amount = paymentRequestDTO.amount,
                 description = transactionDescription,
-                reason = ObjectId(paymentRequestDTO.orderID)
+                reason = paymentRequestDTO.orderID
             )
         )
 
@@ -171,7 +171,7 @@ class WalletServiceImpl(
                 walletID = wallet.id!!,
                 amount = abortPaymentRequestDTO.amount,
                 description = TransactionDescription.REFUND,
-                reason = ObjectId(abortPaymentRequestDTO.orderID)
+                reason = abortPaymentRequestDTO.orderID
             )
         )
 

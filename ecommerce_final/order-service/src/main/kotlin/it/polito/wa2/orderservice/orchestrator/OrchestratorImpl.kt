@@ -34,10 +34,6 @@ class OrchestratorImpl(
     ])
     override fun onKafkaStringEvent(event: String, @Header(KafkaHeaders.RECEIVED_TOPIC) topic: String) = orchestratorActions.onKafkaReceivedStringEvent(event.removeSurrounding("\""), topic)
 
-//    TODO delete this we dont need it
-//    @KafkaListener(topics = ["reserve_products_ok"])
-//    override fun onKafkaProductsReservationOKEvent(event: ProductsReservationResponseDTO, topic: String): Job = orchestratorActions.onKafkaReceivedProductsReservationOKEvent(event)
-
     @EventListener
     override fun onStateMachineEvent(event: StateMachineEvent) {
         val sm = event.source as StateMachineImpl

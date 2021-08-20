@@ -8,6 +8,7 @@ import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerConfig
 import org.apache.kafka.common.serialization.StringDeserializer
 import org.apache.kafka.common.serialization.StringSerializer
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.kafka.annotation.EnableKafka
@@ -20,13 +21,13 @@ import java.util.*
 @Configuration
 @EnableKafka
 class KafkaConfig {
-//    TODO change to docker addr
-    private val bootstrapAddress: String? = "localhost:29092"
+    @Value("\${spring.kafka.bootstrap-servers}")
+    val bootstrapServers: String = ""
 
     @Bean
     fun getProducer(): KafkaProducer<String, String> {
         val props = Properties()
-        props[ProducerConfig.BOOTSTRAP_SERVERS_CONFIG] = bootstrapAddress!!
+        props[ProducerConfig.BOOTSTRAP_SERVERS_CONFIG] = bootstrapServers
         props[ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG] =
             StringSerializer::class.java
         props[ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG] =
@@ -48,7 +49,7 @@ class KafkaConfig {
     @Bean
     fun getPaymentRequestProducer(): KafkaProducer<String, PaymentOrRefundRequestDTO> {
         val props = Properties()
-        props[ProducerConfig.BOOTSTRAP_SERVERS_CONFIG] = bootstrapAddress!!
+        props[ProducerConfig.BOOTSTRAP_SERVERS_CONFIG] = bootstrapServers
         props[ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG] =
             StringSerializer::class.java
         props[ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG] =
@@ -58,9 +59,7 @@ class KafkaConfig {
         props[ProducerConfig.RETRIES_CONFIG] = "2"
         props[ProducerConfig.ACKS_CONFIG] = "all"
         props[ProducerConfig.CLIENT_ID_CONFIG] = "order_service_payment_req_producer"
-//        props[JsonSerializer.TYPE_MAPPINGS] = "payment_done:it.polito.wa2.orderservice.domain.PaymentRequest"
-//        props[ProducerConfig.ISOLATION_LEVEL_CONFIG] = "read_committed"
-//        props[ProducerConfig.ENABLE_AUTO_COMMIT_CONFIG] = false
+
         return KafkaProducer<String, PaymentOrRefundRequestDTO>(props)
     }
 
@@ -71,7 +70,7 @@ class KafkaConfig {
     @Bean
     fun getProductsReservationProducer(): KafkaProducer<String, ProductsReservationRequestDTO> {
         val props = Properties()
-        props[ProducerConfig.BOOTSTRAP_SERVERS_CONFIG] = bootstrapAddress!!
+        props[ProducerConfig.BOOTSTRAP_SERVERS_CONFIG] = bootstrapServers
         props[ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG] =
             StringSerializer::class.java
         props[ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG] =
@@ -91,7 +90,7 @@ class KafkaConfig {
     @Bean
     fun getAbortProductsReservationProducer(): KafkaProducer<String, AbortProductReservationRequestDTO> {
         val props = Properties()
-        props[ProducerConfig.BOOTSTRAP_SERVERS_CONFIG] = bootstrapAddress!!
+        props[ProducerConfig.BOOTSTRAP_SERVERS_CONFIG] = bootstrapServers
         props[ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG] =
             StringSerializer::class.java
         props[ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG] =
@@ -111,7 +110,7 @@ class KafkaConfig {
     @Bean
     fun consumerFactory(): ConsumerFactory<String, String> {
         val props: MutableMap<String, Any> = HashMap()
-        props[ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG] = bootstrapAddress!!
+        props[ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG] = bootstrapServers
         props[ConsumerConfig.GROUP_ID_CONFIG] = "order_service"
         props[ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG] = StringDeserializer::class.java
         props[ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG] = StringDeserializer::class.java
@@ -128,31 +127,4 @@ class KafkaConfig {
         factory.consumerFactory = consumerFactory()
         return factory
     }
-
-//    TODO DELETE THIS I dont think we need it
-    /**
-     * Consumer factory for ProductReservationDTO message types
-     * @return the consumer factory
-     */
-//    @Bean
-//    fun productsReservationConsumerFactory(): ConsumerFactory<String, ProductsReservationResponseDTO> {
-//        val props: MutableMap<String, Any> = HashMap()
-//        props[ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG] = bootstrapAddress!!
-//        props[ConsumerConfig.GROUP_ID_CONFIG] = "order_service"
-//        props[ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG] = StringDeserializer::class.java
-//        props[ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG] = JsonDeserializer::class.java
-//        props[JsonDeserializer.TYPE_MAPPINGS] = "it.polito.wa2.warehouseservice.dto.ProductsReservationResponseDTO:it.polito.wa2.orderservice.dto.ProductsReservationResponseDTO"
-//        return DefaultKafkaConsumerFactory(props)
-//    }
-
-    /**
-     * Make the kafka listener async
-     * @return the concurrent listener container factory
-     */
-//    @Bean
-//    fun productsReservationListenerContainerFactory(): ConcurrentKafkaListenerContainerFactory<String, ProductsReservationResponseDTO> {
-//        val factory = ConcurrentKafkaListenerContainerFactory<String, ProductsReservationResponseDTO>()
-//        factory.consumerFactory = productsReservationConsumerFactory()
-//        return factory
-//    }
 }

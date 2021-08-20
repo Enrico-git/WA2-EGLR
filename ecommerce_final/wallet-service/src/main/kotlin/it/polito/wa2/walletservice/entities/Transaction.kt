@@ -5,6 +5,7 @@ import it.polito.wa2.walletservice.dto.TransactionDTO
 import org.bson.types.ObjectId
 import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.mapping.Document
+import org.springframework.data.mongodb.core.mapping.Field
 import java.math.BigDecimal
 import java.sql.Timestamp
 
@@ -17,9 +18,7 @@ data class Transaction (
     val walletID: ObjectId,
     var amount: BigDecimal = BigDecimal(0.0),
     val description: TransactionDescription,
-//    TODO change this name to reason (it can bne order ID or recharge reference)
-//    as it is now it is confusing
-    val reason: ObjectId?, //also recharge reference
+    val reason: String, //also recharge reference
 )
 
 fun Transaction.toDTO() = TransactionDTO(
@@ -28,7 +27,7 @@ fun Transaction.toDTO() = TransactionDTO(
     walletID = walletID.toString(),
     amount = amount,
     description = description.name,
-    reason = reason?.toHexString()
+    reason = reason
 )
 
 

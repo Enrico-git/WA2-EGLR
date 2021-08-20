@@ -5,7 +5,6 @@ spring:
     mongodb:
       database: warehouseservice
       host: localhost
-      port: 27017
       username: warehouseservice
       password: warehouseservice
       authentication-database: admin

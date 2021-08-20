@@ -13,8 +13,8 @@ import org.springframework.kafka.annotation.KafkaListener
 import org.springframework.stereotype.Component
 
 /**
- * This class is used for listening from "payment_request"
- * and for inserting in "payment_request_failed" topics.
+ * This class is used for listening to "payment_request"
+ * and to send messages to "payment_request_failed" topics.
  * It works as Service.
  * Moreover it's used for "abort_request_payment" and
  * "abort_request_payment_failed".
@@ -43,7 +43,6 @@ class PaymentOrAbortListener(
                     delay(1000)
                 }
             if (result==false) {
-                println("payment_req_failed")
                 kafkaPaymentRequestFailedProducer.send(
                     ProducerRecord("payment_request_failed", paymentRequestDTO.orderID)
                 )
@@ -67,7 +66,6 @@ class PaymentOrAbortListener(
                     delay(1000)
                 }
             if (result==false) {
-                println("abort_payment_request_failed")
                 kafkaPaymentRequestFailedProducer.send(
                     ProducerRecord("abort_payment_request_failed", abortRequestDTO.orderID)
                 )

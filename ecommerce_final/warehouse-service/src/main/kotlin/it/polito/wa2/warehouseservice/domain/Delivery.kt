@@ -1,14 +1,11 @@
 package it.polito.wa2.warehouseservice.domain
 
+import it.polito.wa2.warehouseservice.common.DeliveryDescription
 import org.bson.types.ObjectId
 import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.mapping.Document
 import java.sql.Timestamp
 
-
-enum class DeliveryDescription {
-        RESERVATION, CANCELLATION
-}
 
 @Document(collection = "deliveries")
 data class Delivery (

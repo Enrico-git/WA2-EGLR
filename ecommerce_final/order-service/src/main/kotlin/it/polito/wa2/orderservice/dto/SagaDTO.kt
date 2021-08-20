@@ -1,6 +1,5 @@
 package it.polito.wa2.orderservice.dto
 
-import it.polito.wa2.orderservice.domain.ProductLocation
 import java.math.BigDecimal
 
 data class SagaDTO(

@@ -17,7 +17,6 @@ import reactor.core.publisher.Flux
 class OrderServiceLoadBalancingConfig(@Qualifier("eurekaClient") private val eurekaClient: EurekaClient) {
     @Bean
     @Scope("prototype")
-    @Primary
     fun getOrderServiceInstanceListSupplier() : ServiceInstanceListSupplier{
         return ServiceInstanceListSupplier("order-service", eurekaClient)
     }
@@ -27,7 +26,6 @@ class OrderServiceLoadBalancingConfig(@Qualifier("eurekaClient") private val eur
 class WalletServiceLoadBalancingConfig(@Qualifier("eurekaClient") private val eurekaClient: EurekaClient) {
     @Bean
     @Scope("prototype")
-    @Primary
     fun getWalletServiceInstanceListSupplier() : ServiceInstanceListSupplier{
         return ServiceInstanceListSupplier("wallet-service", eurekaClient)
     }
@@ -37,7 +35,6 @@ class WalletServiceLoadBalancingConfig(@Qualifier("eurekaClient") private val eu
 class WarehouseServiceLoadBalancingConfig(@Qualifier("eurekaClient") private val eurekaClient: EurekaClient) {
     @Bean
     @Scope("prototype")
-    @Primary
     fun getWarehouseServiceInstanceListSupplier() : ServiceInstanceListSupplier{
         return ServiceInstanceListSupplier("warehouse-service", eurekaClient)
     }

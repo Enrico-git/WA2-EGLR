@@ -4,10 +4,8 @@ import it.polito.wa2.orderservice.common.OrderStatus
 import it.polito.wa2.orderservice.constraintGroups.CreateOrder
 import it.polito.wa2.orderservice.constraintGroups.DeleteOrder
 import it.polito.wa2.orderservice.constraintGroups.UpdateOrder
-import it.polito.wa2.orderservice.domain.Delivery
 import it.polito.wa2.orderservice.domain.Product
 import org.bson.types.ObjectId
-import org.springframework.validation.annotation.Validated
 import javax.validation.Valid
 import javax.validation.constraints.Email
 import javax.validation.constraints.NotNull
