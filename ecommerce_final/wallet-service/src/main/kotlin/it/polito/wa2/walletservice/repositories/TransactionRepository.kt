@@ -18,5 +18,5 @@ interface TransactionRepository : CoroutineCrudRepository<Transaction, ObjectId>
 
     suspend fun findByReasonAndDescription(reason: ObjectId, description: TransactionDescription): Transaction?
 
-    suspend fun findAllByReason(reason: ObjectId): Flow<Transaction>
+    suspend fun findAllByReason(reason: String): Flow<Transaction>
 }

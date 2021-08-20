@@ -1,0 +1,7 @@
+FROM openjdk:8-alpine
+RUN addgroup -S spring && adduser -S spring -G spring
+USER spring:spring
+COPY ./catalog-service-0.0.1-SNAPSHOT.jar /catalog-service.jar
+CMD ["java", "-jar", "/catalog-service.jar"]
+
+

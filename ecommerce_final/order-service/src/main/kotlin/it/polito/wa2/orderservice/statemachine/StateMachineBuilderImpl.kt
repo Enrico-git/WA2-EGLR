@@ -55,8 +55,8 @@ class StateMachineBuilderImpl(
         return this
     }
 
-    override fun shippingAddress(address: String?): StateMachineBuilder{
-        shippingAddress = address
+    override fun shippingAddress(newAddress: String?): StateMachineBuilder{
+        shippingAddress = newAddress
         return this
     }
 

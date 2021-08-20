@@ -148,7 +148,7 @@ class WalletServiceImpl(
 
         val user = getAuthorizedUser(abortPaymentRequestDTO.token) ?: return false
 
-        val transactions = transactionRepository.findAllByReason(ObjectId(abortPaymentRequestDTO.orderID)).toSet()
+        val transactions = transactionRepository.findAllByReason(abortPaymentRequestDTO.orderID).toSet()
         if (transactions.any{it.description == TransactionDescription.REFUND})
             return null
 

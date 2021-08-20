@@ -1,0 +1,7 @@
+FROM openjdk:8-alpine
+RUN addgroup -S spring && adduser -S spring -G spring
+USER spring:spring
+COPY ./order-service-0.0.1-SNAPSHOT.jar /order-service.jar
+CMD ["java", "-jar", "/order-service.jar"]
+
+

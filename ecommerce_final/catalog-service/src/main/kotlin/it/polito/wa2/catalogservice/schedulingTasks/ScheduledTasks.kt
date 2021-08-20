@@ -13,7 +13,7 @@ class ScheduledTasks(
     private val emailVerificationTokenRepository: EmailVerificationTokenRepository
 ) {
 
-    @Scheduled(fixedRate = 1000 * 60 * 60 * 12) //12 HOURS
+    @Scheduled(fixedRate = (1000 * 60 * 60 * 12).toLong()) //12 HOURS
     fun clearExpiredTokens() = CoroutineScope(Dispatchers.IO).launch{
         emailVerificationTokenRepository.deleteAllByExpiryDateBefore(Timestamp(System.currentTimeMillis()))
     }

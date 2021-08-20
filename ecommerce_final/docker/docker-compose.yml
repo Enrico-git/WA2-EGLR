@@ -15,11 +15,39 @@ services:
       - 27017:27017 
     volumes:
       - mongodb_server_data:/data/db
+  catalog-service:
+    image: thepassengerhub/catalog-service:0.1
+    container_name: catalog-service
+    ports:
+      - 8080:8080
+    depends_on:
+      - eureka-server
+      - mongo
+    links:
+      - eureka-server
+      - mongo
+    env_file:
+      - ./catalogservice.env
+  order-service:
+    image: thepassengerhub/order-service:0.1
+    container_name: order-service
+    depends_on:
+      - eureka-server
+      - mongo
+      - kafka
+      - catalog-service
+      - redis
+    links:
+      - eureka-server
+      - kafka
+      - mongo
+      - catalog-service
+      - redis
+    env_file:
+      - ./orderservice.env
   wallet-service:
     image: thepassengerhub/wallet-service:0.1
     container_name: wallet-service
-    ports:
-      - 8100:8100
     depends_on:
       - eureka-server
       - mongo
@@ -30,6 +58,21 @@ services:
       - mongo
     env_file:
       - ./walletservice.env
+  warehouse-service:
+    image: thepassengerhub/warehouse-service:0.1
+    container_name: warehouse-service
+    depends_on:
+      - eureka-server
+      - mongo
+      - kafka
+      - catalog-service
+    links:
+      - eureka-server
+      - kafka
+      - mongo
+      - catalog-service
+    env_file:
+      - ./warehouseservice.env
   zookeeper:
     image: confluentinc/cp-zookeeper:latest
     container_name: zookeeper
@@ -63,6 +106,8 @@ services:
     container_name: kafka_connect
     ports:
       - 8083:8083
+    depends_on:
+      - kafka
     links:
       - kafka
       - zookeeper
@@ -76,6 +121,7 @@ services:
   redis:
     image: redis
     container_name: redis
+    hostname: redis
     ports:
       - 6379:6379
 

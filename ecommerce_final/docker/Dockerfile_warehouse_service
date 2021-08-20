@@ -1,0 +1,7 @@
+FROM openjdk:8-alpine
+RUN addgroup -S spring && adduser -S spring -G spring
+USER spring:spring
+COPY ./warehouse-service-0.0.1-SNAPSHOT.jar /warehouse-service.jar
+CMD ["java", "-jar", "/warehouse-service.jar"]
+
+

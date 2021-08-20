@@ -54,7 +54,7 @@ class PaymentOrAbortListener(
         topics=["abort_payment_request"],
         containerFactory = "paymentOrRefundRequestContainerFactory"
     )
-    fun requestConsumer(abortRequestDTO: KafkaPaymentOrRefundRequestDTO){
+    fun abortPaymentRequestConsumer(abortRequestDTO: KafkaPaymentOrRefundRequestDTO){
         CoroutineScope(Dispatchers.IO).launch {
             var counter = 5
             var result : Boolean? = false

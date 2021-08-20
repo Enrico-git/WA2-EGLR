@@ -98,6 +98,7 @@ class StateMachineImpl(val initialState: StateMachineStates,
             redisStateMachineRepository.add(newSM)
             return@launch
         } catch (e: Exception) {
+            logger.severe(e.toString())
             logger.severe("Cant backup new sm $newSM over old sm $oldSM")
         }
     }
