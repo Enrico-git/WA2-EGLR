@@ -1,8 +1,8 @@
 package it.polito.wa2.walletservice.services
 
+import it.polito.wa2.walletservice.common.TransactionDescription
 import it.polito.wa2.walletservice.dto.*
 import it.polito.wa2.walletservice.entities.Transaction
-import it.polito.wa2.walletservice.common.TransactionDescription
 import it.polito.wa2.walletservice.entities.Wallet
 import it.polito.wa2.walletservice.entities.toDTO
 import it.polito.wa2.walletservice.exceptions.NotFoundException

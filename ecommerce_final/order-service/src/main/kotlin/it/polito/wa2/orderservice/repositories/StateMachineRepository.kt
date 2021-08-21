@@ -3,7 +3,6 @@ package it.polito.wa2.orderservice.repositories
 import it.polito.wa2.orderservice.domain.RedisStateMachine
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.reactive.awaitFirstOrNull
-import kotlinx.coroutines.reactor.awaitFirst
 import kotlinx.coroutines.reactor.awaitSingle
 import org.springframework.data.redis.core.ReactiveRedisTemplate
 import org.springframework.data.redis.core.scanAsFlow

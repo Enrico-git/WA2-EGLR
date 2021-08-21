@@ -4,7 +4,6 @@ import it.polito.wa2.catalogservice.dto.OrderDTO
 import kotlinx.coroutines.flow.Flow
 import org.bson.types.ObjectId
 import org.springframework.security.access.prepost.PreAuthorize
-import reactor.core.publisher.Mono
 
 
 interface OrderService {

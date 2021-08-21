@@ -9,14 +9,9 @@ import it.polito.wa2.catalogservice.dto.toDTO
 import it.polito.wa2.catalogservice.exceptions.UnauthorizedException
 import it.polito.wa2.catalogservice.repositories.EmailVerificationTokenRepository
 import it.polito.wa2.catalogservice.repositories.UserRepository
-import it.polito.wa2.catalogservice.security.AuthenticationManager
 import it.polito.wa2.catalogservice.security.JwtUtils
-import kotlinx.coroutines.reactive.awaitFirstOrNull
-import org.apache.http.auth.UsernamePasswordCredentials
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.context.annotation.Lazy
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
-import org.springframework.security.core.Authentication
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.security.core.userdetails.UsernameNotFoundException
 import org.springframework.security.crypto.password.PasswordEncoder
@@ -30,7 +25,6 @@ class UserDetailsServiceExtImpl(
     private val userRepository: UserRepository,
     private val verificationRepository: EmailVerificationTokenRepository,
     private val notificationService: NotificationServiceImpl,
-    @Lazy private val authenticationManager: AuthenticationManager,
     private val passwordEncoder: PasswordEncoder,
     private val jwtUtils: JwtUtils,
     private val mailService: MailServiceImpl

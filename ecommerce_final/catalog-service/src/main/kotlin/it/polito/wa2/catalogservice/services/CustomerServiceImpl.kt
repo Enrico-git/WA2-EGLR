@@ -1,14 +1,12 @@
 package it.polito.wa2.catalogservice.services
 
 import it.polito.wa2.catalogservice.domain.Customer
-import it.polito.wa2.catalogservice.domain.User
 import it.polito.wa2.catalogservice.dto.CustomerDTO
 import it.polito.wa2.catalogservice.dto.UserDetailsDTO
 import it.polito.wa2.catalogservice.dto.toDTO
 import it.polito.wa2.catalogservice.exceptions.NotFoundException
 import it.polito.wa2.catalogservice.exceptions.UnauthorizedException
 import it.polito.wa2.catalogservice.repositories.CustomerRepository
-import it.polito.wa2.catalogservice.repositories.UserRepository
 import kotlinx.coroutines.reactive.awaitFirst
 import org.bson.types.ObjectId
 import org.springframework.security.core.context.ReactiveSecurityContextHolder

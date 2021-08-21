@@ -1,11 +1,13 @@
 package it.polito.wa2.warehouseservice.security
 
-import io.jsonwebtoken.*
+import io.jsonwebtoken.ExpiredJwtException
+import io.jsonwebtoken.Jwts
+import io.jsonwebtoken.MalformedJwtException
+import io.jsonwebtoken.UnsupportedJwtException
 import io.jsonwebtoken.security.Keys
 import it.polito.wa2.warehouseservice.dto.UserDetailsDTO
 import org.bson.types.ObjectId
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.security.core.Authentication
 import org.springframework.stereotype.Component
 import java.security.Key
 import javax.annotation.PostConstruct

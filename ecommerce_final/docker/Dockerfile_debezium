@@ -1,0 +1,11 @@
+FROM debezium/connect:1.6
+COPY ./groovy-3.0.8.jar /kafka/connect/debezium-connector-mongodb
+COPY ./groovy-json-3.0.8.jar /kafka/connect/debezium-connector-mongodb
+COPY ./groovy-jsr223-3.0.8.jar /kafka/connect/debezium-connector-mongodb
+COPY ./debezium-scripting-1.7.0.Alpha1.jar /kafka/connect/debezium-connector-mongodb
+RUN mkdir -p /kafka/bootstrap
+COPY ./connectorWallet.json /kafka/bootstrap
+COPY ./connectorWarehouse.json /kafka/bootstrap
+COPY ./boot.sh /kafka/bootstrap
+
+

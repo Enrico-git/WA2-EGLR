@@ -4,7 +4,6 @@ import it.polito.wa2.warehouseservice.dto.AbortProductReservationRequestDTO
 import it.polito.wa2.warehouseservice.dto.ProductsReservationRequestDTO
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.clients.producer.KafkaProducer
-import org.apache.kafka.clients.producer.Producer
 import org.apache.kafka.clients.producer.ProducerConfig
 import org.apache.kafka.common.serialization.StringDeserializer
 import org.apache.kafka.common.serialization.StringSerializer

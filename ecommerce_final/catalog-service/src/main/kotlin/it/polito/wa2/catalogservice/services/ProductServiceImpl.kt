@@ -1,6 +1,5 @@
 package it.polito.wa2.catalogservice.services
 
-import it.polito.wa2.catalogservice.dto.CommentDTO
 import it.polito.wa2.catalogservice.dto.PictureDTO
 import it.polito.wa2.catalogservice.dto.ProductDTO
 import it.polito.wa2.catalogservice.dto.WarehouseDTO

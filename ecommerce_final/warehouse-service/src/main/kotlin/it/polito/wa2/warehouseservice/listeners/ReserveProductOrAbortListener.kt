@@ -23,7 +23,7 @@ class ReserveProductOrAbortListener(
     @KafkaListener(topics = ["reserve_products"],
     containerFactory = "reserveProductContainerFactory")
     fun reserveRequestConsumer(productsReservationRequestDTO: ProductsReservationRequestDTO, @Header(KafkaHeaders.RECEIVED_TOPIC) topic: String){
-        CoroutineScope(Dispatchers.IO).launch {
+        CoroutineScope(Dispatchers.Default).launch {
             var result: Boolean? = false
             var counter = 5
 
@@ -46,7 +46,7 @@ class ReserveProductOrAbortListener(
     @KafkaListener(topics = ["abort_products_reservation"],
             containerFactory = "abortProductsReservationContainerFactory")
     fun abortRequestConsumer(abortProductReservationRequestDTO: AbortProductReservationRequestDTO, @Header(KafkaHeaders.RECEIVED_TOPIC) topic: String){
-        CoroutineScope(Dispatchers.IO).launch {
+        CoroutineScope(Dispatchers.Default).launch {
             var result: Boolean? = false
             var counter = 5
             while (counter-- > 0)

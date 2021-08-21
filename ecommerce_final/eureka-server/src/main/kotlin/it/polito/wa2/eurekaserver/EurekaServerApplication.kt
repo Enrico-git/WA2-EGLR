@@ -1,4 +1,4 @@
-package it.polito.wa2.eureka
+package it.polito.wa2.eurekaserver
 
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
@@ -6,8 +6,8 @@ import org.springframework.cloud.netflix.eureka.server.EnableEurekaServer
 
 @SpringBootApplication
 @EnableEurekaServer
-class EurekaApplication
+class EurekaServerApplication
 
 fun main(args: Array<String>) {
-    runApplication<EurekaApplication>(*args)
+    runApplication<EurekaServerApplication>(*args)
 }

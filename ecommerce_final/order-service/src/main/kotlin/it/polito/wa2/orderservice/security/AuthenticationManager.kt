@@ -1,15 +1,10 @@
 package it.polito.wa2.orderservice.security
 
-import io.jsonwebtoken.Claims
 import org.springframework.security.authentication.ReactiveAuthenticationManager
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.Authentication
-import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.stereotype.Component
 import reactor.core.publisher.Mono
-import java.util.function.Function
-import java.util.function.Predicate
-import java.util.stream.Collectors
 
 
 /**

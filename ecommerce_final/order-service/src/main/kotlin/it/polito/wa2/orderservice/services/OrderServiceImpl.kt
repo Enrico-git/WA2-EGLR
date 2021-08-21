@@ -15,7 +15,8 @@ import it.polito.wa2.orderservice.repositories.OrderRepository
 import it.polito.wa2.orderservice.statemachine.StateMachineImpl
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.reactive.awaitFirst
 import org.bson.types.ObjectId
@@ -24,7 +25,6 @@ import org.springframework.security.core.context.ReactiveSecurityContextHolder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.math.BigDecimal
-import java.util.logging.Logger
 
 @Service
 @Transactional

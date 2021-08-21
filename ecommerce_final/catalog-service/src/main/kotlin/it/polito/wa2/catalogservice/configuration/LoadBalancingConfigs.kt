@@ -8,9 +8,7 @@ import org.springframework.cloud.client.ServiceInstance
 import org.springframework.cloud.loadbalancer.core.ServiceInstanceListSupplier
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import org.springframework.context.annotation.Primary
 import org.springframework.context.annotation.Scope
-import org.springframework.stereotype.Component
 import reactor.core.publisher.Flux
 
 @Configuration

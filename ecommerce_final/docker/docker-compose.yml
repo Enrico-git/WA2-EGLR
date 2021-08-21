@@ -3,7 +3,7 @@ volumes:
   mongodb_server_data:
 services:
   eureka-server:
-    image: thepassengerhub/eureka:0.1
+    image: thepassengerhub/ecommerce:eureka-server
     container_name: eureka-server
     ports:
       - 8761:8761
@@ -16,7 +16,7 @@ services:
     volumes:
       - mongodb_server_data:/data/db
   catalog-service:
-    image: thepassengerhub/catalog-service:0.1
+    image: thepassengerhub/ecommerce:catalog-service
     container_name: catalog-service
     ports:
       - 8080:8080
@@ -29,9 +29,10 @@ services:
     env_file:
       - ./catalogservice.env
   order-service:
-    image: thepassengerhub/order-service:0.1
+    image: thepassengerhub/ecommerce:order-service
     container_name: order-service
     depends_on:
+      - debezium
       - eureka-server
       - mongo
       - kafka
@@ -46,9 +47,10 @@ services:
     env_file:
       - ./orderservice.env
   wallet-service:
-    image: thepassengerhub/wallet-service:0.1
+    image: thepassengerhub/ecommerce:wallet-service
     container_name: wallet-service
     depends_on:
+      - debezium
       - eureka-server
       - mongo
       - kafka
@@ -59,13 +61,14 @@ services:
     env_file:
       - ./walletservice.env
   warehouse-service:
-    image: thepassengerhub/warehouse-service:0.1
+    image: thepassengerhub/ecommerce:warehouse-service
     container_name: warehouse-service
     depends_on:
       - eureka-server
       - mongo
       - kafka
       - catalog-service
+      - debezium
     links:
       - eureka-server
       - kafka
@@ -101,9 +104,9 @@ services:
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       #KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
       #KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
-  connect:
-    image: thepassengerhub/debezium:0.1
-    container_name: kafka_connect
+  debezium:
+    image: thepassengerhub/ecommerce:debezium
+    container_name: debezium
     ports:
       - 8083:8083
     depends_on:
@@ -118,6 +121,7 @@ services:
       - CONFIG_STORAGE_TOPIC=my_connect_configs
       - OFFSET_STORAGE_TOPIC=my_connect_offsets
       - STATUS_STORAGE_TOPIC=my_connect_statuses
+     
   redis:
     image: redis
     container_name: redis

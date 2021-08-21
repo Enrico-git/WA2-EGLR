@@ -3,7 +3,6 @@ package it.polito.wa2.catalogservice.services
 import it.polito.wa2.catalogservice.domain.EmailVerificationToken
 import it.polito.wa2.catalogservice.domain.User
 import it.polito.wa2.catalogservice.repositories.EmailVerificationTokenRepository
-import it.polito.wa2.catalogservice.repositories.UserRepository
 import org.springframework.stereotype.Service
 import java.sql.Timestamp
 import java.util.*

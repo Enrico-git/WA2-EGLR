@@ -1,7 +1,7 @@
 package it.polito.wa2.warehouseservice.dto
 
-import it.polito.wa2.warehouseservice.domain.Delivery
 import it.polito.wa2.warehouseservice.common.DeliveryDescription
+import it.polito.wa2.warehouseservice.domain.Delivery
 import it.polito.wa2.warehouseservice.domain.ProductLocation
 import org.bson.types.ObjectId
 import java.sql.Timestamp

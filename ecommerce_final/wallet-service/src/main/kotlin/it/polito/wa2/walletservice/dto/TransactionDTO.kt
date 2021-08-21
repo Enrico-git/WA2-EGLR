@@ -1,7 +1,7 @@
 package it.polito.wa2.walletservice.dto
 
-import it.polito.wa2.walletservice.entities.Transaction
 import it.polito.wa2.walletservice.common.TransactionDescription
+import it.polito.wa2.walletservice.entities.Transaction
 import org.bson.types.ObjectId
 import java.math.BigDecimal
 import java.sql.Timestamp

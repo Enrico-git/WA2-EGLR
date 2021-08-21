@@ -1,3 +1,7 @@
+spring:
+  application:
+    name: eureka-server
+
 server:
   port: 8761
 eureka:
@@ -10,5 +14,4 @@ eureka:
     response-cache-update-interval-ms: 5000
 
 #check localhost:8761 web page to see all services!
-
 

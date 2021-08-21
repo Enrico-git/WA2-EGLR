@@ -1,8 +1,8 @@
 package it.polito.wa2.warehouseservice.services
 
-import it.polito.wa2.warehouseservice.domain.ProductInfo
-import it.polito.wa2.warehouseservice.domain.ProductLocation
-import it.polito.wa2.warehouseservice.dto.*
+import it.polito.wa2.warehouseservice.dto.AbortProductReservationRequestDTO
+import it.polito.wa2.warehouseservice.dto.ProductsReservationRequestDTO
+import it.polito.wa2.warehouseservice.dto.WarehouseDTO
 import kotlinx.coroutines.flow.Flow
 import org.bson.types.ObjectId
 import org.springframework.security.access.prepost.PreAuthorize

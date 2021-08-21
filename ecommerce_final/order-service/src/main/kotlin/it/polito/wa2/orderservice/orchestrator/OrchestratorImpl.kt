@@ -1,13 +1,12 @@
 package it.polito.wa2.orderservice.orchestrator
 
 import it.polito.wa2.orderservice.common.StateMachineEvents
-import it.polito.wa2.orderservice.dto.*
+import it.polito.wa2.orderservice.dto.SagaDTO
 import it.polito.wa2.orderservice.events.KafkaResponseReceivedEventInResponseTo
 import it.polito.wa2.orderservice.events.SagaFailureEvent
 import it.polito.wa2.orderservice.events.SagaFinishedEvent
 import it.polito.wa2.orderservice.events.StateMachineEvent
 import it.polito.wa2.orderservice.statemachine.StateMachineImpl
-import kotlinx.coroutines.Job
 import org.springframework.context.event.ContextRefreshedEvent
 import org.springframework.context.event.EventListener
 import org.springframework.kafka.annotation.KafkaListener

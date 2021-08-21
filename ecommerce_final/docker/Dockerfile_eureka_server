@@ -1,0 +1,7 @@
+FROM openjdk:8-alpine
+RUN addgroup -S spring && adduser -S spring -G spring
+USER spring:spring
+COPY ./eureka-server-0.0.1-SNAPSHOT.jar /eureka-server.jar
+CMD ["java", "-jar", "/eureka-server.jar"]
+
+

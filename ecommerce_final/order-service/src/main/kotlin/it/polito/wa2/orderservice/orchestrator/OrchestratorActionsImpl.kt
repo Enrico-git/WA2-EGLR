@@ -5,15 +5,18 @@ import it.polito.wa2.orderservice.common.OrderStatus
 import it.polito.wa2.orderservice.common.StateMachineEvents
 import it.polito.wa2.orderservice.common.StateMachineStates
 import it.polito.wa2.orderservice.domain.toStateMachine
-import it.polito.wa2.orderservice.dto.*
+import it.polito.wa2.orderservice.dto.AbortProductReservationRequestDTO
+import it.polito.wa2.orderservice.dto.PaymentOrRefundRequestDTO
+import it.polito.wa2.orderservice.dto.ProductsReservationRequestDTO
+import it.polito.wa2.orderservice.dto.SagaDTO
 import it.polito.wa2.orderservice.events.KafkaResponseReceivedEventInResponseTo
 import it.polito.wa2.orderservice.events.SagaFailureEvent
 import it.polito.wa2.orderservice.events.SagaFinishedEvent
 import it.polito.wa2.orderservice.repositories.RedisStateMachineRepository
 import it.polito.wa2.orderservice.services.MailServiceImpl
 import it.polito.wa2.orderservice.services.OrderService
-import it.polito.wa2.orderservice.statemachine.StateMachineImpl
 import it.polito.wa2.orderservice.statemachine.StateMachineBuilder
+import it.polito.wa2.orderservice.statemachine.StateMachineImpl
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.onEach
@@ -29,7 +32,6 @@ import org.springframework.dao.OptimisticLockingFailureException
 import org.springframework.data.mongodb.UncategorizedMongoDbException
 import org.springframework.stereotype.Component
 import org.springframework.util.ConcurrentReferenceHashMap
-import java.lang.IllegalArgumentException
 import java.sql.Timestamp
 import java.util.concurrent.ConcurrentHashMap
 import java.util.logging.Logger
@@ -98,7 +100,6 @@ class OrchestratorActionsImpl(
 
 
     override fun onKafkaReceivedStringEvent(event: String, topic: String) = CoroutineScope(Dispatchers.Default).launch {
-        println("event: $event --- topic: $topic")
         val sagas = getListOfStateMachine()
         val sagaEvent = StateMachineEvents.valueOf(topic.uppercase())
         val saga = sagas[event]
@@ -259,10 +260,8 @@ class OrchestratorActionsImpl(
 
     override fun onAbortProductsReservationFailed(sm: StateMachineImpl) = CoroutineScope(Dispatchers.Default).launch {
         logger.severe("COULD NOT ABORT PRODUCTS RESERVATION FOR ORDER ${sm.id}")
-        CoroutineScope(Dispatchers.IO).launch {
-            mailService.notifyAdmin("ORDER ${sm.id} NOTIFICATION", sm.id, EmailType.ABORT_PRODUCT_ERROR)
-        }
         applicationEventPublisher.publishEvent(KafkaResponseReceivedEventInResponseTo(sm, StateMachineEvents.ABORT_PRODUCTS_RESERVATION))
+        mailService.notifyAdmin("ORDER ${sm.id} NOTIFICATION", sm.id, EmailType.ABORT_PRODUCT_ERROR)
     }
 
     override fun onSagaFinishedEvent(sagaFinishedEvent: SagaFinishedEvent){
@@ -317,5 +316,4 @@ class OrchestratorActionsImpl(
         }
         logger.info("SAGA OF ORDER ${sm.id} FAILED ")
     }
-
 }

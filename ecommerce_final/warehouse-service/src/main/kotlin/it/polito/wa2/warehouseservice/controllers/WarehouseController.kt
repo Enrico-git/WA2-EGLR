@@ -2,8 +2,6 @@ package it.polito.wa2.warehouseservice.controllers
 
 import it.polito.wa2.warehouseservice.constraintGroups.CreateOrReplaceWarehouse
 import it.polito.wa2.warehouseservice.constraintGroups.PartialCreateOrUpdateWarehouse
-import it.polito.wa2.warehouseservice.dto.AbortProductReservationRequestDTO
-import it.polito.wa2.warehouseservice.dto.ProductsReservationRequestDTO
 import it.polito.wa2.warehouseservice.dto.WarehouseDTO
 import it.polito.wa2.warehouseservice.services.WarehouseService
 import kotlinx.coroutines.delay

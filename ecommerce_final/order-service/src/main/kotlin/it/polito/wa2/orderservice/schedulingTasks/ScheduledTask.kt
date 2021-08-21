@@ -1,8 +1,8 @@
 package it.polito.wa2.orderservice.schedulingTasks
 
-import it.polito.wa2.orderservice.statemachine.toRedisStateMachine
 import it.polito.wa2.orderservice.repositories.RedisStateMachineRepository
 import it.polito.wa2.orderservice.statemachine.StateMachineImpl
+import it.polito.wa2.orderservice.statemachine.toRedisStateMachine
 import kotlinx.coroutines.*
 import org.springframework.beans.factory.annotation.Lookup
 import org.springframework.context.annotation.Lazy

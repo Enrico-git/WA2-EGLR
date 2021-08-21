@@ -2,17 +2,14 @@ package it.polito.wa2.catalogservice.controllers
 
 import it.polito.wa2.catalogservice.constraintGroups.CreateOrReplaceProduct
 import it.polito.wa2.catalogservice.constraintGroups.CreateProduct
-import it.polito.wa2.catalogservice.dto.CommentDTO
 import it.polito.wa2.catalogservice.dto.PictureDTO
 import it.polito.wa2.catalogservice.dto.ProductDTO
 import it.polito.wa2.catalogservice.dto.WarehouseDTO
 import it.polito.wa2.catalogservice.services.ProductService
 import kotlinx.coroutines.flow.Flow
 import org.bson.types.ObjectId
-import org.springframework.data.domain.Pageable
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
-import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
 

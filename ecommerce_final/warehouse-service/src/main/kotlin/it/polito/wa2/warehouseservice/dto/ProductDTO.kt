@@ -6,7 +6,6 @@ import java.math.BigDecimal
 import java.sql.Timestamp
 import javax.validation.constraints.Min
 import javax.validation.constraints.NotNull
-import javax.validation.constraints.Null
 
 data class ProductDTO (
         @field:NotNull(message = "Id must not be null", groups = [CreateOrReplaceProduct::class])

@@ -3,18 +3,18 @@ package it.polito.wa2.warehouseservice.services
 import it.polito.wa2.warehouseservice.domain.Comment
 import it.polito.wa2.warehouseservice.domain.toDTO
 import it.polito.wa2.warehouseservice.dto.CommentDTO
-import it.polito.wa2.warehouseservice.dto.ProductDTO
 import it.polito.wa2.warehouseservice.dto.UserDetailsDTO
+import it.polito.wa2.warehouseservice.exceptions.NotFoundException
+import it.polito.wa2.warehouseservice.exceptions.UnauthorizedException
 import it.polito.wa2.warehouseservice.repositories.CommentRepository
 import it.polito.wa2.warehouseservice.repositories.ProductRepository
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.reactive.awaitFirst
 import org.bson.types.ObjectId
 import org.springframework.security.core.context.ReactiveSecurityContextHolder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import it.polito.wa2.warehouseservice.exceptions.*
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
 import java.sql.Timestamp
 
 @Service

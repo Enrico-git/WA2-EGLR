@@ -10,9 +10,9 @@ mongo ./mongo_createIndexes.js
 # This links debezium with kafka
 # *Reminder* Debezium is just a trigger: it observes the table and when an event occur it performs an action.
 #curl -i -X POST -H "Accept:application/json" -H "Content-Type:application/json" localhost:8083/connectors/ -d "$(cat connector.json )"
-curl -i -X POST -H "Accept:application/json" -H "Content-Type:application/json" localhost:8083/connectors/ -d "$(cat connectorWallet.json )"
-curl -i -X POST -H "Accept:application/json" -H "Content-Type:application/json" localhost:8083/connectors/ -d "$(cat connectorWarehouse.json )"
-
+#curl -i -X POST -H "Accept:application/json" -H "Content-Type:application/json" localhost:8083/connectors/ -d "$(cat connectorWallet.json )"
+#curl -i -X POST -H "Accept:application/json" -H "Content-Type:application/json" localhost:8083/connectors/ -d "$(cat connectorWarehouse.json )"
+sudo docker exec debezium bash /kafka/bootstrap/boot.sh
 #If something wrong in debezium configuration (connectors.json), you need to perform the delete
 #curl -i -X DELETE -H "Accept:application/json" -H "Content-Type:application/json" localhost:8083/connectors/
 

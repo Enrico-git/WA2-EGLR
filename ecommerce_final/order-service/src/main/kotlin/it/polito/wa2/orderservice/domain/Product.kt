@@ -4,7 +4,6 @@ import it.polito.wa2.orderservice.constraintGroups.CreateOrder
 import it.polito.wa2.orderservice.dto.ProductDTO
 import java.math.BigDecimal
 import javax.validation.constraints.Min
-import javax.validation.constraints.NotNull
 
 data class Product(
     val id: String?,

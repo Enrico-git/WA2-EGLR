@@ -9,7 +9,6 @@ import it.polito.wa2.orderservice.events.SagaFailureEvent
 import it.polito.wa2.orderservice.events.SagaFinishedEvent
 import it.polito.wa2.orderservice.events.StateMachineEvent
 import it.polito.wa2.orderservice.repositories.RedisStateMachineRepository
-import kotlinx.coroutines.*
 import org.springframework.context.ApplicationEvent
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.context.annotation.Scope
@@ -72,7 +71,7 @@ class StateMachineImpl(val initialState: StateMachineStates,
             completed = true
         }
 
-        backup(oldSM, this.toRedisStateMachine()).join()
+        backup(oldSM, this.toRedisStateMachine())
 
         fireEvent(StateMachineEvent(this, event ))
 
@@ -92,11 +91,10 @@ class StateMachineImpl(val initialState: StateMachineStates,
         }
     }
 
-    override suspend fun backup(oldSM: RedisStateMachine, newSM :RedisStateMachine) = CoroutineScope(Dispatchers.IO).launch{
-        try{
+    override suspend fun backup(oldSM: RedisStateMachine, newSM :RedisStateMachine){
+        try {
             redisStateMachineRepository.remove(oldSM)
             redisStateMachineRepository.add(newSM)
-            return@launch
         } catch (e: Exception) {
             logger.severe(e.toString())
             logger.severe("Cant backup new sm $newSM over old sm $oldSM")

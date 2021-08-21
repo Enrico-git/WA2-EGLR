@@ -2,9 +2,15 @@ package it.polito.wa2.warehouseservice.services
 
 import it.polito.wa2.warehouseservice.common.DeliveryDescription
 import it.polito.wa2.warehouseservice.comparators.WarehouseComparator
-import it.polito.wa2.warehouseservice.domain.*
-import it.polito.wa2.warehouseservice.dto.*
-import it.polito.wa2.warehouseservice.exceptions.*
+import it.polito.wa2.warehouseservice.domain.Delivery
+import it.polito.wa2.warehouseservice.domain.ProductLocation
+import it.polito.wa2.warehouseservice.domain.Warehouse
+import it.polito.wa2.warehouseservice.domain.toDTO
+import it.polito.wa2.warehouseservice.dto.AbortProductReservationRequestDTO
+import it.polito.wa2.warehouseservice.dto.ProductsReservationRequestDTO
+import it.polito.wa2.warehouseservice.dto.WarehouseDTO
+import it.polito.wa2.warehouseservice.dto.toEntity
+import it.polito.wa2.warehouseservice.exceptions.NotFoundException
 import it.polito.wa2.warehouseservice.repositories.DeliveryRepository
 import it.polito.wa2.warehouseservice.repositories.ProductRepository
 import it.polito.wa2.warehouseservice.repositories.WarehouseRepository

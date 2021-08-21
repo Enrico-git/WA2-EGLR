@@ -5,7 +5,6 @@ import it.polito.wa2.catalogservice.dto.UserDetailsDTO
 import it.polito.wa2.catalogservice.exceptions.*
 import it.polito.wa2.catalogservice.repositories.CustomerRepository
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toSet
 import kotlinx.coroutines.reactive.awaitSingle
 import org.bson.types.ObjectId
@@ -16,7 +15,10 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.security.core.context.ReactiveSecurityContextHolder
 import org.springframework.stereotype.Service
-import org.springframework.web.reactive.function.client.*
+import org.springframework.web.reactive.function.client.WebClient
+import org.springframework.web.reactive.function.client.awaitBodilessEntity
+import org.springframework.web.reactive.function.client.awaitBody
+import org.springframework.web.reactive.function.client.bodyToFlow
 import java.util.*
 import java.util.function.Predicate
 
@@ -24,7 +26,6 @@ import java.util.function.Predicate
 class OrderServiceImpl(
     @Qualifier("order-service-client") private val loadBalancedWebClientBuilder: WebClient.Builder,
     private val productService: ProductService,
-    private val customerService: CustomerService,
     private val customerRepository: CustomerRepository
 ) : OrderService{
     val serviceURL = "http://order-service"
