@@ -92,7 +92,7 @@ class WarehouseServiceImpl(
         if (deliveries.isNotEmpty())
             return null
         val productIDS = productsReservationRequestDTO.products.map { ObjectId(it.id) }.toSet()
-        val warehouses = warehouseRepository.findWarehousesByProductsIDIn(productIDS).toSet()
+        var warehouses = warehouseRepository.findWarehousesByProductsIDIn(productIDS).toSet()
 
         if (warehouses.isEmpty())
             return false
@@ -100,9 +100,9 @@ class WarehouseServiceImpl(
         val productLocations = mutableSetOf<ProductLocation>()
 
         productsReservationRequestDTO.products.forEach { product ->
-            warehouses.sortedWith(WarehouseComparator(ObjectId(product.id)))
+            val sortedWarehouses = warehouses.sortedWith(WarehouseComparator(ObjectId(product.id)))
             var amount = product.amount
-            warehouses.forEach InnerLoop@{
+            sortedWarehouses.forEach InnerLoop@{
                 if (amount > 0) {
                     val whProd = it.products.find { whProd -> whProd.productId == ObjectId(product.id) } ?: return false
                     val removed: Int
@@ -122,6 +122,7 @@ class WarehouseServiceImpl(
                             amount = removed
                         )
                     )
+                    warehouses = sortedWarehouses.toSet()
                 }
                 else
                     return@InnerLoop

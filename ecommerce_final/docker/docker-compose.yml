@@ -54,6 +54,7 @@ services:
       - eureka-server
       - mongo
       - kafka
+      - catalog-service
     links:
       - eureka-server
       - kafka

@@ -5,12 +5,12 @@ import org.bson.types.ObjectId
 
 class WarehouseComparator(val productId: ObjectId): Comparator<Warehouse>{
     override fun compare(p0: Warehouse, p1: Warehouse): Int {
-        val product1 = p0.products.find { it.productId == productId }
-        val product2 = p1.products.find { it.productId == productId }
+        val product1 = p0.products.find { it.productId == productId } ?: return 1
+        val product2 = p1.products.find { it.productId == productId } ?: return -1
 
-        return if(product1!!.quantity >= product2!!.quantity)
-            1
-        else
+        return if(product1.quantity >= product2.quantity)
             -1
+        else
+            1
     }
 }
