@@ -2,6 +2,7 @@
 mongo ./mongo_bootstrap.js
 mongo ./mongo_createUsers.js
 mongo ./mongo_createIndexes.js
+mongo ./mongo_populateDB.js
 #sudo docker cp groovy-json-3.0.8.jar kafka_connect:/kafka/connect/debezium-connector-mongodb
 #sudo docker cp groovy-3.0.8.jar kafka_connect:/kafka/connect/debezium-connector-mongodb
 #sudo docker cp groovy-jsr223-3.0.8.jar kafka_connect:/kafka/connect/debezium-connector-mongodb
