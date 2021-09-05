@@ -1,17 +1,17 @@
 #!bin/bash	
+printf "__          __     ___             ______ _____ ____  __  __ __  __ ______ _____   _____ ______ \n"  
+printf "\ \        / /\   |__ \           |  ____/ ____/ __ \|  \/  |  \/  |  ____|  __ \ / ____|  ____| \n" 
+printf " \ \  /\  / /  \     ) |  ______  | |__ | |   | |  | | \  / | \  / | |__  | |__) | |    | |__   \n" 
+printf "  \ \/  \/ / /\ \   / /  |______| |  __|| |   | |  | | |\/| | |\/| |  __| |  _  /| |    |  __|  \n" 
+printf "   \  /\  / ____ \ / /_           | |___| |___| |__| | |  | | |  | | |____| | \ \| |____| |____ \n" 
+printf "    \/  \/_/    \_\____|          |______\_____\____/|_|  |_|_|  |_|______|_|  \_\\_____|______| \n \n"
+customerToken="eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJyb2xlcyI6IkNVU1RPTUVSIiwic3ViIjoiNjEyMjAxZGYzNDliYjI3ODY4MjFjODgxIiwiaWF0IjoxNTE2MjM5MDIyLCJleHAiOjE4MTYyMzkwMjJ9.PQv2bC260jKtz978AtRxdqQBeeO1TQ_oWCtoyVd6Inxh1rw8w8zD2H_iXAf2sO1f5Yh7mNdK1ClBUlSxdx6rig"
+adminToken="eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJyb2xlcyI6IkFETUlOIiwic3ViIjoiNjEyMjAxZGYzNDliYjI3ODY4MjFjODgyIiwiaWF0IjoxNTE2MjM5MDIyLCJleHAiOjE4MTYyMzkwMjJ9.gRyOHEj4b09C3CSGN9Cu1c9YlKuyrsq-QFD8MxARD1uvZw7CVrG5RJgTgVK8sSFyed_81_TIIE-yPho9I2x73Q"
 
-#customerToken = "eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJyb2xlcyI6IkNVU1RPTUVSIiwic3ViIjoiNjEyMjAxZGYzNDliYjI3ODY4MjFjODgxIiwiaWF0IjoxNTE2MjM5MDIyLCJleHAiOjE4MTYyMzkwMjJ9.PQv2bC260jKtz978AtRxdqQBeeO1TQ_oWCtoyVd6Inxh1rw8w8zD2H_iXAf2sO1f5Yh7mNdK1ClBUlSxdx6rig"
-#adminToken = "eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJyb2xlcyI6IkFETUlOIiwic3ViIjoiNjEyMjAxZGYzNDliYjI3ODY4MjFjODgyIiwiaWF0IjoxNTE2MjM5MDIyLCJleHAiOjE4MTYyMzkwMjJ9.gRyOHEj4b09C3CSGN9Cu1c9YlKuyrsq-QFD8MxARD1uvZw7CVrG5RJgTgVK8sSFyed_81_TIIE-yPho9I2x73Q"
-
-#read -p "GET ALL PRODUCTS -> PRESS ENTER" input
-
-
-#printf "\n NEXT -> GET ONE PRODUCT"
-#read input
-
- 
 while :
 do
+	printf "\nPress anything to show the menu"
+	read
 	printf "PRESS FOR ACTION: \n"
 	printf "1 FOR GET ALL PRODUCTS\n"
 	printf "2 FOR GET PRODUCT BY ID\n"
@@ -23,47 +23,187 @@ do
 	printf "8 FOR POST COMMENT \n"
 	printf "9 FOR DELETE COMMENT \n"
 	printf "10 FOR PUT COMMENT \n"
-	printf "11 FOR DELETE COMMENT \n"
-	printf "12 FOR GET WALLET \n"
-	printf "13 FOR POST WALLET \n"
-	printf "14 FOR GET ALL WALLET TRANSACTIONS \n"
-	printf "15 FOR GET TRANSACTION BY ID \n"
-	printf "16 FOR POST RECHARGE TRANSACTION \n"
-	printf "17 FOR GET ALL WAREHOUSES \n"
-        printf "18 FOR GET WAREHOUSE BY ID\n"
-        printf "19 FOR POST WAREHOUSE \n"
-        printf "20 FOR DELETE WAREHOUSE \n"
-        printf "21 FOR PATCH WAREHOUSE \n"
- 	printf "22 FOR GET ALL ORDERS\n"
-        printf "23 FOR GET ORDER BY ID\n"
-        printf "24 FOR POST ORDER - SAGA START \n"
-        printf "25 FOR DELETE ORDER - SAGA START \n"
-        printf "26 FOR UPDATE PRODUCT STATUS \n"
-        printf "27 FOR POST REGISER NEW USER \n"
-        printf "28 FOR GET EMAIL CONFIRMATION TOKEN \n"
-        printf "29 FOR POST SIGN IN \n"
-        printf "30 FOR POST NEW USER PROFILE \n"
+	printf "11 FOR GET WALLET \n"
+	printf "12 FOR POST WALLET \n"
+	printf "13 FOR GET ALL WALLET TRANSACTIONS \n"
+	printf "14 FOR GET TRANSACTION BY ID \n"
+	printf "15 FOR POST RECHARGE TRANSACTION \n"
+	printf "16 FOR GET ALL WAREHOUSES \n"
+        printf "17 FOR GET WAREHOUSE BY ID\n"
+        printf "18 FOR POST WAREHOUSE \n"
+        printf "19 FOR DELETE WAREHOUSE \n"
+        printf "20 FOR PATCH WAREHOUSE \n"
+ 	printf "21 FOR GET ALL ORDERS\n"
+        printf "22 FOR GET ORDER BY ID\n"
+        printf "23 FOR POST ORDER - SAGA START \n"
+        printf "24 FOR DELETE ORDER - SAGA START \n"
+        printf "25 FOR UPDATE PRODUCT STATUS \n"
+        printf "26 FOR POST REGISER NEW USER \n"
+        printf "27 FOR GET EMAIL CONFIRMATION TOKEN \n"
+        printf "28 FOR POST SIGN IN \n"
+        printf "29 FOR POST NEW USER PROFILE \n"
 
        
 	read input
 	case $input in
 		1)
-			curl -v -H "Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJyb2xlcyI6IkFETUlOIiwic3ViIjoiNjBmODAzZjgwYjgxZDBmN2JhODgxZTczIiwiaWF0IjoxMDE2MjM5MDIyLCJleHAiOjYwMTYyMzkwMjJ9.CUEY8nJrjtZAxaPVj5KTelTAzTOaNFoIdvUfhstCUFNBPeRoEM2Gnyq6srWYiihYIrTqbtP4-9ZU-IJnoMBQkA" "localhost:8080/products"
+			curl -v \
+ "localhost:8080/products"
 		;;
 		2) 
-			curl -v -H "Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJyb2xlcyI6IkFETUlOIiwic3ViIjoiNjBmODAzZjgwYjgxZDBmN2JhODgxZTczIiwiaWF0IjoxMDE2MjM5MDIyLCJleHAiOjYwMTYyMzkwMjJ9.CUEY8nJrjtZAxaPVj5KTelTAzTOaNFoIdvUfhstCUFNBPeRoEM2Gnyq6srWYiihYIrTqbtP4-9ZU-IJnoMBQkA" "localhost:8080/products/613488c9971c0b138c7eb655" 
+			curl -v \
+"localhost:8080/products/613488c9971c0b138c7eb655" 
 		;;
 		3)
-			
+			 curl -v -X POST  \
+  -H "Authorization: Bearer $adminToken" \
+  -H "Content-Type: application/json" \
+  -d '{"name": "Sprite", "description": "A good drink", "pictureUrl": "SpriteUrl", "category": "Drink", "price": 1.99 }' \
+ "localhost:8080/products"
 		;;
-		3)
-
+		4)
+			curl -v -H "Authorization: Bearer $adminToken" \
+ "localhost:8080/products/613488c9971c0b138c7eb655/warehouses"
                 ;;
-		3)
-
+		5)
+		read -p "insert product id " productID
+			curl -v -X DELETE  \
+  -H "Authorization: Bearer $adminToken" \
+  -H "Content-Type: application/json" \
+ "localhost:8080/products/$productID"
                 ;;
-		3)
-
+		6)
+			curl -X PATCH \
+  -H "Authorization: Bearer $adminToken" \
+ "localhost:8080/products/613488c9971c0b138c7eb655" \
+ -H "Content-Type: application/json" -d '{"price": 10}' -v 
                 ;;	
+		7)
+			curl -v \
+			"localhost:8080/products/613488c9971c0b138c7eb655/comments"
+		;;
+		8)
+			curl -v -X POST \
+  -H "Authorization: Bearer $customerToken" \
+ -H "Content-Type: application/json" -d '{"title": "NICE PRODUCT", "body": "TASTES GOOD BRO", "stars": 4}' \
+ "localhost:8080/products/613488c9971c0b138c7eb655/comments" 
+		;;
+		9)
+		read -p "insert comment id: " commentID
+		curl -v -X DELETE \
+  -H "Authorization: Bearer $customerToken" \
+  "localhost:8080/products/613488c9971c0b138c7eb655/comments/$commentID"
+		;;
+		10)
+		read -p "insert comment id: " commentID
+		 curl -v -X PUT \
+  -H "Authorization: Bearer $customerToken" \
+ -H "Content-Type: application/json" -d '{"title": "NICE PRODUCT MODIFIED", "body": "TASTES GOOD BRO", "stars": 3}' \
+ "localhost:8080/products/613488c9971c0b138c7eb655/comments/$commentID" 
+		;;
+		11)
+		curl -v \
+   -H "Authorization: Bearer $customerToken" \
+  "localhost:8080/wallets/6134871711dbe16c02850167"
+		;;
+		12)
+		read -p "insert user id: " userID
+                curl -v -X POST localhost:8080/wallets/ \
+ -H "Authorization: Bearer $adminToken" \
+ -H "Content-Type: application/json" \
+ -d '{"userID": $userID, "balance": 1200}' 
+		;;
+		13)
+		curl -v "localhost:8080/wallets/6134871711dbe16c02850167/transactions" \
+ -H "Authorization: Bearer $customerToken" 
+		;;
+		14)
+		curl -v "localhost:8080/wallets/6134871711dbe16c02850167/transactions/6134b9869ca59b3be655b9bd" \
+ 		-H "Authorization: Bearer $customerToken"
+		;;
+		15)
+		curl -v -X POST "localhost:8080/wallets/6134871711dbe16c02850167/transactions" \
+ 		-H "Authorization: Bearer $adminToken" \
+ 		-H "Content-Type: application/json" \
+		-d '{"amount": 20}'
+		;;
+		16)
+		curl -v "localhost:8080/warehouses" \
+		-H "Authorization: Bearer $adminToken"
+		;;
+		17)
+		curl -v "localhost:8080/warehouses/61348a58971c0b138c7eb654" \
+                -H "Authorization: Bearer $adminToken"
+		;;
+		18)
+		curl -v -X POST  \
+ 		 -H "Authorization: Bearer $adminToken" \
+  		-H "Content-Type: application/json" \
+ 		"localhost:8080/warehouses" \
+		-H "Content-Type: application/json" \
+                -d '{"products":[{"id": "613488c9971c0b138c7eb653", "alarm": 2, "quantity": 100}]}'
+		;;
+		19)
+		curl -v -X DELETE \
+ 		 -H "Authorization: Bearer $adminToken" \
+		"localhost:8080/warehouses/61348a58971c0b138c7eb654"		
+		;;
+		20)
+		read -p "insert warehouse id: " warehouseID
+		curl -v -X PATCH  -H "Authorization: Bearer $adminToken" -H "Content-Type: application/json" -d '{"products": [{"id":"613488c9971c0b138c7eb653", "alarm":1,"quantity":7}]}' \
+		"localhost:8080/warehouses/$warehouseID" 
+		;;
+		21)
+		curl -v \
+   -H "Authorization: Bearer $customerToken" \
+   "localhost:8080/orders"
+		;;
+		22)
+		curl -v \
+  		-H "Authorization: Bearer $customerToken" \
+  		"localhost:8080/orders/6134c2509a1f747afdd251ae"
+		;;
+		23)
+		curl -X POST -H "Authorization: Bearer $customerToken" \
+  "localhost:8080/orders" \
+  -H "Content-Type: application/json" \
+  -d '{"buyer": "612201df349bb2786821c881", "products": [{"id": "613488c9971c0b138c7eb655", "amount": 2}, {"id": "613488c9971c0b138c7eb653", "amount": 3}], "deliveryAddress": "random street 15", "email":  "eglrgroup9@gmail.com" }' -v
+		;;
+		24)
+                read -p "insert order ID: " orderID
+		curl -v -X DELETE -H "Authorization: Bearer $customerToken" \
+                "localhost:8080/orders/$orderID" \
+		-H "Content-Type: application/json" \
+                -d '{"email": "eglrgroup9@gmail.com" }' -v
+		;;
+		25)
+		curl -X PATCH -H "Authorization: Bearer $adminToken" \
+  "localhost:8080/orders/6134c2509a1f747afdd251ae" \
+ -H "Content-Type: application/json" \
+ -d '{"email": "eglrgroup9@gmail.com", "status": "DELIVERED"}' -v
+		;;
+		26)
+		read -p "insert email: " email
+		curl localhost:8080/auth/register -v -X POST \
+  -H "Content-Type: application/json" -d '{"username": "testUsername", "password": "Valid_password2", "confirmPassword": "Valid_password2", "email": "'$email'"}'
+		;;
+		27)
+		read -p "insert token" token
+		curl "http://127.0.0.1:8080/auth/registrationConfirm?token=$token"
+		;;
+		28)
+		curl -v -X POST -H "Content-Type: application/json" -d '{"username": "myUserName", "password": "Valid_password2"}' \
+ localhost:8080/auth/signin
+		;;
+		29)
+		read -p "insert user id: " userID
+		read -p "insert user email: " userEmail
+		curl -X POST \
+	 -H "Authorization: Bearer $adminToken" \
+	 -H "Content-Type: application/json" \
+ 	-d '{"name": "simulation name", "surname": "simulation surname", "address": "random street", "email": "'$userEmail'", "userID": "'$userID'"}' \
+ 	localhost:8080/customers -v
+		;;
   	esac
 done
+
