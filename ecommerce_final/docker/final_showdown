@@ -1,6 +1,69 @@
-#!bin/bash
+#!bin/bash	
 
-customerToken = "eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJyb2xlcyI6IkNVU1RPTUVSIiwic3ViIjoiNjEyMjAxZGYzNDliYjI3ODY4MjFjODgxIiwiaWF0IjoxNTE2MjM5MDIyLCJleHAiOjE4MTYyMzkwMjJ9.PQv2bC260jKtz978AtRxdqQBeeO1TQ_oWCtoyVd6Inxh1rw8w8zD2H_iXAf2sO1f5Yh7mNdK1ClBUlSxdx6rig"
-adminToken = "eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJyb2xlcyI6IkFETUlOIiwic3ViIjoiNjEyMjAxZGYzNDliYjI3ODY4MjFjODgyIiwiaWF0IjoxNTE2MjM5MDIyLCJleHAiOjE4MTYyMzkwMjJ9.gRyOHEj4b09C3CSGN9Cu1c9YlKuyrsq-QFD8MxARD1uvZw7CVrG5RJgTgVK8sSFyed_81_TIIE-yPho9I2x73Q"
+#customerToken = "eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJyb2xlcyI6IkNVU1RPTUVSIiwic3ViIjoiNjEyMjAxZGYzNDliYjI3ODY4MjFjODgxIiwiaWF0IjoxNTE2MjM5MDIyLCJleHAiOjE4MTYyMzkwMjJ9.PQv2bC260jKtz978AtRxdqQBeeO1TQ_oWCtoyVd6Inxh1rw8w8zD2H_iXAf2sO1f5Yh7mNdK1ClBUlSxdx6rig"
+#adminToken = "eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJyb2xlcyI6IkFETUlOIiwic3ViIjoiNjEyMjAxZGYzNDliYjI3ODY4MjFjODgyIiwiaWF0IjoxNTE2MjM5MDIyLCJleHAiOjE4MTYyMzkwMjJ9.gRyOHEj4b09C3CSGN9Cu1c9YlKuyrsq-QFD8MxARD1uvZw7CVrG5RJgTgVK8sSFyed_81_TIIE-yPho9I2x73Q"
 
-echo 
+#read -p "GET ALL PRODUCTS -> PRESS ENTER" input
+
+
+#printf "\n NEXT -> GET ONE PRODUCT"
+#read input
+
+ 
+while :
+do
+	printf "PRESS FOR ACTION: \n"
+	printf "1 FOR GET ALL PRODUCTS\n"
+	printf "2 FOR GET PRODUCT BY ID\n"
+	printf "3 FOR POST PRODUCTS \n"
+	printf "4 FOR GET PRODUCT LOCATION \n"
+	printf "5 FOR DELETE PRODUCT \n"
+	printf "6 FOR PATCH PRODUCT \n"
+	printf "7 FOR GET ALL PRODUCT'S COMMENTS \n"
+	printf "8 FOR POST COMMENT \n"
+	printf "9 FOR DELETE COMMENT \n"
+	printf "10 FOR PUT COMMENT \n"
+	printf "11 FOR DELETE COMMENT \n"
+	printf "12 FOR GET WALLET \n"
+	printf "13 FOR POST WALLET \n"
+	printf "14 FOR GET ALL WALLET TRANSACTIONS \n"
+	printf "15 FOR GET TRANSACTION BY ID \n"
+	printf "16 FOR POST RECHARGE TRANSACTION \n"
+	printf "17 FOR GET ALL WAREHOUSES \n"
+        printf "18 FOR GET WAREHOUSE BY ID\n"
+        printf "19 FOR POST WAREHOUSE \n"
+        printf "20 FOR DELETE WAREHOUSE \n"
+        printf "21 FOR PATCH WAREHOUSE \n"
+ 	printf "22 FOR GET ALL ORDERS\n"
+        printf "23 FOR GET ORDER BY ID\n"
+        printf "24 FOR POST ORDER - SAGA START \n"
+        printf "25 FOR DELETE ORDER - SAGA START \n"
+        printf "26 FOR UPDATE PRODUCT STATUS \n"
+        printf "27 FOR POST REGISER NEW USER \n"
+        printf "28 FOR GET EMAIL CONFIRMATION TOKEN \n"
+        printf "29 FOR POST SIGN IN \n"
+        printf "30 FOR POST NEW USER PROFILE \n"
+
+       
+	read input
+	case $input in
+		1)
+			curl -v -H "Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJyb2xlcyI6IkFETUlOIiwic3ViIjoiNjBmODAzZjgwYjgxZDBmN2JhODgxZTczIiwiaWF0IjoxMDE2MjM5MDIyLCJleHAiOjYwMTYyMzkwMjJ9.CUEY8nJrjtZAxaPVj5KTelTAzTOaNFoIdvUfhstCUFNBPeRoEM2Gnyq6srWYiihYIrTqbtP4-9ZU-IJnoMBQkA" "localhost:8080/products"
+		;;
+		2) 
+			curl -v -H "Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJyb2xlcyI6IkFETUlOIiwic3ViIjoiNjBmODAzZjgwYjgxZDBmN2JhODgxZTczIiwiaWF0IjoxMDE2MjM5MDIyLCJleHAiOjYwMTYyMzkwMjJ9.CUEY8nJrjtZAxaPVj5KTelTAzTOaNFoIdvUfhstCUFNBPeRoEM2Gnyq6srWYiihYIrTqbtP4-9ZU-IJnoMBQkA" "localhost:8080/products/613488c9971c0b138c7eb655" 
+		;;
+		3)
+			
+		;;
+		3)
+
+                ;;
+		3)
+
+                ;;
+		3)
+
+                ;;	
+  	esac
+done
