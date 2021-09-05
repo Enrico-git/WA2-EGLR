@@ -85,7 +85,7 @@ do
 		8)
 			curl -v -X POST \
   -H "Authorization: Bearer $customerToken" \
- -H "Content-Type: application/json" -d '{"title": "NICE PRODUCT", "body": "TASTES GOOD BRO", "stars": 4}' \
+ -H "Content-Type: application/json" -d '{"title": "NICE PRODUCT", "body": "Nice product", "stars": 4}' \
  "localhost:8080/products/613488c9971c0b138c7eb655/comments" 
 		;;
 		9)
@@ -98,7 +98,7 @@ do
 		read -p "insert comment id: " commentID
 		 curl -v -X PUT \
   -H "Authorization: Bearer $customerToken" \
- -H "Content-Type: application/json" -d '{"title": "NICE PRODUCT MODIFIED", "body": "TASTES GOOD BRO", "stars": 3}' \
+ -H "Content-Type: application/json" -d '{"title": "NICE PRODUCT MODIFIED", "body": "Nice product", "stars": 3}' \
  "localhost:8080/products/613488c9971c0b138c7eb655/comments/$commentID" 
 		;;
 		11)
@@ -159,9 +159,10 @@ do
    "localhost:8080/orders"
 		;;
 		22)
+		read -p "insert order id: " orderID
 		curl -v \
   		-H "Authorization: Bearer $customerToken" \
-  		"localhost:8080/orders/6134c2509a1f747afdd251ae"
+  		"localhost:8080/orders/$orderID"
 		;;
 		23)
 		curl -X POST -H "Authorization: Bearer $customerToken" \
