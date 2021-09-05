@@ -51,7 +51,7 @@ interface Orchestrator {
     fun onSagaFailureEvent(sagaFailureEvent: SagaFailureEvent)
 
     /**
-     * Application event listener to check if there are peding state machines
+     * Application event listener to check if there are pending state machines
      * @param event
      * @return coroutine job
      */

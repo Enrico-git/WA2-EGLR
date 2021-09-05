@@ -37,7 +37,7 @@ do
         printf "22 FOR GET ORDER BY ID\n"
         printf "23 FOR POST ORDER - SAGA START \n"
         printf "24 FOR DELETE ORDER - SAGA START \n"
-        printf "25 FOR UPDATE PRODUCT STATUS \n"
+        printf "25 FOR UPDATE ORDER STATUS \n"
         printf "26 FOR POST REGISER NEW USER \n"
         printf "27 FOR GET EMAIL CONFIRMATION TOKEN \n"
         printf "28 FOR POST SIGN IN \n"
@@ -178,8 +178,9 @@ do
                 -d '{"email": "eglrgroup9@gmail.com" }' -v
 		;;
 		25)
+		read -p "insert order id: " orderID
 		curl -X PATCH -H "Authorization: Bearer $adminToken" \
-  "localhost:8080/orders/6134c2509a1f747afdd251ae" \
+  "localhost:8080/orders/$orderID" \
  -H "Content-Type: application/json" \
  -d '{"email": "eglrgroup9@gmail.com", "status": "DELIVERED"}' -v
 		;;
